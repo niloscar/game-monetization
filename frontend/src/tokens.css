@@ -1,0 +1,28 @@
+:root {
+
+  --bg: #0a0a0f;
+  --surface: #14141c;
+  --border: #22222e;
+  --code-bg: #14141c;
+
+  --text: #9797a6;
+  --text-secondary: #6b6b78;
+  --text-h: #f5f5f7;
+
+  --accent: #f72585;
+  --accent-bg: rgba(247, 37, 133, 0.1);
+  --accent-border: rgba(247, 37, 133, 0.5);
+
+  --tier-quarter: #2de2e6;
+  --tier-combo: #f72585;
+  --tier-combo-text: #4a0e29;
+  --tier-highscore: #ffd60a;
+
+  --social-bg: rgba(20, 20, 28, 0.5);
+  --shadow:
+    rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
+
+  --sans: 'Space Mono', ui-monospace, Consolas, monospace;
+  --heading: 'Press Start 2P', ui-monospace, Consolas, monospace;
+  --mono: 'Space Mono', ui-monospace, Consolas, monospace;
+}
