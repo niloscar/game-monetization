@@ -1,9 +1,5 @@
-
-
 const ScorePage = () => {
-  return (
-    <div>ScorePage</div>
-  )
+    return <div>ScorePage</div>
 }
 
 export default ScorePage
