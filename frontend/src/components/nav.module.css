@@ -1,27 +1,26 @@
 .nav {
-  display: flex;
-  align-items: center;
+    display: flex;
+    align-items: center;
 }
 
 .list {
-  display: flex;
-  align-items: center;
-  gap: 28px;
+    display: flex;
+    align-items: center;
+    gap: 28px;
 }
 
 .link {
-  display: block;
-  padding: 0.75rem 0.1rem;
+    display: block;
+    padding: 0.75rem 0.1rem;
 
-  color: var(--text);
-  font-size: 0.85rem;
-  font-weight: bold;
-  text-decoration: none;
+    color: var(--text);
+    font-size: 0.85rem;
+    font-weight: bold;
+    text-decoration: none;
 
-  transition: color 0.2s ease;
+    transition: color 0.2s ease;
 }
 
 .link:hover {
-  color: var(--text-h);
+    color: var(--text-h);
 }
-
