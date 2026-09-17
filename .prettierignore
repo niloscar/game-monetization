@@ -5,3 +5,4 @@
 
 .vercel/
 package-lock.json
+**/*.md
