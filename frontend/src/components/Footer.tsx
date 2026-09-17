@@ -1,4 +1,5 @@
-import styles from "./footer.module.css"
+import { Link } from "react-router-dom";
+import styles from "./footer.module.css";
 
 const Footer = () => {
   return (
@@ -6,13 +7,11 @@ const Footer = () => {
       <p>pizza arcade &copy; 2026</p>
 
       <div className={styles.links}>
-
-        <a href="/terms">villkor</a>
-        <a href="/contact">kontakt</a>
-
+        <Link to="/terms">villkor</Link>
+        <Link to="/contact">kontakt</Link>
       </div>
     </footer>
-  )
-}
+  );
+};
 
-export default Footer
+export default Footer;
