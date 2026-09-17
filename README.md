@@ -73,9 +73,23 @@ VITE_API_URL=http://localhost:3000
 
 **Backend (`backend/.env`):**
 
-Konfigurera serverinställningar, databasanslutning och säkerhetsnycklar enligt projektets miljövariabler.
+```dotenv
+ENV=development
+HOST=localhost
+PORT=3000
+SECRET_KEY=
 
-Känsliga uppgifter får inte versionshanteras eller exponeras i frontend.
+DB_HOST=
+DB_PORT=
+DB_USER=
+DB_PASSWORD=
+DB_NAME=
+
+SALT_ROUNDS=
+SALT_SECRET=
+```
+
+Fyll i databasuppgifter från Neon och generera egna säkerhetsnycklar. Känsliga uppgifter får inte versionshanteras eller exponeras i frontend.
 
 ### Starta utvecklingsmiljön
 
