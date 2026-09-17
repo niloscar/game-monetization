@@ -1,8 +1,11 @@
 node_modules/
 dist/
+.vscode/
+.vercel/
 
 .DS_Store
+.vercel
 
 .env
-.vercel
-.env*
+.env.*
+!.env.example
