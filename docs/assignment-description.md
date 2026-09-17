@@ -6,7 +6,6 @@ Vi kommer skapa en online tjänst som get en tillgång till en unik funktionalit
 
 https://medieinstitutet-my.sharepoint.com/:x:/g/personal/mattias_ekendahl_elevera_org/IQCC2_emS1T9RoWFlJ8J6bB3AZBp7kPLsPsWq0oTWPwV7bw?e=LWl2fD&nav=MTVfezAwMDAwMDAwLTAwMDEtMDAwMC0wMDAwLTAwMDAwMDAwMDAwMH0
 
-
 ## Kraven för denna uppgift:
 
 **Betyg G**
@@ -26,7 +25,6 @@ https://medieinstitutet-my.sharepoint.com/:x:/g/personal/mattias_ekendahl_elever
 - Sidan ska vara deployad
 
 Ge er tjänst ett unikt namn och tema t.ex. “StoryStream Chronicles” och ge de olika nivåerna olika namn, t.ex. “Explorer's Pass”, “Odyssey Membership” och “Mastermind Access”. Detta gör att det står ut mer när man använder det i sin portfolio vid LIA- och arbetsansökan.
-
 
 ## Denna uppgift mäter följande moment från kursplanen:
 

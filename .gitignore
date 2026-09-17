@@ -4,6 +4,7 @@ dist/
 .vercel/
 
 .DS_Store
+.vercel
 
 .env
 .env.*

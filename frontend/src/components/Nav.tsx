@@ -1,11 +1,9 @@
-import { NavLink } from "react-router-dom";
+import { NavLink } from 'react-router-dom'
 
 const Nav = () => {
-
-    const isAdmin = true;
+    const isAdmin = true
 
     return (
-
         <nav>
             <ul>
                 <li>
@@ -25,10 +23,9 @@ const Nav = () => {
                         <NavLink to="/admin">admin</NavLink>
                     </li>
                 )}
-
             </ul>
         </nav>
-    );
-};
+    )
+}
 
 export default Nav

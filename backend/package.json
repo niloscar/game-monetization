@@ -1,28 +1,31 @@
 {
-  "name": "backend",
-  "version": "1.0.0",
-  "description": "",
-  "scripts": {
-    "dev": "nodemon --watch src --exec tsx src/server.mts",
-    "build": "tsc --noEmit && node build.mjs",
-    "start": "node dist/server.mjs",
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "type": "module",
-  "dependencies": {
-    "cors": "^2.8.6",
-    "express": "^5.2.1"
-  },
-  "devDependencies": {
-    "@types/cors": "^2.8.19",
-    "@types/express": "^5.0.6",
-    "@types/node": "^26.5.1",
-    "esbuild": "^0.28.2",
-    "nodemon": "^3.1.14",
-    "tsx": "^4.23.13",
-    "typescript": "6.0.3"
-  }
+    "name": "backend",
+    "version": "1.0.0",
+    "description": "",
+    "scripts": {
+        "dev": "nodemon --watch src --exec tsx src/server.mts",
+        "build": "tsc --noEmit && node build.mjs",
+        "start": "node dist/server.mjs",
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "type": "module",
+    "dependencies": {
+        "cors": "^2.8.6",
+        "dotenv": "^17.4.2",
+        "express": "^5.2.1",
+        "pg": "^8.23.0"
+    },
+    "devDependencies": {
+        "@types/cors": "^2.8.19",
+        "@types/express": "^5.0.6",
+        "@types/node": "^26.5.1",
+        "@types/pg": "^8.23.1",
+        "esbuild": "^0.28.2",
+        "nodemon": "^3.1.14",
+        "tsx": "^4.23.13",
+        "typescript": "6.0.3"
+    }
 }
