@@ -2,9 +2,9 @@
 
 ## 1. Projektbeskrivning
 
-Projektet syftar till att utveckla en webbaserad plattform som möjliggör intäktsgenerering kring befintliga spel genom reklam och engångsköp.
+Projektet syftar till att utveckla en speloberoende webbplattform som möjliggör intäktsgenerering kring befintliga spel genom reklam och engångsköp.
 
-Fokus ligger på användarhantering, betalningar och åtkomst till innehåll snarare än på spelutveckling. *Pizza Arcade* används som exempelspel.
+Fokus ligger på användarhantering, betalningar och åtkomst till innehåll snarare än på spelutveckling. Plattformen utformas för att spel ska kunna bytas ut med så få ändringar som möjligt. *Pizza Arcade* används som exempelspel.
 
 ### Planerad funktionalitet
 
@@ -15,6 +15,7 @@ Fokus ligger på användarhantering, betalningar och åtkomst till innehåll sna
 - **Reklam:** Hantering och visning av annonser.
 - **Topplistor:** Registrering och visning av spelresultat.
 - **Administration:** Hantering av användare, produkter, innehåll och annonser.
+- **Spelintegration:** Stöd för utbytbara spelmoduler genom gemensamma gränssnitt.
 
 ## 2. Förhandsvisning
 
@@ -34,15 +35,69 @@ Applikationen driftsätts via Vercel.
 
 ## 4. Projektstruktur
 
+Projektet har en modulär struktur där plattformen och spelen hålls separerade genom tydligt definierade gränssnitt.
+
 ```text
 /
-├── frontend/       # React
-├── backend/        # Express API
-├── docs/           # Dokumentation
+├── frontend/              # Plattformens React-applikation
+│   └── src/
+│       ├── components/    # Gemensamma komponenter
+│       ├── pages/         # Plattformens sidor
+│       ├── services/      # API-kommunikation
+│       └── game/          # Integration och registrering av spel
+│
+├── backend/               # Plattformens Express API
+│   └── src/
+│       ├── routes/        # API-endpoints
+│       ├── services/      # Affärslogik
+│       ├── types/         # Backend-specifika typer
+│       ├── game/          # Spelintegration och resultatvalidering
+│       ├── database.ts
+│       └── server.mts
+│
+├── games/                 # Utbytbara spelmoduler
+│   └── pizza/
+│       ├── frontend/      # Spelets React-komponenter och logik
+│       ├── backend/       # Spelspecifik serverlogik
+│
+├── shared/                # Gemensamma typer för plattform och spel
+│   └── game.ts
+│
+├── docs/                  # Dokumentation
+├── package.json
+├── vercel.json
 └── README.md
 ```
 
+### Arkitektur och ansvarsfördelning
+
+**Plattformen** ansvarar för användare, köp, behörigheter, reklam, spelomgångar och resultatlagring.
+
+**Spelmodulerna** ansvarar för sin egen presentation, spellogik och spelspecifika funktioner.
+
+**Gemensamma kontrakt** i `shared/` definierar hur plattformen och spelen kommunicerar.
+
 Frontend kommunicerar med backend via ett REST API. Backend hanterar affärslogik, behörighet och kommunikationen med PostgreSQL-databasen på Neon.
+
+### Spelintegration
+
+Spelen integreras genom ett gemensamt gränssnitt. Plattformen startar spelet och skickar nödvändig information, exempelvis spelomgångens ID och tillgängliga power-ups.
+
+Spelet rapporterar tillbaka resultat och avslut genom definierade callbacks.
+
+Varje spel registreras i plattformens spelregister och beskriver sitt innehåll genom ett manifest.
+
+Spelmoduler ska inte vara direkt beroende av plattformens interna implementationer.
+
+### Power-ups
+
+Plattformen hanterar köp, ägande och behörighet till power-ups. Vid spelstart kontrollerar backend användarens tillgång och skapar en spelomgång med godkända power-ups.
+
+Spelet tar emot dessa som identifierare och ansvarar för att implementera deras effekter.
+
+Backend ansvarar för att kontrollera behörighet och förbrukning samt verifiera spelresultat enligt den valideringsmetod som implementeras.
+
+Detta gör det möjligt att byta spel utan att förändra plattformens grundläggande köp- och behörighetssystem.
 
 ## 5. Kom igång
 
@@ -54,10 +109,13 @@ Klona projektet och installera beroenden:
 
 ```bash
 git clone https://github.com/niloscar/game-monetization.git
+
 cd game-monetization
 
 npm install
+
 npm install --prefix frontend
+
 npm install --prefix backend
 ```
 
@@ -78,13 +136,11 @@ ENV=development
 HOST=localhost
 PORT=3000
 SECRET_KEY=
-
 DB_HOST=
 DB_PORT=
 DB_USER=
 DB_PASSWORD=
 DB_NAME=
-
 SALT_ROUNDS=
 SALT_SECRET=
 ```
@@ -147,12 +203,15 @@ Commit-meddelanden skrivs på engelska enligt Conventional Commits, exempelvis `
 - Enkla citattecken används där det är möjligt.
 - Funktioner och moduler ska ha tydliga ansvarsområden.
 - Prettier används för formatering och ESLint för statisk kodanalys.
+- Spelspecifik kod ska hållas separerad från plattformens affärslogik.
 
 ## 7. Tester och kvalitetssäkring
 
 Varje utvecklare ansvarar för att testa sin kod manuellt innan ändringarna pushas.
 
 Kontrollera att funktionaliteten fungerar, att befintlig kod inte påverkas negativt och att projektet kan byggas utan fel.
+
+Vid ändringar i gemensamma kontrakt ska även integrationen mellan plattform och spel kontrolleras.
 
 Kodstandarden kontrolleras med:
 
@@ -168,6 +227,9 @@ Kompletterande dokumentation finns i `docs/`.
 - [Checklista för uppgiftskrav](docs/assignment-checklist.md)
 - [Databasdesign](docs/database-design.md)
 - [ER-diagram](docs/er-diagram.png)
-- [API-dokumentation](docs/api.md)
 
-Frontend och backend driftsätts via Vercel och databasen via Neon. Miljövariabler för driftsättning hanteras i Vercels projektinställningar.
+## 9. Driftsättning
+
+Frontend och backend driftsätts via Vercel och databasen via Neon.
+
+Miljövariabler för produktion hanteras i Vercels projektinställningar. Spelmodulerna byggs tillsammans med applikationen och inkluderas i driftsättningen.

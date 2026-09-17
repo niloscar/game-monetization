@@ -3,6 +3,10 @@
     "version": "1.0.0",
     "private": true,
     "description": "Projektet syftar till att utveckla en webbaserad plattform som möjliggör intäktsgenerering kring befintliga spel genom reklam och engångsköp.",
+    "workspaces": [
+        "frontend",
+        "backend"
+    ],
     "directories": {
         "doc": "docs"
     },
