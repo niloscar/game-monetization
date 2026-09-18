@@ -1,0 +1,61 @@
+import type { Receipt } from './types'
+
+// Kvitton kopplade till lyckade orders (status: "completed")
+export const receipts: Receipt[] = [
+    {
+        id: 'receipt-1',
+        orderId: 'order-1',
+        userId: 'user-1',
+        tierId: 'tier-1',
+        amountKr: 29,
+        issuedAt: '2026-07-03T10:15:00Z'
+    },
+    {
+        id: 'receipt-2',
+        orderId: 'order-2',
+        userId: 'user-1',
+        tierId: 'tier-2',
+        amountKr: 59,
+        issuedAt: '2026-08-03T10:15:00Z'
+    },
+    {
+        id: 'receipt-3',
+        orderId: 'order-3',
+        userId: 'user-1',
+        tierId: 'tier-2',
+        amountKr: 59,
+        issuedAt: '2026-09-03T10:15:00Z'
+    },
+    {
+        id: 'receipt-4',
+        orderId: 'order-4',
+        userId: 'user-2',
+        tierId: 'tier-3',
+        amountKr: 99,
+        issuedAt: '2026-06-14T09:00:00Z'
+    },
+    {
+        id: 'receipt-5',
+        orderId: 'order-5',
+        userId: 'user-3',
+        tierId: 'tier-2',
+        amountKr: 59,
+        issuedAt: '2026-06-20T14:10:00Z'
+    },
+    {
+        id: 'receipt-6',
+        orderId: 'order-6',
+        userId: 'user-4',
+        tierId: 'tier-1',
+        amountKr: 29,
+        issuedAt: '2026-08-01T19:25:00Z'
+    },
+    {
+        id: 'receipt-7',
+        orderId: 'order-8',
+        userId: 'user-5',
+        tierId: 'tier-1',
+        amountKr: 29,
+        issuedAt: '2026-08-11T22:58:00Z'
+    }
+]

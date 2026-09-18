@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 
 import Header from './components/Header'
+import Footer from './components/Footer'
 
 import HomePage from './pages/HomePage'
 import ScorePage from './pages/ScorePage'
@@ -13,11 +14,15 @@ import AdminUsersPage from './pages/AdminUsersPage'
 import ReceiptPage from './pages/ReceiptPage'
 import ProfilePage from './pages/ProfilePage'
 import StorePage from './pages/StorePage'
+import ApiTestPage from './pages/ApiTestPage' // Remove this page later, it's just for testing the API connection
+import ContactPage from './pages/ContactPage'
+import TermsPage from './pages/TermsPage'
 
 const App = () => {
     return (
         <BrowserRouter>
             <Header />
+
             <Routes>
                 <Route path="/" element={<HomePage />}></Route>
                 <Route path="/scoreboard" element={<ScorePage />}></Route>
@@ -33,7 +38,12 @@ const App = () => {
                 <Route path="/receipt" element={<ReceiptPage />}></Route>
                 <Route path="/profile" element={<ProfilePage />}></Route>
                 <Route path="/store" element={<StorePage />}></Route>
+                <Route path="/api-test" element={<ApiTestPage />}></Route>
+                <Route path="/contact" element={<ContactPage />}></Route>
+                <Route path="/terms" element={<TermsPage />}></Route>
             </Routes>
+
+            <Footer />
         </BrowserRouter>
     )
 }

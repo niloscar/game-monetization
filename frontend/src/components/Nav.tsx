@@ -1,26 +1,35 @@
 import { NavLink } from 'react-router-dom'
+import styles from './nav.module.css'
 
 const Nav = () => {
     const isAdmin = true
 
     return (
-        <nav>
-            <ul>
+        <nav className={styles.nav}>
+            <ul className={styles.list}>
                 <li>
-                    <NavLink to="/">hem</NavLink>
+                    <NavLink to="/" className={styles.link}>
+                        hem
+                    </NavLink>
                 </li>
 
                 <li>
-                    <NavLink to="/scoreboard">scoreboard</NavLink>
+                    <NavLink to="/scoreboard" className={styles.link}>
+                        scoreboard
+                    </NavLink>
                 </li>
 
                 <li>
-                    <NavLink to="/about">om oss</NavLink>
+                    <NavLink to="/about" className={styles.link}>
+                        om oss
+                    </NavLink>
                 </li>
 
                 {isAdmin && (
                     <li>
-                        <NavLink to="/admin">admin</NavLink>
+                        <NavLink to="/admin" className={styles.link}>
+                            admin
+                        </NavLink>
                     </li>
                 )}
             </ul>
