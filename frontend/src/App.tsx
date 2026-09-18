@@ -13,6 +13,7 @@ import AdminUsersPage from './pages/AdminUsersPage'
 import ReceiptPage from './pages/ReceiptPage'
 import ProfilePage from './pages/ProfilePage'
 import StorePage from './pages/StorePage'
+import ApiTestPage from './pages/ApiTestPage' // Remove this page later, it's just for testing the API connection
 
 const App = () => {
     return (
@@ -33,6 +34,7 @@ const App = () => {
                 <Route path="/receipt" element={<ReceiptPage />}></Route>
                 <Route path="/profile" element={<ProfilePage />}></Route>
                 <Route path="/store" element={<StorePage />}></Route>
+                <Route path="/api-test" element={<ApiTestPage />}></Route>
             </Routes>
         </BrowserRouter>
     )
