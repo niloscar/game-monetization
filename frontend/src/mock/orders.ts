@@ -1,0 +1,68 @@
+import type { Order } from './types'
+
+export const orders: Order[] = [
+    {
+        id: 'order-1',
+        userId: 'user-1',
+        tierId: 'tier-1',
+        status: 'completed',
+        amountKr: 29,
+        createdAt: '2026-07-03T10:15:00Z'
+    },
+    {
+        id: 'order-2',
+        userId: 'user-1',
+        tierId: 'tier-2',
+        status: 'completed',
+        amountKr: 59,
+        createdAt: '2026-08-03T10:15:00Z'
+    },
+    {
+        id: 'order-3',
+        userId: 'user-1',
+        tierId: 'tier-2',
+        status: 'completed',
+        amountKr: 59,
+        createdAt: '2026-09-03T10:15:00Z'
+    },
+    {
+        id: 'order-4',
+        userId: 'user-2',
+        tierId: 'tier-3',
+        status: 'completed',
+        amountKr: 99,
+        createdAt: '2026-06-14T09:00:00Z'
+    },
+    {
+        id: 'order-5',
+        userId: 'user-3',
+        tierId: 'tier-2',
+        status: 'completed',
+        amountKr: 59,
+        createdAt: '2026-06-20T14:10:00Z'
+    },
+    {
+        id: 'order-6',
+        userId: 'user-4',
+        tierId: 'tier-1',
+        status: 'completed',
+        amountKr: 29,
+        createdAt: '2026-08-01T19:25:00Z'
+    },
+    {
+        id: 'order-7',
+        userId: 'user-5',
+        tierId: 'tier-1',
+        status: 'failed',
+        amountKr: 29,
+        createdAt: '2026-08-11T22:52:00Z'
+    },
+    {
+        id: 'order-8',
+        userId: 'user-5',
+        tierId: 'tier-1',
+        status: 'completed',
+        amountKr: 29,
+        createdAt: '2026-08-11T22:58:00Z'
+    }
+]
