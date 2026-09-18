@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import { useAuth } from '../context/AuthContext'
 import Nav from './Nav'
 import logo from '../assets/pizza-arcade-logo-1.png'
 import styles from './header.module.css'
@@ -7,8 +8,10 @@ import highscoreIcon from '../assets/highscore-icon.png'
 import quarterIcon from '../assets/quarter-icon.png'
 import adminIcon from '../assets/admin-icon.png'
 
+const { user, login, logout, isAuthenticated } = useAuth();
+
 const Header = () => {
-    const isLoggedIn = false
+    const isLoggedIn = isAuthenticated
 
     const profileIcons = {
         quarter: quarterIcon,
