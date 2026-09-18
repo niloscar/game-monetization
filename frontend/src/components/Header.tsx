@@ -1,25 +1,48 @@
 import { Link } from 'react-router-dom'
 import Nav from './Nav'
-import logo from '../assets/pizza-arcade-logo.png'
+import logo from '../assets/pizza-arcade-logo-1.png'
+import styles from './header.module.css'
+import comboIcon from '../assets/combo-icon.png'
+import highscoreIcon from '../assets/highscore-icon.png'
+import quarterIcon from '../assets/quarter-icon.png'
+import adminIcon from '../assets/admin-icon.png'
 
 const Header = () => {
+    const isLoggedIn = false
+
+    const profileIcons = {
+        quarter: quarterIcon,
+        combo: comboIcon,
+        highscore: highscoreIcon,
+        admin: adminIcon
+    }
+
+    const userTier = 'quarter'
+
     return (
-        <header>
-            <Link to="/" className="logo-link">
-                <img
-                    height="100px"
-                    width="250px"
-                    src={logo}
-                    alt="Pizza Arcade"
-                    className="logo"
-                />
+        <header className={styles.header}>
+            <Link to="/" className={styles.logo}>
+                <img src={logo} alt="Pizza Arcade Logo" />
             </Link>
 
             <Nav />
 
-            <div className="auth-links">
-                <Link to="/login">logga in</Link>
-                <Link to="/register">skapa konto</Link>
+            <div className={styles.authLinks}>
+                {!isLoggedIn ? (
+                    <div className={styles.authButtons}>
+                        <Link to="/login" className={styles.loginButton}>
+                            logga in
+                        </Link>
+
+                        <Link to="/register" className={styles.registerButton}>
+                            skapa konto
+                        </Link>
+                    </div>
+                ) : (
+                    <Link to="/profile" className={styles.profile}>
+                        <img src={profileIcons[userTier]} alt="Profil" />
+                    </Link>
+                )}
             </div>
         </header>
     )
