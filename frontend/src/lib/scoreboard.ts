@@ -1,4 +1,4 @@
-// Matchar er nuvarande mock/types.ts:
+// Matchar nuvarande mock/types.ts:
 //   Score { id, userId, value, playtimeSeconds, track, createdAt }
 //
 // OBS: den riktiga scores-tabellen i databasen har fälten
@@ -31,6 +31,9 @@ function isWithinPeriod(createdAt: string, period: Period): boolean {
 
 /**
  * Bygger topplistan för en given period.
+ * En spelare kan ha flera scores (flera spelomgångar) — bara den BÄSTA
+ * per spelare räknas in på listan, annars skulle samma person kunna ta
+ * flera platser samtidigt.
  * Sortering: högst poäng överst. Vid lika poäng: den som nådde poängen
  * först rankas högre (kan behöva ändras beroende på hur spelets
  * poängsystem slutligen fungerar).
@@ -44,7 +47,16 @@ export function getLeaderboard(
 
   const filtered = scores.filter((s) => isWithinPeriod(s.createdAt, period));
 
-  const sorted = [...filtered].sort((a, b) => {
+  // Behåll bara varje spelares bästa score i perioden.
+  const bestByUser = new Map<string, Score>();
+  for (const s of filtered) {
+    const current = bestByUser.get(s.userId);
+    if (!current || s.value > current.value) {
+      bestByUser.set(s.userId, s);
+    }
+  }
+
+  const sorted = [...bestByUser.values()].sort((a, b) => {
     if (b.value !== a.value) return b.value - a.value;
     return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
   });

@@ -100,7 +100,7 @@ const ScorePage = () => {
           fallback={
             <div className="board">
               {top3.map((entry) => (
-                <div key={entry.user.id} className={medalClass(entry.rank)}>
+                <div key={entry.score.id} className={medalClass(entry.rank)}>
                   <span className="rank">#{entry.rank}</span>
                   <span className="name">{entry.user.username}</span>
                   <span className="score">{formatPoints(entry.score.value)}</span>
@@ -111,7 +111,7 @@ const ScorePage = () => {
         >
           <div className="board">
             {top3.map((entry) => (
-              <div key={entry.user.id} className={medalClass(entry.rank)}>
+              <div key={entry.score.id} className={medalClass(entry.rank)}>
                 <span className="rank">#{entry.rank}</span>
                 <span className="name">{entry.user.username}</span>
                 <span className="score">{formatPoints(entry.score.value)}</span>
@@ -125,7 +125,7 @@ const ScorePage = () => {
           <div className="board">
             {restOfList.map((entry) => (
               <div
-                key={entry.user.id}
+                key={entry.score.id}
                 className={`row ${user && entry.user.id === user.id ? "hsa-self" : ""}`}
               >
                 <span className="rank">#{entry.rank}</span>
