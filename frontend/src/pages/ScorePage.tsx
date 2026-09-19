@@ -23,6 +23,12 @@ const highScoreTier = getTierBySlug("high-score-access");
 // som räknas ut från den ofiltrerade listan, inte den här trunkerade.
 const MAX_LEADERBOARD_SIZE = 50;
 
+// Hur många blurrade platshållarrader som visas bakom TierGate:s
+// "kräver High Score Access"-overlay, oavsett hur många placeringar
+// som faktiskt är dolda — annars kan luckan bli väldigt lång att
+// scrolla igenom med bara en rad per dold placering.
+const GAP_PLACEHOLDER_ROWS = 3;
+
 const ScorePage = () => {
   const { user, isAuthenticated } = useAuth();
   const [period, setPeriod] = useState<Period>("all");
@@ -140,25 +146,25 @@ const ScorePage = () => {
         </TierGate>
 
         {/* Platser mellan topp 3 och din egen placering — infällda, kräver
-            High Score Access för att visas. Fallback = blurrade
-            platshållarrader (inga riktiga namn/poäng) bakom TierGate:s
-            egen "kräver High Score Access"-overlay. */}
+            High Score Access för att visas. Fallback = ett fåtal
+            blurrade platshållarrader (inga riktiga namn/poäng) bakom
+            TierGate:s egen "kräver High Score Access"-overlay — en
+            kompakt, infälld ruta istället för en rad per dold
+            placering (som annars kan bli väldigt lång). */}
         {gapEntries.length > 0 && (
           <TierGate
             requiredTier="high-score-access"
             fallback={
-              // min-height: TierGates overlay ("kräver High Score
-              // Access" + knapp) storleksätts efter det blurrade
-              // innehållets höjd — med bara 1-2 dolda rader blir ytan
-              // annars för liten och overlayn klipps av.
               <div className="board" style={{ minHeight: 104 }}>
-                {gapEntries.map((entry) => (
-                  <div key={entry.score.id} className="row">
-                    <span className="rank">#{entry.rank}</span>
-                    <span className="name">••••••••</span>
-                    <span className="score">•••• p</span>
-                  </div>
-                ))}
+                {Array.from({ length: Math.min(gapEntries.length, GAP_PLACEHOLDER_ROWS) }).map(
+                  (_, i) => (
+                    <div key={i} className="row">
+                      <span className="rank">••</span>
+                      <span className="name">••••••••</span>
+                      <span className="score">•••• p</span>
+                    </div>
+                  )
+                )}
               </div>
             }
           >
@@ -196,16 +202,18 @@ const ScorePage = () => {
           <TierGate
             requiredTier="high-score-access"
             fallback={
-              // Samma min-height-fix som gap-sektionen ovan — annars
-              // klipps overlayn av om det bara är ett fåtal rader kvar.
+              // Samma kompakta platshållar-ruta som gap-sektionen ovan
+              // — en handfull rader istället för en per dold placering.
               <div className="board" style={{ minHeight: 104 }}>
-                {afterEntries.map((entry) => (
-                  <div key={entry.score.id} className="row">
-                    <span className="rank">#{entry.rank}</span>
-                    <span className="name">••••••••</span>
-                    <span className="score">•••• p</span>
-                  </div>
-                ))}
+                {Array.from({ length: Math.min(afterEntries.length, GAP_PLACEHOLDER_ROWS) }).map(
+                  (_, i) => (
+                    <div key={i} className="row">
+                      <span className="rank">••</span>
+                      <span className="name">••••••••</span>
+                      <span className="score">•••• p</span>
+                    </div>
+                  )
+                )}
               </div>
             }
           >
