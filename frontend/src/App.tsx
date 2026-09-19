@@ -30,13 +30,11 @@ const App = () => {
                 <Route path="/register" element={<RegisterPage />}></Route>
                 <Route path="/login" element={<LoginPage />}></Route>
                 <Route path="/admin" element={<AdminDashboardPage />}></Route>
-                <Route
-                    path="/admin/content"
-                    element={<AdminContentPage />}
-                ></Route>
+                <Route path="/admin/content" element={<AdminContentPage />}></Route>
                 <Route path="/admin/users" element={<AdminUsersPage />}></Route>
                 <Route path="/receipt" element={<ReceiptPage />}></Route>
                 <Route path="/profile" element={<ProfilePage />}></Route>
+                <Route path="/profile/:username" element={<ProfilePage />} /> // publik profil, öppen för alla
                 <Route path="/store" element={<StorePage />}></Route>
                 <Route path="/api-test" element={<ApiTestPage />}></Route>
                 <Route path="/contact" element={<ContactPage />}></Route>

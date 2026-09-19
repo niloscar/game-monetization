@@ -7,19 +7,27 @@ import comboIcon from '../assets/combo-icon.png'
 import highscoreIcon from '../assets/highscore-icon.png'
 import quarterIcon from '../assets/quarter-icon.png'
 import adminIcon from '../assets/admin-icon.png'
+import { tiers } from '../mock'
+import type { User } from '../mock/types'
+import { getProfileIconKey } from '../lib/profile'
+
+const profileIcons = {
+    quarter: quarterIcon,
+    combo: comboIcon,
+    highscore: highscoreIcon,
+    admin: adminIcon
+}
+
+// user.tierId (eller admin-roll) till rätt ikon/färg.
+const tierSlugById = new Map(tiers.map((t) => [t.id, t.slug]))
 
 const Header = () => {
-    const { user, login, logout, isAuthenticated } = useAuth()
+    const { user, isAuthenticated } = useAuth()
     const isLoggedIn = isAuthenticated
 
-    const profileIcons = {
-        quarter: quarterIcon,
-        combo: comboIcon,
-        highscore: highscoreIcon,
-        admin: adminIcon
-    }
-
-    const userTier = 'quarter'
+    const iconKey = user
+        ? getProfileIconKey(user as User, tierSlugById)
+        : 'quarter'
 
     return (
         <header className={styles.header}>
@@ -42,7 +50,7 @@ const Header = () => {
                     </div>
                 ) : (
                     <Link to="/profile" className={styles.profile}>
-                        <img src={profileIcons[userTier]} alt="Profil" />
+                        <img src={profileIcons[iconKey]} alt="Profil" />
                     </Link>
                 )}
             </div>
