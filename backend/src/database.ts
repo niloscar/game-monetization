@@ -17,7 +17,7 @@ export const pool = new Pool({
 
 export async function connect() {
     const client = await pool.connect()
-    console.log('Connected to the database')
+    console.log('Ansluten till databasen.')
     client.release()
 }
 

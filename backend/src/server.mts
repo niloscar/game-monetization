@@ -1,4 +1,7 @@
 import express from 'express'
+import expressSession from 'express-session'
+import connectPgSimple from 'connect-pg-simple'
+import { pool } from './database'
 import dotenv from 'dotenv'
 
 import adRoutes from './routes/ad'
@@ -17,45 +20,44 @@ const app = express()
 
 app.use(express.json())
 
-// const PgSession = connectPgSimple(expressSession)
-
 /* Middleware */
-app.use(express.static('public'))
-app.use(express.json()) 
+app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
-// app.use(expressSession({
-//   store: new PgSession({
-//     pool
-//   }),
-//   secret: process.env.SECRET_KEY || 'secret-key',
-//   resave: false,
-//   saveUninitialized: false,
-//   cookie: { 
-//     httpOnly: true,
-//     maxAge: 60 * 60 * 1000
-//   }
-// })) // Enable session support
+
+const PgStore = connectPgSimple(expressSession)
+app.use(
+    expressSession({
+        store: new PgStore({ pool }),
+        secret: process.env.SESSION_SECRET || 'mega-secret-key',
+        resave: false,
+        saveUninitialized: false,
+        cookie: {
+            httpOnly: true,
+            maxAge: 60 * 60 * 1000
+        }
+    })
+)
 
 /* API routes */
 app.use('/api/ad', adRoutes)
 app.use('/api/auth', authRouter)
-app.use ('/api/game', gameRoutes)
+app.use('/api/game', gameRoutes)
 app.use('/api/order', orderRoutes)
 app.use('/api/product', productRoutes)
 app.use('/api/user', userRouter)
 
-app.get('/api', (req, res) => {
+app.get('/api/test', (_req, res) => {
     res.json({
-        message: 'Backend is running',
+        message: 'Backend fungerar!'
     })
 })
 
 /* Handle unknown API endpoints */
 app.use('/api', (req, res) => {
-  res.status(404).json({
-    error: 'Ogiltig metod och/eller endpoint',
-    message: `${req.method} och ${req.originalUrl} är ingen giltig kombination.`,
-  })
+    res.status(404).json({
+        error: 'Ogiltig metod och/eller endpoint',
+        message: `${req.method} och ${req.originalUrl} är ingen giltig kombination.`
+    })
 })
 
 app.listen(port, () => console.log(`Backend running on http://${host}:${port}`))

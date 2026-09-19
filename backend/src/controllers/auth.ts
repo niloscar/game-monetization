@@ -9,6 +9,14 @@ interface LoginRequestBody {
     password: string
 }
 
+interface PublicUser {
+    email: string
+}
+
+interface SessionInfo {
+    userId: number
+}
+
 const MOCK_USERS = [
     {
         email: 'user1@example.com',
@@ -21,36 +29,36 @@ const MOCK_USERS = [
 ]
 
 export const login = (req: Request<LoginRequestBody>, res: Response<{ message: string }>) => {
-    if (!req.body.email || !req.body.password) {
-        res.status(400).json({ message: 'Email and password are required' })
+    const { email, password } = req.body
+
+    if (!email || !password) {
+        res.status(400).json({ message: 'E-post och lösenord krävs.' })
         return
     }
 
-    if (typeof req.body.email !== 'string' || typeof req.body.password !== 'string') {
-        res.status(400).json({ message: 'Email and password must be strings' })
+    if (typeof email !== 'string' || typeof password !== 'string') {
+        res.status(400).json({ message: 'E-post och lösenord måste vara strängar.' })
         return
     }
 
-    const user = MOCK_USERS.find(
-        (user) => user.email === req.body.email && user.password_hash === req.body.password
-    )
+    const user = MOCK_USERS.find((user) => user.email === email && user.password_hash === password)
 
     if (!user) {
-        res.status(401).json({ message: 'Invalid email or password' })
+        res.status(401).json({ message: 'Fel e-post eller lösenord.' })
         return
     }
 
-    res.json({ message: 'Login route' })
+    res.json({ message: 'Login-route' })
 }
 
 export const logout = (_req: Request, res: Response<{ message: string }>) => {
-    res.json({ message: 'Logout route' })
+    res.json({ message: 'Logout-route' })
 }
 
 export const getCurrentUser = (_req: Request, res: Response<{ message: string }>) => {
-    res.json({ message: 'Current user route' })
+    res.json({ message: 'Me-route' })
 }
 
-export const getSessionInfo = (_req: Request, res: Response<{ message: string }>) => {
-    res.json({ message: 'Session info route' })
+export const getSession = (_req: Request, res: Response<{ message: string }>) => {
+    res.json({ message: 'Session-route' })
 }
