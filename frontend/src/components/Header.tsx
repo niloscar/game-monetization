@@ -8,9 +8,8 @@ import highscoreIcon from '../assets/highscore-icon.png'
 import quarterIcon from '../assets/quarter-icon.png'
 import adminIcon from '../assets/admin-icon.png'
 
-const { user, login, logout, isAuthenticated } = useAuth();
-
 const Header = () => {
+    const { user, login, logout, isAuthenticated } = useAuth()
     const isLoggedIn = isAuthenticated
 
     const profileIcons = {

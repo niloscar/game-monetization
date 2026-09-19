@@ -1,5 +1,29 @@
 @import './tokens.css';
 
+@font-face {
+    font-family: 'Press Start 2P';
+    src: url('/fonts/press-start-2p-v16-latin-regular.woff2') format('woff2');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Space Mono';
+    src: url('/fonts/space-mono-v17-latin-regular.woff2') format('woff2');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Space Mono';
+    src: url('/fonts/space-mono-v17-latin-700.woff2') format('woff2');
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+}
+
 /* CSS RESET */
 
 *,
@@ -138,4 +162,213 @@ code {
     padding: 4px 8px;
     background: var(--code-bg);
     border: 0.5px solid var(--border);
+}
+
+/* ============================================================
+   SCOREBOARD — delade klasser för topplista, tier-gating m.m.
+   Text-align på #root är center; dessa klasser sätter egen
+   text-align: left där det behövs för läsbarhet i listor.
+   ============================================================ */
+
+.score-page {
+    max-width: 880px;
+    margin: 0 auto;
+    padding-inline: 20px;
+    padding-block: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    text-align: left;
+}
+
+.page-title {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+.page-title h1 {
+    font-size: 18px;
+    margin: 0;
+}
+.page-title p {
+    font-size: 11px;
+    color: var(--text-secondary);
+    margin: 0;
+}
+
+.card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.card-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.card-head h2 {
+    font-size: 12px;
+    margin: 0;
+}
+
+.tabs {
+    display: flex;
+    gap: 6px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 4px;
+}
+
+.tab {
+    font-size: 10px;
+    padding: 6px 10px;
+    border-radius: 6px;
+    background: transparent;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    white-space: nowrap;
+}
+
+.tab.active {
+    background: var(--surface);
+    color: var(--text-h);
+}
+.tab.locked {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+.tab.locked svg {
+    width: 10px;
+    height: 10px;
+}
+
+.own-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 14px;
+    border: 1px solid var(--tier-quarter);
+    border-radius: 8px;
+    background: rgba(45, 226, 230, 0.06);
+    font-size: 11px;
+    color: var(--text-h);
+}
+.own-row .rank {
+    color: var(--tier-quarter);
+    font-family: var(--heading);
+    font-size: 10px;
+    width: 34px;
+}
+.own-row .name {
+    flex: 1;
+}
+.own-row .score {
+    font-variant-numeric: tabular-nums;
+    color: var(--text-h);
+}
+
+.login-cta {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    align-items: center;
+    text-align: center;
+    padding: 14px;
+    border: 1px dashed var(--border);
+    border-radius: 8px;
+}
+.login-cta p {
+    font-size: 11px;
+    color: var(--text-secondary);
+    max-width: 380px;
+}
+
+.board {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 9px 14px;
+    border-radius: 8px;
+    font-size: 11px;
+}
+.row:nth-child(odd) {
+    background: rgba(255, 255, 255, 0.02);
+}
+.row .rank {
+    width: 34px;
+    font-variant-numeric: tabular-nums;
+    color: var(--text-secondary);
+}
+.row .name {
+    flex: 1;
+    color: var(--text-h);
+}
+.row .score {
+    font-variant-numeric: tabular-nums;
+}
+
+.row.medal-gold {
+    border: 1px solid var(--medal-gold);
+    background: rgba(255, 214, 10, 0.06);
+}
+.row.medal-silver {
+    border: 1px solid var(--medal-silver);
+    background: rgba(201, 205, 214, 0.06);
+}
+.row.medal-bronze {
+    border: 1px solid var(--medal-bronze);
+    background: rgba(201, 129, 74, 0.06);
+}
+.row.medal-gold .rank {
+    color: var(--medal-gold);
+}
+.row.medal-silver .rank {
+    color: var(--medal-silver);
+}
+.row.medal-bronze .rank {
+    color: var(--medal-bronze);
+}
+
+.row.hsa-self {
+    border: 1px solid var(--tier-highscore);
+    background: rgba(255, 214, 10, 0.06);
+}
+
+.btn {
+    font-family: var(--sans);
+    font-size: 10px;
+    font-weight: 700;
+    border-radius: 6px;
+    padding: 7px 16px;
+    color: var(--bg);
+}
+.btn.combo {
+    background: var(--tier-combo);
+    color: var(--tier-combo-text);
+}
+.btn.hsa {
+    background: var(--tier-highscore);
+}
+
+@media (max-width: 480px) {
+    .card-head {
+        align-items: flex-start;
+    }
 }

@@ -17,6 +17,10 @@
     --tier-combo-text: #4a0e29;
     --tier-highscore: #ffd60a;
 
+    --medal-gold: #ffd60a;
+    --medal-silver: #c9cdd6;
+    --medal-bronze: #c9814a;
+
     --social-bg: rgba(20, 20, 28, 0.5);
     --shadow:
         rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
