@@ -346,6 +346,12 @@ code {
     background: rgba(255, 214, 10, 0.06);
 }
 
+/* Extra cyan ring ovanpå medaljfärgen för att markera "det här är du"
+   när du själv ligger i topp 3. */
+.row.row-self {
+    box-shadow: inset 0 0 0 2px var(--tier-quarter);
+}
+
 .btn {
     font-family: var(--sans);
     font-size: 10px;
