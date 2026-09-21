@@ -2,27 +2,252 @@
  * User controller
  */
 
+import * as service from '../services/user'
+import { validateField, validateId } from '../utils/validation'
+import { hashPassword } from '../utils/password'
 import type { Request, Response } from 'express'
+import type { ApiError } from '../types/errors'
+import type { CreateUserBody, UpdateUserData, User } from '../types/user'
 
-export const getUsers = (_req: Request, res: Response<{ message: string }>) => {
-    res.json({ message: 'Users-route' })
+export const getMe = async (req: Request, res: Response<User | ApiError>) => {
+    const id = req.session.userId
+
+    if (id === undefined) {
+        res.status(401).json({ message: 'Användaren är inte autentiserad.' })
+        return
+    }
+
+    const user = await service.getUser(id)
+
+    if (!user) {
+        res.status(404).json({ message: 'Användaren hittades inte.' })
+        return
+    }
+
+    res.status(200).json(user)
 }
 
-export const getUser = (req: Request<{ userId: string }>, res: Response<{ message: string }>) => {
-    const { userId } = req.params
-    res.json({ message: `User-route for userId: ${userId}` })
+export const updateMe = async (req: Request, res: Response<User | ApiError>) => {
+    const id = req.session.userId
+
+    if (!id) {
+        res.status(401).json({ message: 'Användaren är inte autentiserad.' })
+        return
+    }
+
+    const { username, email, password } = req.body ?? {}
+
+    if ([username, email, password].every(value => value === undefined)) {
+        res.status(400).json({
+            message: 'Minst ett fält måste anges.'
+        })
+        return
+    }
+
+    if (username !== undefined) {
+        const error = validateField('username', username, 'string')
+        if (error) {
+            res.status(400).json(error)
+            return
+        }
+    }
+
+    if (email !== undefined) {
+        const error = validateField('email', email, 'string')
+        if (error) {
+            res.status(400).json(error)
+            return
+        }
+    }
+
+    if (password !== undefined) {
+        const error = validateField('password', password, 'string')
+        if (error) {
+            res.status(400).json(error)
+            return
+        }
+    }
+
+    const data: UpdateUserData = {
+        username,
+        email
+    }
+
+    if (password !== undefined) data.passwordHash = await hashPassword(password)
+
+    const updatedUser = await service.updateUser(id, data)
+
+    if (!updatedUser) {
+        res.status(404).json({ message: 'Användaren hittades inte.' })
+        return
+    }
+
+    res.status(200).json(updatedUser)
 }
 
-export const createUser = (req: Request, res: Response<{ message: string }>) => {
-    res.json({ message: 'Create-user route' })
+export const getUsers = async (_req: Request, res: Response<User[]>) => {
+    const users = await service.getUsers()
+
+    res.status(200).json(users)
 }
 
-export const updateUser = (req: Request<{ userId: string }>, res: Response<{ message: string }>) => {
-    const { userId } = req.params
-    res.json({ message: `Update-user route for userId: ${userId}` })
+export const getUser = async (req: Request<{ id: string }>, res: Response<User | ApiError>) => {
+    const id = Number(req.params.id)
+
+    const error = validateId('id', id)
+    if (error) {
+        res.status(400).json(error)
+        return
+    }
+
+    const user = await service.getUser(id)
+    if (!user) {
+        res.status(404).json({ message: 'Användare hittades inte.' })
+        return
+    }
+
+    res.status(200).json(user)
 }
 
-export const deleteUser = (req: Request<{ userId: string }>, res: Response<{ message: string }>) => {
-    const { userId } = req.params
-    res.json({ message: `Delete-user route for userId: ${userId}` })
+export const createUser = async ( req: Request<{}, User | ApiError, CreateUserBody>, res: Response<User | ApiError>) => {
+    const { username, email, password } = req.body ?? {}
+
+    const usernameError = validateField('username', username, 'string')
+    if (usernameError) {
+        res.status(400).json(usernameError)
+        return
+    }
+
+    const emailError = validateField('email', email, 'string')
+    if (emailError) {
+        res.status(400).json(emailError)
+        return
+    }
+
+    const passwordError = validateField('password', password, 'string')
+    if (passwordError) {
+        res.status(400).json(passwordError)
+        return
+    }
+
+    const passwordHash = await hashPassword(password)
+
+    const newUser = await service.createUser({ username, email, passwordHash, roleId: 1 }) // TODO: Set the roleId based on your application's logic
+
+    res.status(201).json(newUser)
+}
+
+export const updateUser = async (req: Request<{ id: string }>, res: Response<User | ApiError>) => {
+    const id = Number(req.params.id)
+    const { username, email, password, roleId } = req.body ?? {}
+
+    const idError = validateId('id', id)
+    if (idError) {
+        res.status(400).json(idError)
+        return
+    }
+
+    if ([username, email, password, roleId].every(value => value === undefined)) {
+        res.status(400).json({
+            message: 'Minst ett fält måste anges.'
+        })
+        return
+    }
+
+    if (username !== undefined) {
+        const error = validateField('username', username, 'string')
+        if (error) {
+            res.status(400).json(error)
+            return
+        }
+    }
+
+    if (email !== undefined) {
+        const error = validateField('email', email, 'string')
+        if (error) {
+            res.status(400).json(error)
+            return
+        }
+    }
+
+    if (password !== undefined) {
+        const error = validateField('password', password, 'string')
+        if (error) {
+            res.status(400).json(error)
+            return
+        }
+    }
+
+    if (roleId !== undefined) {
+        const error = validateId('roleId', roleId)
+        if (error) {
+            res.status(400).json(error)
+            return
+        }
+    }
+
+    const data: UpdateUserData = { username, email, roleId }
+
+    if (password !== undefined) data.passwordHash = await hashPassword(password)
+    
+    const updatedUser = await service.updateUser(id, data)
+
+    if (!updatedUser) {
+        res.status(404).json({ message: 'Användaren hittades inte.' })
+        return
+    }
+
+    res.status(200).json(updatedUser)
+}
+
+export const deleteUser = async (req: Request<{ id: string }>, res: Response<ApiError>) => {
+    const id = Number(req.params.id)
+
+    const error = validateId('id', id)
+    if (error) {
+        res.status(400).json(error)
+        return
+    }
+
+    const deletedUser = await service.deleteUser(id)
+
+    if (!deletedUser) {
+        res.status(404).json({ message: 'Användaren hittades inte.' })
+        return
+    }
+
+    res.status(204).send()
+}
+
+export const updateUserPassword = async (req: Request<{ id: string }>, res: Response<User | ApiError>) => {
+    const id = Number(req.session.userId)
+    const { password } = req.body ?? {}
+
+    const idError = validateId('id', id)
+    if (idError) {
+        res.status(400).json(idError)
+        return
+    }
+
+    if (password === undefined) {
+        res.status(400).json({ message: 'Lösenord måste anges.', field: 'password' })
+        return
+    }
+
+    const passwordError = validateField('password', password, 'string')
+    if (passwordError) {
+        res.status(400).json(passwordError)
+        return
+    }
+
+    const passwordHash = await hashPassword(password)
+
+    const updatedUser = await service.updateUser(id, { passwordHash })
+
+    if (!updatedUser) {
+        res.status(404).json({ message: 'Användaren hittades inte.' })
+        return
+    }
+
+    res.status(200).json(updatedUser)
 }
