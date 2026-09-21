@@ -10,6 +10,8 @@ import gameRoutes from './routes/game'
 import orderRoutes from './routes/order'
 import productRoutes from './routes/product'
 import userRouter from './routes/user'
+import testRouter from './routes/test'
+import adminUserRouter from './routes/admin/user'
 
 dotenv.config()
 
@@ -45,12 +47,8 @@ app.use('/api/game', gameRoutes)
 app.use('/api/order', orderRoutes)
 app.use('/api/product', productRoutes)
 app.use('/api/user', userRouter)
-
-app.get('/api/test', (_req, res) => {
-    res.json({
-        message: 'Backend fungerar!'
-    })
-})
+app.use('/api/test', testRouter)
+app.use('/api/admin/users', adminUserRouter)
 
 /* Handle unknown API endpoints */
 app.use('/api', (req, res) => {

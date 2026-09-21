@@ -3,13 +3,14 @@
  */
 
 import { Router } from 'express'
-import { login, logout, getCurrentUser, getSession } from '../controllers/auth'
+import { login, logout, getSession } from '../controllers/auth'
+import { getMe } from '../controllers/user'
 
 const authRouter = Router()
 
 authRouter.post('/login', login)
 authRouter.post('/logout', logout)
-authRouter.get('/me', getCurrentUser)
+authRouter.get('/me', getMe)
 authRouter.get('/session', getSession)
 
 export default authRouter

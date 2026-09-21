@@ -2,63 +2,76 @@
  * Auth controller
  */
 
+import { verifyPassword } from '../utils/password'
+import { validateField } from '../utils/validation'
 import type { Request, Response } from 'express'
+import type { ApiError } from '../types/errors'
+import { getAuthCredentialsByEmail } from '../services/auth'
 
 interface LoginRequestBody {
     email: string
     password: string
 }
 
-interface PublicUser {
-    email: string
-}
+export const login = async (req: Request<{}, ApiError, LoginRequestBody>, res: Response<ApiError>) => {
+    const { email, password } = req.body ?? {}
 
-interface SessionInfo {
-    userId: number
-}
-
-const MOCK_USERS = [
-    {
-        email: 'user1@example.com',
-        password_hash: 'password1'
-    },
-    {
-        email: 'user2@example.com',
-        password_hash: 'password2'
-    }
-]
-
-export const login = (req: Request<LoginRequestBody>, res: Response<{ message: string }>) => {
-    const { email, password } = req.body
-
-    if (!email || !password) {
-        res.status(400).json({ message: 'E-post och lösenord krävs.' })
+    const emailError = validateField('email', email, 'string')
+    if (emailError) {
+        res.status(400).json(emailError)
         return
     }
 
-    if (typeof email !== 'string' || typeof password !== 'string') {
-        res.status(400).json({ message: 'E-post och lösenord måste vara strängar.' })
+    const passwordError = validateField('password', password, 'string')
+    if (passwordError) {
+        res.status(400).json(passwordError)
         return
     }
 
-    const user = MOCK_USERS.find((user) => user.email === email && user.password_hash === password)
+    const user = await getAuthCredentialsByEmail(email)
 
     if (!user) {
         res.status(401).json({ message: 'Fel e-post eller lösenord.' })
         return
     }
 
-    res.json({ message: 'Login-route' })
+    console.log('User credentials:', user.passwordHash)
+
+    const isPasswordValid = await verifyPassword(user.passwordHash, password)
+
+    if (!isPasswordValid) {
+        res.status(401).json({ message: 'Fel e-post eller lösenord.' })
+        return
+    }
+
+    req.session.regenerate((error) => {
+        if (error) {
+            res.status(500).json({ message: 'Kunde inte skapa session.' })
+            return
+        }
+
+        req.session.userId = user.id
+
+        res.status(204).send()
+    })
 }
 
-export const logout = (_req: Request, res: Response<{ message: string }>) => {
-    res.json({ message: 'Logout-route' })
+export const logout = (req: Request, res: Response<ApiError>) => {
+    req.session.destroy((error) => {
+        if (error) {
+            res.status(500).json({ message: 'Kunde inte logga ut.' })
+            return
+        }
+
+        res.clearCookie('connect.sid')
+        res.status(204).send()
+    })
 }
 
-export const getCurrentUser = (_req: Request, res: Response<{ message: string }>) => {
+export const getMe = (_req: Request, res: Response<ApiError>) => {
     res.json({ message: 'Me-route' })
 }
 
-export const getSession = (_req: Request, res: Response<{ message: string }>) => {
+export const getSession = (_req: Request, res: Response<ApiError>) => {
     res.json({ message: 'Session-route' })
 }
