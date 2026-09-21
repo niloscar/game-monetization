@@ -141,8 +141,6 @@ DB_USER=
 DB_PASSWORD=
 DB_NAME=
 SESSION_SECRET=
-SALT_ROUNDS=
-SALT_SECRET=
 ```
 
 Fyll i databasuppgifter från Neon och generera egna säkerhetsnycklar. Känsliga uppgifter får inte versionshanteras eller exponeras i frontend.
