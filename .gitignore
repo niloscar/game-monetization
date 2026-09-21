@@ -1,11 +1,11 @@
-node_modules/
 dist/
-.vscode/
+node_modules/
+postman/
 .vercel/
+.vscode/
 
 .DS_Store
-.vercel
-
 .env
 .env.*
 !.env.example
+.postman

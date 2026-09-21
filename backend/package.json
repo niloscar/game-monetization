@@ -3,7 +3,7 @@
     "version": "1.0.0",
     "description": "",
     "scripts": {
-        "dev": "nodemon --watch src --exec tsx src/server.mts",
+        "dev": "nodemon --watch src --ext ts,mts,js,mjs,json --exec tsx src/server.mts",
         "build": "tsc --noEmit && node build.mjs",
         "start": "node dist/server.mjs",
         "test": "echo \"Error: no test specified\" && exit 1"
@@ -13,14 +13,18 @@
     "license": "ISC",
     "type": "module",
     "dependencies": {
+        "connect-pg-simple": "^10.0.0",
         "cors": "^2.8.6",
         "dotenv": "^17.4.2",
         "express": "^5.2.1",
+        "express-session": "^1.19.0",
         "pg": "^8.23.0"
     },
     "devDependencies": {
+        "@types/connect-pg-simple": "^7.0.3",
         "@types/cors": "^2.8.19",
         "@types/express": "^5.0.6",
+        "@types/express-session": "^1.19.0",
         "@types/node": "^26.5.1",
         "@types/pg": "^8.23.1",
         "esbuild": "^0.28.2",

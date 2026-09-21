@@ -27,6 +27,12 @@
     },
     "homepage": "https://github.com/niloscar/game-monetization#readme",
     "devDependencies": {
+        "@types/express-session": "^1.19.0",
         "prettier": "^3.9.7"
+    },
+    "dependencies": {
+        "@types/connect-pg-simple": "^7.0.3",
+        "connect-pg-simple": "^10.0.0",
+        "express-session": "^1.19.0"
     }
 }

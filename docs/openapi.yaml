@@ -1,0 +1,213 @@
+openapi: 3.1.0
+
+info:
+    title: Game Monetization API
+    version: 1.0.0
+    description: API for the Game Monetization platform.
+
+servers:
+    - url: http://localhost:3000/api
+      description: Local development
+
+tags:
+    - name: Ads
+      description: Advertisement management
+
+paths:
+    /ad:
+        get:
+            tags:
+                - Ads
+            summary: Get all ads
+            operationId: getAds
+
+            responses:
+                "200":
+                    description: List of all ads
+                    content:
+                        application/json:
+                            schema:
+                                type: array
+                                items:
+                                    $ref: "#/components/schemas/Ad"
+
+        post:
+            tags:
+                - Ads
+            summary: Create an ad
+            operationId: createAd
+
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: "#/components/schemas/CreateAd"
+
+            responses:
+                "201":
+                    description: Ad created successfully
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Ad"
+
+                "400":
+                    description: Invalid request data
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Error"
+
+    /ad/{id}:
+        parameters:
+            - name: id
+              in: path
+              required: true
+              description: Unique identifier of the ad
+              schema:
+                  type: integer
+              example: 1
+
+        get:
+            tags:
+                - Ads
+            summary: Get an ad by ID
+            operationId: getAd
+
+            responses:
+                "200":
+                    description: Ad found
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Ad"
+
+                "404":
+                    description: Ad not found
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Error"
+
+        patch:
+            tags:
+                - Ads
+            summary: Update an ad
+            operationId: updateAd
+
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: "#/components/schemas/UpdateAd"
+
+            responses:
+                "200":
+                    description: Ad updated successfully
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Ad"
+
+                "404":
+                    description: Ad not found
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Error"
+
+        delete:
+            tags:
+                - Ads
+            summary: Deactivate an ad
+            description: Soft delete by setting is_active to false.
+            operationId: deleteAd
+
+            responses:
+                "204":
+                    description: Ad deactivated successfully
+
+                "404":
+                    description: Ad not found
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Error"
+
+components:
+    schemas:
+        Ad:
+            type: object
+            required:
+                - id
+                - type
+                - url
+                - is_active
+
+            properties:
+                id:
+                    type: integer
+                    readOnly: true
+                    example: 1
+
+                type:
+                    type: string
+                    enum:
+                        - video
+                        - banner
+                    example: video
+
+                url:
+                    type: string
+                    example: https://example.com/ad.mp4
+
+                is_active:
+                    type: boolean
+                    example: true
+
+        CreateAd:
+            type: object
+            required:
+                - type
+                - url
+
+            properties:
+                type:
+                    type: string
+                    enum:
+                        - video
+                        - banner
+
+                url:
+                    type: string
+
+                is_active:
+                    type: boolean
+                    default: true
+
+        UpdateAd:
+            type: object
+            properties:
+                type:
+                    type: string
+                    enum:
+                        - video
+                        - banner
+
+                url:
+                    type: string
+
+                is_active:
+                    type: boolean
+
+        Error:
+            type: object
+            required:
+                - message
+
+            properties:
+                message:
+                    type: string
+                    example: Ad not found

@@ -132,15 +132,15 @@ VITE_API_URL=http://localhost:3000
 **Backend (`backend/.env`):**
 
 ```dotenv
-ENV=development
+NODE_ENV=development
 HOST=localhost
 PORT=3000
-SECRET_KEY=
 DB_HOST=
 DB_PORT=
 DB_USER=
 DB_PASSWORD=
 DB_NAME=
+SESSION_SECRET=
 SALT_ROUNDS=
 SALT_SECRET=
 ```
