@@ -8,7 +8,6 @@ import highscoreIcon from '../assets/highscore-icon.png'
 import quarterIcon from '../assets/quarter-icon.png'
 import adminIcon from '../assets/admin-icon.png'
 import { tiers } from '../mock'
-import type { User } from '../mock/types'
 import { getProfileIconKey } from '../lib/profile'
 
 const profileIcons = {
@@ -18,7 +17,6 @@ const profileIcons = {
     admin: adminIcon
 }
 
-// user.tierId (eller admin-roll) till rätt ikon/färg.
 const tierSlugById = new Map(tiers.map((t) => [t.id, t.slug]))
 
 const Header = () => {
@@ -26,7 +24,7 @@ const Header = () => {
     const isLoggedIn = isAuthenticated
 
     const iconKey = user
-        ? getProfileIconKey(user as User, tierSlugById)
+        ? getProfileIconKey(user, tierSlugById)
         : 'quarter'
 
     return (
