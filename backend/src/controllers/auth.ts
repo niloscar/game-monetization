@@ -2,11 +2,13 @@
  * Auth controller
  */
 
-import { verifyPassword } from '../utils/password'
+import { verifyPassword, hashPassword } from '../utils/password'
 import { validateField } from '../utils/validation'
 import type { Request, Response } from 'express'
 import type { ApiError } from '../types/errors'
 import { getAuthCredentialsByEmail } from '../services/auth'
+import type { CreateUserBody } from '../types/user'
+import { createUser } from '../services/user'
 
 interface LoginRequestBody {
     email: string
@@ -74,4 +76,62 @@ export const getMe = (_req: Request, res: Response<ApiError>) => {
 
 export const getSession = (_req: Request, res: Response<ApiError>) => {
     res.json({ message: 'Session-route' })
+}
+
+export const register = async (
+    req: Request<{}, ApiError, CreateUserBody>,
+    res: Response<ApiError>
+) => {
+    const { username, email, password } = req.body ?? {}
+
+    const usernameError = validateField('username', username, 'string')
+    if (usernameError) {
+        res.status(400).json(usernameError)
+        return
+    }
+
+    const emailError = validateField('email', email, 'string')
+    if (emailError) {
+        res.status(400).json(emailError)
+        return
+    }
+
+    const passwordError = validateField('password', password, 'string')
+    if (passwordError) {
+        res.status(400).json(passwordError)
+        return
+    }
+
+    if (password.length < 8) {
+    res.status(400).json({
+        message: 'Lösenordet måste vara minst 8 tecken.',
+        field: 'password'
+    })
+    return
+}
+
+    const passwordHash = await hashPassword(password)
+
+ let user
+
+try {
+    user = await createUser({
+        username,
+        email,
+        passwordHash,
+        roleId: 1
+    })
+} catch (error) {
+    console.error(error)
+
+     res.status(409).json({
+        message: 'E-postadressen används redan.',
+        field: 'email'
+    })
+
+   return
+
+}
+res.status(201).json(user)
+
 }

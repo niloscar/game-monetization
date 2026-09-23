@@ -3,6 +3,7 @@ import expressSession from 'express-session'
 import connectPgSimple from 'connect-pg-simple'
 import { pool } from './database'
 import dotenv from 'dotenv'
+import cors from 'cors'
 
 import adRoutes from './routes/ad'
 import authRouter from './routes/auth'
@@ -19,6 +20,13 @@ const host = process.env.HOST || 'localhost'
 const port = process.env.PORT || 3000
 
 const app = express()
+
+app.use(
+    cors({
+        origin: 'http://localhost:5173',
+        credentials: true
+    })
+)
 
 app.use(express.json())
 
