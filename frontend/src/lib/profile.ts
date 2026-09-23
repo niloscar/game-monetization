@@ -1,7 +1,3 @@
-// Hjälpfunktioner för ProfilePage — hittar en användare via username,
-// räknar ut statistik från deras scores, och avgör vilken tier-ikon
-// som ska visas (samma ikonuppsättning som Header.tsx använder).
-
 import type { Score, User } from "../mock/types";
 import { getLeaderboard } from "./scoreboard";
 
@@ -43,7 +39,6 @@ export function getProfileStats(scores: Score[], userId: string): ProfileStats {
   };
 }
 
-/** "4h 12m" eller "35m" om under en timme. */
 export function formatPlaytime(totalSeconds: number): string {
   const hours = Math.floor(totalSeconds / 3600);
   const minutes = Math.floor((totalSeconds % 3600) / 60);
@@ -51,7 +46,6 @@ export function formatPlaytime(totalSeconds: number): string {
   return `${hours}h ${minutes}m`;
 }
 
-/** Var i topplistan (alla spelare) ligger den här användaren? */
 export function getProfileRank(scores: Score[], users: User[], userId: string): number | null {
   const leaderboard = getLeaderboard(scores, users, "all");
   const entry = leaderboard.find((e) => e.user.id === userId);
@@ -66,8 +60,10 @@ const TIER_SLUG_TO_ICON: Record<string, ProfileIconKey> = {
   "high-score-access": "highscore",
 };
 
-/** Admin-ikonen vinner alltid, annars ikonen för användarens nivå. */
-export function getProfileIconKey(user: User, tierSlugById: Map<string, string>): ProfileIconKey {
+export function getProfileIconKey(
+  user: Pick<User, "role" | "tierId">,
+  tierSlugById: Map<string, string>
+): ProfileIconKey {
   if (user.role === "admin") return "admin";
   const slug = tierSlugById.get(user.tierId);
   return (slug && TIER_SLUG_TO_ICON[slug]) || "quarter";
