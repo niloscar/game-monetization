@@ -3,29 +3,15 @@
  */
 
 import { Router } from 'express'
+import { authenticate } from '../middleware/auth'
+import { getScores, getScore, createScore } from '../controllers/game'
 
-const gameRoutes = Router()
+const gameRouter = Router()
 
-gameRoutes.get('/score', (req, res) => {
-  // Handle fetching the game score logic here
-  res.json({ message: 'Get game score route' })
-})
+gameRouter.use(authenticate) // Check if the user is authenticated for all routes below
 
-gameRoutes.post('/score', (req, res) => {
-  // Handle adding new game score logic here
-  res.json({ message: 'Add game score route' })
-})
+gameRouter.get('/score', getScores)
+gameRouter.get('/score/:id', getScore)
+gameRouter.post('/score', createScore)
 
-gameRoutes.get('/score/:id', (req, res) => {
-  // Handle fetching a specific game score by ID logic here
-  const { id } = req.params
-  res.json({ message: `Get game score with ID ${id} route` })
-})
-
-gameRoutes.delete('/score/:id', (req, res) => {
-  // Handle deleting a specific game score by ID logic here
-  const { id } = req.params
-  res.json({ message: `Delete game score with ID ${id} route` })
-})
-
-export default gameRoutes
+export default gameRouter

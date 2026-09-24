@@ -3,14 +3,11 @@
  */
 
 import { Router } from 'express'
-import { getAds, getAd, createAd, updateAd, deleteAd } from '../controllers/ad'
+import { getAds, getAd} from '../controllers/ad'
 
-const adRoutes = Router()
+const adRouter = Router()
 
-adRoutes.get('/', getAds)
-adRoutes.get('/:id', getAd)
-adRoutes.post('/', createAd)
-adRoutes.patch('/:id', updateAd)
-adRoutes.delete('/:id', deleteAd)
+adRouter.get('/', getAds)
+adRouter.get('/:id', getAd)
 
-export default adRoutes
+export default adRouter
