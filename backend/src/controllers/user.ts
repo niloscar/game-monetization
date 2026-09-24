@@ -9,6 +9,9 @@ import type { Request, Response } from 'express'
 import type { ApiError } from '../types/errors'
 import type { CreateUserBody, UpdateUserData, User } from '../types/user'
 
+const NEW_USER_DEFAULT_ROLE_ID = 1
+// const NEW_USER_DEFAULT_TIER_ID = null
+
 export const getMe = async (req: Request, res: Response<User | ApiError>) => {
     const id = req.session.userId
 
@@ -109,7 +112,12 @@ export const getUser = async (req: Request<{ id: string }>, res: Response<User |
     res.status(200).json(user)
 }
 
-export const createUser = async ( req: Request<{}, User | ApiError, CreateUserBody>, res: Response<User | ApiError>) => {
+import type { DatabaseError } from 'pg'
+
+export const createUser = async (
+    req: Request<{}, User | ApiError, CreateUserBody>,
+    res: Response<User | ApiError>
+) => {
     const { username, email, password } = req.body ?? {}
 
     const usernameError = validateField('username', username, 'string')
@@ -130,11 +138,40 @@ export const createUser = async ( req: Request<{}, User | ApiError, CreateUserBo
         return
     }
 
-    const passwordHash = await hashPassword(password)
+    try {
+        const passwordHash = await hashPassword(password)
 
-    const newUser = await service.createUser({ username, email, passwordHash, roleId: 1 }) // TODO: Set the roleId based on your application's logic
+        const newUser = await service.createUser({
+            username,
+            email,
+            passwordHash,
+            roleId: NEW_USER_DEFAULT_ROLE_ID
+        })
 
-    res.status(201).json(newUser)
+        res.status(201).json(newUser)
+    } catch (error) {
+        const dbError = error as DatabaseError
+
+        if (dbError.code === '23505') {
+            if (dbError.constraint === 'uq_users_email_lower') {
+                res.status(409).json({
+                    message: 'E-postadressen används redan av en annan användare.',
+                    field: 'email'
+                })
+                return
+            }
+
+            if (dbError.constraint === 'uq_users_username_lower') {
+                res.status(409).json({
+                    message: 'Användarnamnet används redan av en annan användare.',
+                    field: 'username'
+                })
+                return
+            }
+        }
+
+        throw error
+    }
 }
 
 export const updateUser = async (req: Request<{ id: string }>, res: Response<User | ApiError>) => {

@@ -4,11 +4,13 @@
 
 import { Router } from 'express'
 import { authenticate } from '../middleware/auth'
-import { getMe, updateMe } from '../controllers/user'
+import { getMe, updateMe, createUser } from '../controllers/user'
 
 const userRouter = Router()
 
-userRouter.use(authenticate)
+userRouter.post('/', createUser)
+
+userRouter.use(authenticate) // Check if the user is authenticated for all routes below
 
 userRouter.get('/me', getMe)
 userRouter.patch('/me', updateMe)
