@@ -37,7 +37,10 @@ app.use(express.urlencoded({ extended: true }))
 const PgStore = connectPgSimple(expressSession)
 app.use(
     expressSession({
-        store: new PgStore({ pool }),
+        store: new PgStore({
+            pool,
+            tableName: 'sessions'
+        }),
         secret: process.env.SESSION_SECRET || 'mega-secret-key',
         resave: false,
         saveUninitialized: false,
