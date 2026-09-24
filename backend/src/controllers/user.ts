@@ -12,15 +12,8 @@ import type { CreateUserBody, UpdateUserData, User } from '../types/user'
 const NEW_USER_DEFAULT_ROLE_ID = 1
 // const NEW_USER_DEFAULT_TIER_ID = null
 
-export const getMe = async (req: Request, res: Response<User | ApiError>) => {
-    const id = req.session.userId
-
-    if (id === undefined) {
-        res.status(401).json({ message: 'Användaren är inte autentiserad.' })
-        return
-    }
-
-    const user = await service.getUser(id)
+export const getCurrentUser = async (req: Request, res: Response<User | ApiError>) => {
+    const user = await service.getUser(req.session.userId!)
 
     if (!user) {
         res.status(404).json({ message: 'Användaren hittades inte.' })
@@ -30,7 +23,7 @@ export const getMe = async (req: Request, res: Response<User | ApiError>) => {
     res.status(200).json(user)
 }
 
-export const updateMe = async (req: Request, res: Response<User | ApiError>) => {
+export const updateCurrentUser = async (req: Request, res: Response<User | ApiError>) => {
     const id = req.session.userId
 
     if (!id) {
