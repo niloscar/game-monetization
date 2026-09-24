@@ -70,11 +70,3 @@ export const logout = (req: Request, res: Response<ApiError>) => {
         res.status(204).send()
     })
 }
-
-export const getMe = (_req: Request, res: Response<ApiError>) => {
-    res.json({ message: 'Me-route' })
-}
-
-export const getSession = (_req: Request, res: Response<ApiError>) => {
-    res.json({ message: 'Session-route' })
-}
