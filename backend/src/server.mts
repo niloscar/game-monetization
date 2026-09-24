@@ -1,9 +1,8 @@
 import express from 'express'
 import expressSession from 'express-session'
 import connectPgSimple from 'connect-pg-simple'
-import { pool } from './database'
 import dotenv from 'dotenv'
-import cors from 'cors'
+import { pool } from './database'
 
 import adRoutes from './routes/ad'
 import authRouter from './routes/auth'
@@ -12,7 +11,10 @@ import orderRoutes from './routes/order'
 import productRoutes from './routes/product'
 import userRouter from './routes/user'
 import testRouter from './routes/test'
+
 import adminUserRouter from './routes/admin/user'
+import { errorHandler } from './middleware/errorHandler'
+import { notFoundHandler } from './middleware/notFoundHandler'
 
 dotenv.config()
 
@@ -20,13 +22,6 @@ const host = process.env.HOST || 'localhost'
 const port = process.env.PORT || 3000
 
 const app = express()
-
-app.use(
-    cors({
-        origin: 'http://localhost:5173',
-        credentials: true
-    })
-)
 
 app.use(express.json())
 
@@ -61,12 +56,9 @@ app.use('/api/user', userRouter)
 app.use('/api/test', testRouter)
 app.use('/api/admin/users', adminUserRouter)
 
-/* Handle unknown API endpoints */
-app.use('/api', (req, res) => {
-    res.status(404).json({
-        error: 'Ogiltig metod och/eller endpoint',
-        message: `${req.method} och ${req.originalUrl} är ingen giltig kombination.`
-    })
-})
+/* Error handling middleware */
+app.use('/api', notFoundHandler)
+app.use(errorHandler)
 
+/* Start the server */
 app.listen(port, () => console.log(`Backend running on http://${host}:${port}`))
