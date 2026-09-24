@@ -1,0 +1,83 @@
+.login-card {
+    width: 100%;
+    max-width: 350px;
+    margin: 5rem auto 20rem;
+    padding: 16px;
+    background-color: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    text-align: left;
+}
+
+.login-card h1 {
+    font-size: 12px;
+    line-height: 1.4;
+    margin: 0 0 4px;
+}
+
+.login-card form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.login-card .field {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.login-card .field-label {
+    font-size: 14px;
+    color: var(--text-secondary);
+}
+
+.login-card input {
+    width: 100%;
+    height: 45px;
+    padding: 8px 10px;
+    font-size: 11px;
+    color: var(--text-secondary);
+}
+
+.login-card input:focus {
+    border-color: #f5f5f7;
+    outline: none;
+}
+
+.login-card button {
+    width: 100%;
+    height: 45px;
+    margin-top: 2px;
+    background: var(--accent);
+    color: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 10px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.login-card > p {
+    margin: 10px 0 0;
+    text-align: center;
+    font-size: 14px;
+    color: var(--text-secondary);
+}
+
+.login-card a {
+    color: var(--text-primary);
+    text-decoration: none;
+}
+
+.login-card > p:last-child {
+    margin: 15px 0 0;
+    text-align: center;
+    font-size: 9px;
+}
+
+.login-card > p:last-child a {
+    color: var(--accent);
+}
