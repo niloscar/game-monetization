@@ -38,8 +38,6 @@ export const login = async (
         return
     }
 
-    console.log('User credentials:', user.passwordHash)
-
     const isPasswordValid = await verifyPassword(user.passwordHash, password)
 
     if (!isPasswordValid) {

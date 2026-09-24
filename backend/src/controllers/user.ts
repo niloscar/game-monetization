@@ -6,6 +6,7 @@ import * as service from '../services/user'
 import { validateField, validateId } from '../utils/validation'
 import { hashPassword } from '../utils/password'
 import type { Request, Response } from 'express'
+import type { DatabaseError } from 'pg'
 import type { ApiError } from '../types/errors'
 import type { CreateUserBody, UpdateUserData, User } from '../types/user'
 
@@ -105,12 +106,7 @@ export const getUser = async (req: Request<{ id: string }>, res: Response<User |
     res.status(200).json(user)
 }
 
-import type { DatabaseError } from 'pg'
-
-export const createUser = async (
-    req: Request<{}, User | ApiError, CreateUserBody>,
-    res: Response<User | ApiError>
-) => {
+export const createUser = async (req: Request<{}, {}, CreateUserBody>, res: Response<User | ApiError>) => {
     const { username, email, password } = req.body ?? {}
 
     const usernameError = validateField('username', username, 'string')
