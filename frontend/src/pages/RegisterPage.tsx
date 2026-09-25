@@ -62,7 +62,7 @@ const RegisterPage = () => {
       setIsLoading(true);
 
       const response = await fetch(
-        "http://localhost:3000/api/auth/register",
+         "/api/user",
         {
           method: "POST",
           headers: {
