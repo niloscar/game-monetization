@@ -23,6 +23,7 @@ const LoginPage = () => {
 
             navigate('/')
         } catch {
+            // Fel hanteras av AuthProvider.
         } finally {
             setIsLoading(false)
         }
