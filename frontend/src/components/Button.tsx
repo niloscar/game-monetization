@@ -1,8 +1,16 @@
-type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement>;
+interface ButtonProps {
+    type?: 'button' | 'submit' | 'reset'
+    className?: string
+    children: React.ReactNode
+}
 
-const Button = ({ className = "", children, ...props }: ButtonProps) => {
+const Button = ({ type='button', className = '', children, ...props }: ButtonProps) => {
   return (
-    <button className={`btn ${className}`} {...props}>
+    <button 
+        type={type}
+        className={`btn ${className}`}
+        {...props}
+    >
       {children}
     </button>
   );
