@@ -77,3 +77,8 @@ export const logout = (req: Request, res: Response<ApiError>) => {
         res.status(204).send()
     })
 }
+
+export const getSession = (req: Request, res: Response<{ authenticated: boolean; userId: number | null }>) => {
+    const userId = req.session.userId ?? null
+    res.status(200).json({ authenticated: userId !== null, userId })
+}

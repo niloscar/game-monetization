@@ -1,13 +1,12 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { TierGate } from "../components/TierGate";
-import { scores, users, getTierAccess, getTierBySlug } from "../mock";
+import api from "../api/apiClient";
 import {
-  getLeaderboard,
-  getOwnEntry,
-  getTopN,
   formatPoints,
   type Period,
+  type ScoreboardEntry,
+  type ScoreboardResponse,
 } from "../lib/scoreboard";
 
 const PERIOD_LABELS: Record<Period, string> = {
@@ -16,62 +15,75 @@ const PERIOD_LABELS: Record<Period, string> = {
   all: "Totalt",
 };
 
-const highScoreTier = getTierBySlug("high-score-access");
-
-// Hur många placeringar scoreboarden visar totalt (topp 3 + luckan +
-// resten). Din egen placering visas alltid oavsett rank — se ownEntry,
-// som räknas ut från den ofiltrerade listan, inte den här trunkerade.
-const MAX_LEADERBOARD_SIZE = 50;
-
-// Hur många blurrade platshållarrader som visas bakom TierGate:s
-// "kräver High Score Access"-overlay, oavsett hur många placeringar
-// som faktiskt är dolda — annars kan luckan bli väldigt lång att
-// scrolla igenom med bara en rad per dold placering.
+const HIGH_SCORE_ACCESS_LEVEL = 3;
 const GAP_PLACEHOLDER_ROWS = 3;
 
 const ScorePage = () => {
   const { user, isAuthenticated } = useAuth();
   const [period, setPeriod] = useState<Period>("all");
+  const [data, setData] = useState<ScoreboardResponse | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   const hasHSA = Boolean(
-    isAuthenticated && user && highScoreTier && getTierAccess(user.tierId, highScoreTier.id)
+    isAuthenticated && user && (user.tier?.level ?? 0) >= HIGH_SCORE_ACCESS_LEVEL
   );
 
   // Filtren (Idag/Vecka) är en High Score Access-funktion — övriga är låsta till "Totalt".
   const effectivePeriod: Period = hasHSA ? period : "all";
 
-  // Ofiltrerad — används bara för att slå upp din egen placering, som
-  // ska stämma även om du ligger utanför topp 50.
-  const leaderboard = useMemo(
-    () => getLeaderboard(scores, users, effectivePeriod),
-    [effectivePeriod]
-  );
+  useEffect(() => {
+    let cancelled = false;
 
-  // Det som faktiskt visas i listan (topp 3, luckan, resten) — trunkerat
-  // till MAX_LEADERBOARD_SIZE.
-  const displayLeaderboard = leaderboard.slice(0, MAX_LEADERBOARD_SIZE);
+    async function loadScoreboard() {
+      setIsLoading(true);
+      setLoadError(null);
 
-  const ownEntry = user ? getOwnEntry(leaderboard, user.id) : undefined;
-  const top3 = getTopN(displayLeaderboard, 3);
+      try {
+        const res = await api.get<ScoreboardResponse>("/game/scoreboard", {
+          params: { period: effectivePeriod },
+        });
+        if (!cancelled) setData(res.data);
+      } catch {
+        if (!cancelled) setLoadError("Kunde inte hämta topplistan just nu.");
+      } finally {
+        if (!cancelled) setIsLoading(false);
+      }
+    }
+
+    loadScoreboard();
+    return () => {
+      cancelled = true;
+    };
+  }, [effectivePeriod]);
+
+  const scoreboard = data?.scoreboard ?? [];
+  const ownEntry = data?.own ?? null;
   const ownRank = ownEntry?.rank ?? null;
 
-  // Platser mellan topp 3 och din egen placering — infällda, kräver High
-  // Score Access för att visas. Om du själv ligger i topp 3 (eller inte är
-  // inloggad) finns det ingen "lucka" att fälla in. slice klamras
-  // automatiskt till displayLeaderboards längd om din placering ligger
-  // utanför topp 50.
-  const gapEntries = ownRank && ownRank > 4 ? displayLeaderboard.slice(3, ownRank - 1) : [];
+  const top3 = useMemo(() => scoreboard.slice(0, 3), [scoreboard]);
 
-  // Resten av listan, efter din egen placering (eller hela listan efter
-  // topp 3 om du ligger i topp 3 / inte är inloggad). Tom om din
-  // placering redan ligger vid eller bortom gränsen på 50.
-  const afterEntries =
-    ownRank && ownRank > 3 ? displayLeaderboard.slice(ownRank) : displayLeaderboard.slice(3);
+  const gapEntries = useMemo(
+    () =>
+      ownRank && ownRank > 4
+        ? scoreboard.filter((entry) => entry.rank > 3 && entry.rank < ownRank)
+        : [],
+    [scoreboard, ownRank]
+  );
 
-  function medalClass(rank: number, isSelf: boolean) {
+  const afterEntries = useMemo(
+    () => scoreboard.filter((entry) => (ownRank ? entry.rank > ownRank : entry.rank > 3)),
+    [scoreboard, ownRank]
+  );
+
+  function isSelf(entry: ScoreboardEntry) {
+    return Boolean(ownEntry && entry.userId === ownEntry.userId);
+  }
+
+  function medalClass(rank: number, self: boolean) {
     const base =
       rank === 1 ? "row medal-gold" : rank === 2 ? "row medal-silver" : rank === 3 ? "row medal-bronze" : "row";
-    return isSelf ? `${base} row-self` : base;
+    return self ? `${base} row-self` : base;
   }
 
   return (
@@ -81,7 +93,7 @@ const ScorePage = () => {
         <p>deliver, dodge, repeat</p>
       </div>
 
-      {/* ================= LEADERBOARD ================= */}
+      {/* ================= SCOREBOARD ================= */}
       <div className="card">
         <div className="card-head">
           <h2>TOPPLISTA</h2>
@@ -107,41 +119,38 @@ const ScorePage = () => {
           </div>
         </div>
 
+        {loadError && <p className="error-text">{loadError}</p>}
+        {isLoading && !data && !loadError && <p className="loading-text">Laddar topplistan…</p>}
+
         {/* Combo Pass: topp 3 */}
         <TierGate
           requiredTier="combo-pass"
           fallback={
             <div className="board">
-              {top3.map((entry) => {
-                const isSelf = Boolean(user && entry.user.id === user.id);
-                return (
-                  <div key={entry.score.id} className={medalClass(entry.rank, isSelf)}>
-                    <span className="rank">#{entry.rank}</span>
-                    <span className="name">
-                      {entry.user.username}
-                      {isSelf ? " (du)" : ""}
-                    </span>
-                    <span className="score">{formatPoints(entry.score.value)}</span>
-                  </div>
-                );
-              })}
+              {top3.map((entry) => (
+                <div key={entry.userId} className={medalClass(entry.rank, isSelf(entry))}>
+                  <span className="rank">#{entry.rank}</span>
+                  <span className="name">
+                    {entry.username}
+                    {isSelf(entry) ? " (du)" : ""}
+                  </span>
+                  <span className="score">{formatPoints(entry.score)}</span>
+                </div>
+              ))}
             </div>
           }
         >
           <div className="board">
-            {top3.map((entry) => {
-              const isSelf = Boolean(user && entry.user.id === user.id);
-              return (
-                <div key={entry.score.id} className={medalClass(entry.rank, isSelf)}>
-                  <span className="rank">#{entry.rank}</span>
-                  <span className="name">
-                    {entry.user.username}
-                    {isSelf ? " (du)" : ""}
-                  </span>
-                  <span className="score">{formatPoints(entry.score.value)}</span>
-                </div>
-              );
-            })}
+            {top3.map((entry) => (
+              <div key={entry.userId} className={medalClass(entry.rank, isSelf(entry))}>
+                <span className="rank">#{entry.rank}</span>
+                <span className="name">
+                  {entry.username}
+                  {isSelf(entry) ? " (du)" : ""}
+                </span>
+                <span className="score">{formatPoints(entry.score)}</span>
+              </div>
+            ))}
           </div>
         </TierGate>
 
@@ -170,10 +179,10 @@ const ScorePage = () => {
           >
             <div className="board">
               {gapEntries.map((entry) => (
-                <div key={entry.score.id} className="row">
+                <div key={entry.userId} className="row">
                   <span className="rank">#{entry.rank}</span>
-                  <span className="name">{entry.user.username}</span>
-                  <span className="score">{formatPoints(entry.score.value)}</span>
+                  <span className="name">{entry.username}</span>
+                  <span className="score">{formatPoints(entry.score)}</span>
                 </div>
               ))}
             </div>
@@ -185,8 +194,8 @@ const ScorePage = () => {
         {isAuthenticated && ownEntry && ownRank && ownRank > 3 ? (
           <div className="own-row">
             <div className="rank">#{ownEntry.rank}</div>
-            <div className="name">{ownEntry.user.username} (du)</div>
-            <div className="score">{formatPoints(ownEntry.score.value)}</div>
+            <div className="name">{ownEntry.username} (du)</div>
+            <div className="score">{formatPoints(ownEntry.score)}</div>
           </div>
         ) : !isAuthenticated ? (
           <div className="login-cta">
@@ -219,10 +228,10 @@ const ScorePage = () => {
           >
             <div className="board">
               {afterEntries.map((entry) => (
-                <div key={entry.score.id} className="row">
+                <div key={entry.userId} className="row">
                   <span className="rank">#{entry.rank}</span>
-                  <span className="name">{entry.user.username}</span>
-                  <span className="score">{formatPoints(entry.score.value)}</span>
+                  <span className="name">{entry.username}</span>
+                  <span className="score">{formatPoints(entry.score)}</span>
                 </div>
               ))}
             </div>
