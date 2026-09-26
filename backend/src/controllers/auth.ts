@@ -38,8 +38,6 @@ export const login = async (
         return
     }
 
-    console.log('User credentials:', user.passwordHash)
-
     const isPasswordValid = await verifyPassword(user.passwordHash, password)
 
     if (!isPasswordValid) {
@@ -71,10 +69,7 @@ export const logout = (req: Request, res: Response<ApiError>) => {
     })
 }
 
-export const getMe = (_req: Request, res: Response<ApiError>) => {
-    res.json({ message: 'Me-route' })
-}
-
-export const getSession = (_req: Request, res: Response<ApiError>) => {
-    res.json({ message: 'Session-route' })
+export const getSession = (req: Request, res: Response<{ authenticated: boolean; userId: number | null }>) => {
+    const userId = req.session.userId ?? null
+    res.status(200).json({ authenticated: userId !== null, userId })
 }

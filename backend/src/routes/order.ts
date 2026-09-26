@@ -3,35 +3,15 @@
  */
 
 import { Router } from 'express'
+import { authenticate } from '../middleware/auth'
+import { createOrder, getCurrentUserOrders, getCurrentUserOrder } from '../controllers/order'
 
-const orderRoutes = Router()
+const orderRouter = Router()
 
-orderRoutes.get('/', (req, res) => {
-  // Handle fetching all orders logic here
-  res.json({ message: 'Get all orders route' })
-})
+orderRouter.use(authenticate) // Check if the user is authenticated for all routes below
 
-orderRoutes.get('/:id', (req, res) => {
-  // Handle fetching a specific order by ID logic here
-  const { id } = req.params
-  res.json({ message: `Get order with ID ${id} route` })
-})
+orderRouter.get('/', getCurrentUserOrders)
+orderRouter.get('/:id', getCurrentUserOrder)
+orderRouter.post('/', createOrder)
 
-orderRoutes.post('/', (req, res) => {
-  // Handle creating a new order logic here
-  res.json({ message: 'Create new order route' })
-})
-
-orderRoutes.patch('/:id', (req, res) => {
-  // Handle updating a specific order by ID logic here
-  const { id } = req.params
-  res.json({ message: `Update order with ID ${id} route` })
-})
-
-orderRoutes.delete('/:id', (req, res) => {
-  // Handle deleting a specific order by ID logic here
-  const { id } = req.params
-  res.json({ message: `Delete order with ID ${id} route` })
-})
-
-export default orderRoutes
+export default orderRouter

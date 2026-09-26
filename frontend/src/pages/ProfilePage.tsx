@@ -1,18 +1,19 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { FormEvent } from "react";
 import { useParams, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { TierGate } from "../components/TierGate";
-import { users, scores, tiers } from "../mock";
+import api from "../api/apiClient";
 import {
-  findUserByUsername,
+  fetchMyScores,
+  fetchScoresForUser,
   getProfileStats,
-  getProfileRank,
+  findRankInScoreboard,
+  findIdentityInScoreboard,
   getProfileIconKey,
-  formatPlaytime,
 } from "../lib/profile";
-import { formatPoints } from "../lib/scoreboard";
-import { getAchievements, countUnlocked } from "../lib/achievements";
+import type { ProfileIdentity, ProfileStats } from "../lib/profile";
+import { formatPoints, type ScoreboardResponse } from "../lib/scoreboard";
 
 import quarterIcon from "../assets/quarter-icon.png";
 import comboIcon from "../assets/combo-icon.png";
@@ -26,21 +27,21 @@ const PROFILE_ICONS = {
   admin: adminIcon,
 };
 
-const tierSlugById = new Map(tiers.map((t) => [t.id, t.slug]));
-const tierNameById = new Map(tiers.map((t) => [t.id, t.name]));
-
 const ProfilePage = () => {
   const { username } = useParams();
   const { user: loggedInUser, logout, updateProfile } = useAuth();
 
   const isOwnProfile = !username || username === loggedInUser?.username;
-  const viewedUser = isOwnProfile ? loggedInUser : findUserByUsername(users, username!);
 
-  // Stängt som standard så sidan inte blir onödigt lång — kortet visar
-  // ändå "x/9 upplåsta" i card-head utan att expanderas.
+  const [identity, setIdentity] = useState<ProfileIdentity | null>(null);
+  const [stats, setStats] = useState<ProfileStats | null>(null);
+  const [rank, setRank] = useState<number | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [notFound, setNotFound] = useState(false);
+
   const [isAchievementsOpen, setIsAchievementsOpen] = useState(false);
 
-  // ---- Inline-redigering av KONTO-kortet (bara på egen profil) ----
   const [isEditing, setIsEditing] = useState(false);
   const [formUsername, setFormUsername] = useState("");
   const [formEmail, setFormEmail] = useState("");
@@ -98,20 +99,75 @@ const ProfilePage = () => {
     }
   }
 
-  const stats = useMemo(
-    () => (viewedUser ? getProfileStats(scores, viewedUser.id) : null),
-    [viewedUser]
-  );
-  const rank = useMemo(
-    () => (viewedUser ? getProfileRank(scores, users, viewedUser.id) : null),
-    [viewedUser]
-  );
-  const achievements = useMemo(
-    () => (viewedUser ? getAchievements(scores, viewedUser.id, rank) : []),
-    [viewedUser, rank]
-  );
+  useEffect(() => {
+    let cancelled = false;
 
-  // Inte inloggad och inget username i URL:en — kan inte visa "egen profil".
+    async function load() {
+      setIsLoading(true);
+      setLoadError(null);
+      setNotFound(false);
+
+      try {
+        if (isOwnProfile) {
+          if (!loggedInUser) {
+            return;
+          }
+
+          const [myScores, board] = await Promise.all([
+            fetchMyScores(),
+            api.get<ScoreboardResponse>("/game/scoreboard", { params: { period: "all" } }),
+          ]);
+
+          if (cancelled) return;
+
+          setIdentity({
+            userId: loggedInUser.id,
+            username: loggedInUser.username,
+            email: loggedInUser.email,
+            role: loggedInUser.role,
+            tier: loggedInUser.tier,
+            createdAt: loggedInUser.createdAt,
+          });
+          setStats(getProfileStats(myScores));
+          setRank(board.data.own?.rank ?? findRankInScoreboard(board.data.scoreboard, loggedInUser.id));
+        } else {
+
+          const board = await api.get<ScoreboardResponse>("/game/scoreboard", {
+            params: { period: "all" },
+          });
+          if (cancelled) return;
+
+          const found = findIdentityInScoreboard(board.data.scoreboard, username!);
+          if (!found) {
+            setNotFound(true);
+            return;
+          }
+
+          setIdentity({ userId: found.userId, username: found.username });
+          setRank(findRankInScoreboard(board.data.scoreboard, found.userId));
+
+          try {
+            const otherScores = await fetchScoresForUser(found.userId);
+            if (!cancelled) setStats(getProfileStats(otherScores));
+          } catch {
+            if (!cancelled) {
+              setStats({ bestScore: found.bestScoreFromBoard, averageScore: null, gamesPlayed: 0 });
+            }
+          }
+        }
+      } catch {
+        if (!cancelled) setLoadError("Kunde inte hämta profildata just nu.");
+      } finally {
+        if (!cancelled) setIsLoading(false);
+      }
+    }
+
+    load();
+    return () => {
+      cancelled = true;
+    };
+  }, [isOwnProfile, username, loggedInUser]);
+
   if (isOwnProfile && !loggedInUser) {
     return (
       <div className="score-page">
@@ -125,8 +181,17 @@ const ProfilePage = () => {
     );
   }
 
-  // Publik profil, men användarnamnet finns inte.
-  if (!viewedUser) {
+  if (isLoading && !identity && !loadError && !notFound) {
+    return (
+      <div className="score-page">
+        <div className="card">
+          <p className="loading-text">Laddar profil…</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (notFound) {
     return (
       <div className="score-page">
         <div className="card">
@@ -139,8 +204,20 @@ const ProfilePage = () => {
     );
   }
 
-  const iconKey = getProfileIconKey(viewedUser, tierSlugById);
-  const tierName = tierNameById.get(viewedUser.tierId) ?? "Okänd nivå";
+  if (loadError && !identity) {
+    return (
+      <div className="score-page">
+        <div className="card">
+          <p className="error-text">{loadError}</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!identity) return null;
+
+  const iconKey = getProfileIconKey(identity);
+  const tierName = identity.tier?.name ?? "Okänd nivå";
 
   return (
     <div className="score-page">
@@ -154,11 +231,15 @@ const ProfilePage = () => {
       <div className="card profile-head">
         <img src={PROFILE_ICONS[iconKey]} alt="" className="profile-avatar" />
         <div className="profile-head-info">
-          <h1>{viewedUser.username}</h1>
+          <h1>{identity.username}</h1>
           <span className={`tier-badge tier-badge-${iconKey}`}>{tierName}</span>
-          <p className="profile-meta">
-            Medlem sedan {new Date(viewedUser.createdAt).toLocaleDateString("sv-SE")}
-          </p>
+          {identity.createdAt ? (
+            <p className="profile-meta">
+              Medlem sedan {new Date(identity.createdAt).toLocaleDateString("sv-SE")}
+            </p>
+          ) : (
+            <p className="profile-meta profile-meta-unknown">Nivå och medlemsdatum kräver att en publik profil-endpoint finns.</p>
+          )}
         </div>
       </div>
 
@@ -179,8 +260,10 @@ const ProfilePage = () => {
             </div>
           </div>
 
-          {/* Snittresultat, antal omgångar och speltid: fritt för alla på
-              egen profil, men kräver High Score Access att se på andras. */}
+          {/* Snittresultat och antal omgångar: fritt för alla på egen
+              profil, men kräver High Score Access att se på andras.
+              OBS: "Speltid, totalt" är borttagen härifrån — riktiga
+              scores-tabellen har ingen playtime-kolumn, se lib/profile.ts. */}
           {isOwnProfile ? (
             <>
               <div className="stat-tile">
@@ -192,12 +275,6 @@ const ProfilePage = () => {
               <div className="stat-tile">
                 <div className="label">Omgångar spelade</div>
                 <div className="value">{stats?.gamesPlayed ?? 0}</div>
-              </div>
-              <div className="stat-tile">
-                <div className="label">Speltid, totalt</div>
-                <div className="value">
-                  {stats ? formatPlaytime(stats.totalPlaytimeSeconds) : "—"}
-                </div>
               </div>
             </>
           ) : (
@@ -213,10 +290,6 @@ const ProfilePage = () => {
                     <div className="label">Omgångar spelade</div>
                     <div className="value">—</div>
                   </div>
-                  <div className="stat-tile">
-                    <div className="label">Speltid, totalt</div>
-                    <div className="value">—</div>
-                  </div>
                 </>
               }
             >
@@ -230,12 +303,6 @@ const ProfilePage = () => {
                 <div className="label">Omgångar spelade</div>
                 <div className="value">{stats?.gamesPlayed ?? 0}</div>
               </div>
-              <div className="stat-tile">
-                <div className="label">Speltid, totalt</div>
-                <div className="value">
-                  {stats ? formatPlaytime(stats.totalPlaytimeSeconds) : "—"}
-                </div>
-              </div>
             </TierGate>
           )}
         </div>
@@ -244,7 +311,14 @@ const ProfilePage = () => {
         )}
       </div>
 
-      {/* ================= PRESTATIONER (infällbart) ================= */}
+      {/* ================= PRESTATIONER (infällbart) =================
+          Tillfälligt pausad: achievements.ts räknar (bland annat) på
+          speltid/track som inte finns i riktiga scores-tabellen längre
+          (se lib/profile.ts, punkt 1). Snarare än att skicka in data i
+          fel form och riskera att den kraschar eller visar felaktiga
+          "upplåsta" prestationer, visar vi bara en platshållare tills
+          vi bestämt om de speltids-baserade prestationerna tas bort
+          eller om Oscar lägger till kolumnerna på scores. */}
       <div className="card">
         <button
           type="button"
@@ -254,26 +328,14 @@ const ProfilePage = () => {
         >
           <h2>PRESTATIONER</h2>
           <span className="achievement-count">
-            {countUnlocked(achievements)}/{achievements.length} upplåsta
             <span className={`chevron${isAchievementsOpen ? " open" : ""}`}>▾</span>
           </span>
         </button>
         {isAchievementsOpen && (
-          <div className="achievement-grid">
-            {achievements.map(({ achievement, unlocked }) => (
-              <div
-                key={achievement.id}
-                className={`achievement-tile${unlocked ? "" : " locked"}`}
-                title={achievement.description}
-              >
-                <span className="achievement-icon">{achievement.icon}</span>
-                <div className="achievement-text">
-                  <span className="achievement-name">{achievement.name}</span>
-                  <span className="achievement-desc">{achievement.description}</span>
-                </div>
-              </div>
-            ))}
-          </div>
+          <p className="profile-meta">
+            Prestationer är pausade tills vi bestämt hur de ska räknas mot riktig data
+            (en del bygger på speltid som inte finns i databasen ännu).
+          </p>
         )}
       </div>
 

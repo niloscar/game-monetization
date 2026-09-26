@@ -6,21 +6,15 @@ import * as service from '../services/user'
 import { validateField, validateId } from '../utils/validation'
 import { hashPassword } from '../utils/password'
 import type { Request, Response } from 'express'
+import type { DatabaseError } from 'pg'
 import type { ApiError } from '../types/errors'
 import type { CreateUserBody, UpdateUserData, User } from '../types/user'
 
 const NEW_USER_DEFAULT_ROLE_ID = 1
 // const NEW_USER_DEFAULT_TIER_ID = null
 
-export const getMe = async (req: Request, res: Response<User | ApiError>) => {
-    const id = req.session.userId
-
-    if (id === undefined) {
-        res.status(401).json({ message: 'Användaren är inte autentiserad.' })
-        return
-    }
-
-    const user = await service.getUser(id)
+export const getCurrentUser = async (req: Request, res: Response<User | ApiError>) => {
+    const user = await service.getUser(req.session.userId!)
 
     if (!user) {
         res.status(404).json({ message: 'Användaren hittades inte.' })
@@ -30,7 +24,7 @@ export const getMe = async (req: Request, res: Response<User | ApiError>) => {
     res.status(200).json(user)
 }
 
-export const updateMe = async (req: Request, res: Response<User | ApiError>) => {
+export const updateCurrentUser = async (req: Request, res: Response<User | ApiError>) => {
     const id = req.session.userId
 
     if (!id) {
@@ -112,12 +106,7 @@ export const getUser = async (req: Request<{ id: string }>, res: Response<User |
     res.status(200).json(user)
 }
 
-import type { DatabaseError } from 'pg'
-
-export const createUser = async (
-    req: Request<{}, User | ApiError, CreateUserBody>,
-    res: Response<User | ApiError>
-) => {
+export const createUser = async (req: Request<{}, {}, CreateUserBody>, res: Response<User | ApiError>) => {
     const { username, email, password } = req.body ?? {}
 
     const usernameError = validateField('username', username, 'string')

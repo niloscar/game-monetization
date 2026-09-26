@@ -3,29 +3,31 @@
  */
 
 import { Router } from 'express'
+import { authenticate } from '../middleware/auth'
+import {
+    getScores,
+    getScore,
+    getScoresByUserId,
+    getMyScores,
+    createScore,
+    deleteScore,
+    getScoreboard,
+} from '../controllers/game'
 
 const gameRoutes = Router()
 
-gameRoutes.get('/score', (req, res) => {
-  // Handle fetching the game score logic here
-  res.json({ message: 'Get game score route' })
-})
+// Publik — ScorePage ska kunna visa topplistan även utloggad.
+gameRoutes.get('/scoreboard', getScoreboard)
 
-gameRoutes.post('/score', (req, res) => {
-  // Handle adding new game score logic here
-  res.json({ message: 'Add game score route' })
-})
+gameRoutes.use(authenticate) // Allt nedanför kräver inloggning
 
-gameRoutes.get('/score/:id', (req, res) => {
-  // Handle fetching a specific game score by ID logic here
-  const { id } = req.params
-  res.json({ message: `Get game score with ID ${id} route` })
-})
-
-gameRoutes.delete('/score/:id', (req, res) => {
-  // Handle deleting a specific game score by ID logic here
-  const { id } = req.params
-  res.json({ message: `Delete game score with ID ${id} route` })
-})
+// OBS ordning: /score/me och /score/user/:userId måste stå FÖRE
+// /score/:scoreId, annars tolkar Express "me" som ett scoreId.
+gameRoutes.get('/score', getScores)
+gameRoutes.get('/score/me', getMyScores)
+gameRoutes.get('/score/user/:userId', getScoresByUserId)
+gameRoutes.get('/score/:scoreId', getScore)
+gameRoutes.post('/score', createScore)
+gameRoutes.delete('/score/:scoreId', deleteScore)
 
 export default gameRoutes
