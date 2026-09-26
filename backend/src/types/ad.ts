@@ -3,10 +3,15 @@ export interface Ad {
     type: 'video' | 'banner'
     url: string
     is_active: boolean
+    title: string | null
+    weight: number | null
 }
-
-export type CreateAdBody = Omit<Ad, 'id' | 'is_active'> & {
+export interface CreateAdBody {
+    type: 'video' | 'banner'
+    url: string
     is_active?: boolean
+    title?: string | null
+    weight?: number | null
 }
 
 export type UpdateAdBody = Partial<CreateAdBody>

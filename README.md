@@ -37,37 +37,52 @@ Applikationen driftsätts via Vercel.
 
 Projektet har en modulär struktur där plattformen och spelen hålls separerade genom tydligt definierade gränssnitt.
 
-```text
 /
-├── frontend/              # Plattformens React-applikation
+├── frontend/                      # Plattformens React/Vite-applikation
+│   ├── public/                    # Statiska filer, fonter och ikoner
 │   └── src/
-│       ├── components/    # Gemensamma komponenter
-│       ├── pages/         # Plattformens sidor
-│       ├── services/      # API-kommunikation
-│       └── game/          # Integration och registrering av spel
+│       ├── api/                   # API-klient och API-anrop
+│       ├── assets/                # Bilder och grafiska resurser
+│       ├── components/            # Återanvändbara UI-komponenter
+│       ├── context/               # React context, t.ex. autentisering
+│       ├── lib/                   # Hjälpfunktioner och frontendlogik
+│       ├── mock/                  # Mockdata för utveckling
+│       ├── pages/                 # Applikationens sidor
+│       ├── App.tsx
+│       └── main.tsx
 │
-├── backend/               # Plattformens Express API
+├── backend/                       # Plattformens Express API
+│   ├── build.mjs                  # Backend-build med esbuild
 │   └── src/
-│       ├── routes/        # API-endpoints
-│       ├── services/      # Affärslogik
-│       ├── types/         # Backend-specifika typer
-│       ├── game/          # Spelintegration och resultatvalidering
-│       ├── database.ts
-│       └── server.mts
+│       ├── controllers/           # Hantering av HTTP-anrop och svar
+│       ├── middleware/            # Auth, felhantering och 404-hantering
+│       ├── routes/                # Publika API-routes
+│       │   └── admin/             # Administrativa API-routes
+│       ├── seed/                  # Seeddata
+│       ├── services/              # Databasåtkomst och applikationslogik
+│       ├── types/                 # Backend-specifika TypeScript-typer
+│       ├── utils/                 # Validering, lösenordshantering m.m.
+│       ├── database.ts            # PostgreSQL-anslutning
+│       └── server.mts             # Express-serverns entry point
 │
-├── games/                 # Utbytbara spelmoduler
-│   └── pizza/
-│       ├── frontend/      # Spelets React-komponenter och logik
-│       ├── backend/       # Spelspecifik serverlogik
+├── games/                         # Utbytbara spelmoduler
+│   └── pizza_arcade/
+│       ├── frontend/              # Spelspecifik frontend
+│       └── backend/               # Spelspecifik backend
 │
-├── shared/                # Gemensamma typer för plattform och spel
+├── shared/                        # Gemensamma typer för plattform och spel
 │   └── game.ts
 │
-├── docs/                  # Dokumentation
-├── package.json
-├── vercel.json
+├── docs/                          # Projektdokumentation
+│   ├── openapi.yaml               # API-specifikation
+│   ├── database-design.md         # Databasdesign
+│   ├── er-diagram.png             # ER-diagram
+│   └── ...                        # Wireframes och övrig dokumentation
+│
+├── package.json                   # Root workspace-konfiguration
+├── package-lock.json
+├── vercel.json                    # Vercel-konfiguration
 └── README.md
-```
 
 ### Arkitektur och ansvarsfördelning
 
@@ -225,6 +240,7 @@ Kompletterande dokumentation finns i `docs/`.
 - [Checklista för uppgiftskrav](docs/assignment-checklist.md)
 - [Databasdesign](docs/database-design.md)
 - [ER-diagram](docs/er-diagram.png)
+- [OpenAPI-specifikation](docs/openapi.yaml) – API-endpoints och request/response-strukturer
 
 ## 9. Driftsättning
 
