@@ -4,15 +4,14 @@ import connectPgSimple from 'connect-pg-simple'
 import dotenv from 'dotenv'
 import { pool } from './database'
 
-import adRoutes from './routes/ad'
+import adRouter from './routes/ad'
 import authRouter from './routes/auth'
-import gameRoutes from './routes/game'
-import orderRoutes from './routes/order'
-import productRoutes from './routes/product'
+import gameRouter from './routes/game'
+import orderRouter from './routes/order'
+import productRouter from './routes/product'
 import userRouter from './routes/user'
-import testRouter from './routes/test'
+import adminRouter from './routes/admin'
 
-import adminUserRouter from './routes/admin/user'
 import { errorHandler } from './middleware/errorHandler'
 import { notFoundHandler } from './middleware/notFoundHandler'
 
@@ -47,14 +46,13 @@ app.use(
 )
 
 /* API routes */
-app.use('/api/ad', adRoutes)
+app.use('/api/ad', adRouter)
 app.use('/api/auth', authRouter)
-app.use('/api/game', gameRoutes)
-app.use('/api/order', orderRoutes)
-app.use('/api/product', productRoutes)
+app.use('/api/game', gameRouter)
+app.use('/api/order', orderRouter)
+app.use('/api/product', productRouter)
 app.use('/api/user', userRouter)
-app.use('/api/test', testRouter)
-app.use('/api/admin/users', adminUserRouter)
+app.use('/api/admin', adminRouter)
 
 /* Error handling middleware */
 app.use('/api', notFoundHandler)

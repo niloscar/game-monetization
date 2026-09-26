@@ -108,6 +108,7 @@ export async function deleteScore(id: number): Promise<Score | null> {
     return rows[0] ?? null
 }
 
+// Bara 'today'/'week' behöver ett intervall — 'all' filtrerar inget.
 const PERIOD_INTERVAL: Record<Exclude<ScoreboardPeriod, 'all'>, string> = {
     today: '1 day',
     week: '7 days'

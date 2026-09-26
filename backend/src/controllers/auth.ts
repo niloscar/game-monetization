@@ -7,6 +7,8 @@ import { validateField } from '../utils/validation'
 import type { Request, Response } from 'express'
 import type { ApiError } from '../types/errors'
 import { getAuthCredentialsByEmail } from '../services/auth'
+import { getUser } from '../services/user'
+import type { User } from '../types/user'
 
 interface LoginRequestBody {
     email: string
@@ -15,7 +17,7 @@ interface LoginRequestBody {
 
 export const login = async (
     req: Request<{}, ApiError, LoginRequestBody>,
-    res: Response<ApiError>
+    res: Response<ApiError | User>
 ) => {
     const { email, password } = req.body ?? {}
 
@@ -45,7 +47,7 @@ export const login = async (
         return
     }
 
-    req.session.regenerate((error) => {
+    req.session.regenerate(async(error) => {
         if (error) {
             res.status(500).json({ message: 'Kunde inte skapa session.' })
             return
@@ -53,7 +55,14 @@ export const login = async (
 
         req.session.userId = user.id
 
-        res.status(204).send()
+        const authUser = await getUser(user.id)
+
+        if (!authUser) {
+            res.status(500).json({ message: 'Kunde inte hämta användaren.' })
+            return
+        }
+
+        res.status(200).json(authUser)
     })
 }
 
