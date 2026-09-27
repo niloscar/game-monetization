@@ -1,27 +1,27 @@
 import type { ReactNode } from "react";
 import { useAuth } from "../context/AuthContext";
-import { getTierAccess, getTierBySlug } from "../mock";
-import type { TierSlug } from "../mock/types";
+
+export type TierSlug = "quarter-pass" | "combo-pass" | "high-score-access";
+
+const TIER_INFO: Record<TierSlug, { level: number; name: string; color: string }> = {
+  "quarter-pass": { level: 1, name: "Quarter Pass", color: "#8A8F98" },
+  "combo-pass": { level: 2, name: "Combo Pass", color: "#F5A623" },
+  "high-score-access": { level: 3, name: "High Score Access", color: "#7C5CFF" },
+};
 
 interface TierGateProps {
   requiredTier: TierSlug;
   children: ReactNode;
-  // Innehållet som visas blurrat/dimmat bakom overlayn, t.ex. en förhandsvisning
   fallback?: ReactNode;
 }
 
-// Wrappar innehåll som kräver en viss nivå.
-// Visar overlay med "den här sidan kräver X" + uppgraderingsknapp
-// om användaren saknar rätt nivå — annars visas children rakt av.
 export function TierGate({ requiredTier, children, fallback }: TierGateProps) {
   const { user, isAuthenticated } = useAuth();
-  const required = getTierBySlug(requiredTier);
+  const required = TIER_INFO[requiredTier];
 
-  if (!required) return null; // ogiltig nivå angiven, visa inget
+  if (!required) return null; 
 
-  const hasAccess = isAuthenticated && user
-    ? getTierAccess(user.tierId, required.id)
-    : false;
+  const hasAccess = isAuthenticated && user ? (user.tier?.level ?? 0) >= required.level : false;
 
   if (hasAccess) return <>{children}</>;
 
@@ -63,7 +63,7 @@ export function TierGate({ requiredTier, children, fallback }: TierGateProps) {
             borderRadius: 8,
           }}
           onClick={() => {
-            // koppla till navigation, t.ex. navigate("/priser")
+            // koppla till navigation, t.ex. navigate("/store")
           }}
         >
           Uppgradera nu

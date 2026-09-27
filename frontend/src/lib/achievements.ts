@@ -1,11 +1,4 @@
-// Prestationer (achievements) för profilsidan i PizzaArcade.
-//
-// Bygger bara på data vi redan har i mock/scores — inga nya fält behövs.
-// Trösklarna är satta relativt (antal omgångar, speltid, placering,
-// antal olika banor) istället för absoluta poängnivåer, eftersom
-// poängskalan skiljer sig mellan spel/banor.
-
-import type { Score } from "../mock/types";
+import type { UserScore } from "./profile";
 
 export interface Achievement {
   id: string;
@@ -21,8 +14,6 @@ export interface AchievementProgress {
 
 interface AchievementStats {
   gamesPlayed: number;
-  totalPlaytimeSeconds: number;
-  distinctTracks: number;
   rank: number | null;
 }
 
@@ -53,27 +44,6 @@ const ACHIEVEMENT_DEFS: AchievementDef[] = [
     isUnlocked: (s) => s.gamesPlayed >= 50,
   },
   {
-    id: "hour-in",
-    name: "En timme in",
-    description: "Logga en timmes speltid totalt.",
-    icon: "⏱️",
-    isUnlocked: (s) => s.totalPlaytimeSeconds >= 3600,
-  },
-  {
-    id: "marathon",
-    name: "Maratonspelare",
-    description: "Logga 10 timmars speltid totalt.",
-    icon: "🏁",
-    isUnlocked: (s) => s.totalPlaytimeSeconds >= 10 * 3600,
-  },
-  {
-    id: "explorer",
-    name: "Utforskare",
-    description: "Spela på 3 olika banor.",
-    icon: "🗺️",
-    isUnlocked: (s) => s.distinctTracks >= 3,
-  },
-  {
     id: "top-ten",
     name: "Topp 10",
     description: "Nå en topp 10-placering på scoreboard.",
@@ -96,20 +66,21 @@ const ACHIEVEMENT_DEFS: AchievementDef[] = [
   },
 ];
 
-function getAchievementStats(scores: Score[], userId: string, rank: number | null): AchievementStats {
+function getAchievementStats(
+  scores: UserScore[],
+  userId: number,
+  rank: number | null
+): AchievementStats {
   const own = scores.filter((s) => s.userId === userId);
   return {
     gamesPlayed: own.length,
-    totalPlaytimeSeconds: own.reduce((sum, s) => sum + s.playtimeSeconds, 0),
-    distinctTracks: new Set(own.map((s) => s.track)).size,
     rank,
   };
 }
 
-/** Alla prestationer med upplåst-status för en given spelare, i definitionsordning. */
 export function getAchievements(
-  scores: Score[],
-  userId: string,
+  scores: UserScore[],
+  userId: number,
   rank: number | null
 ): AchievementProgress[] {
   const stats = getAchievementStats(scores, userId, rank);

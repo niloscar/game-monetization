@@ -3,12 +3,6 @@ import type { ReactNode } from "react";
 import type { AxiosError } from "axios";
 import api from "../api/apiClient";
 
-// AuthUser är inte längre samma typ som mock/types' User minus
-// passwordHash — den mock-typen har inget tier-fält och är byggd för
-// mockdatan. Detta är formen vi FAKTISKT får tillbaka från
-// GET /api/user/me (och därmed vad AuthProvider håller i state).
-// Justera fälten här om Oscars getUser-query i services/user.ts skiljer
-// sig från detta.
 export interface AuthUser {
   id: number;
   username: string;
@@ -18,15 +12,8 @@ export interface AuthUser {
   createdAt: string;
 }
 
-// Lokal förhandsgranskning av inloggat läge utan riktig backend.
-// Styrs av VITE_DEV_FAKE_USER i frontend/.env.local (gitignored).
-// import.meta.env.DEV gör att detta aldrig kan slå på i en
-// produktionsbuild, oavsett env-fil.
 const DEV_FAKE_USER = import.meta.env.DEV && import.meta.env.VITE_DEV_FAKE_USER === "true";
 
-// Bygger en fejkad AuthUser istället för att låna users[0] från mock —
-// mock-datans User-typ har inte samma form (bl.a. inget tier-objekt)
-// längre, så de två kan inte blandas.
 const FAKE_USER: AuthUser = {
   id: 1,
   username: "dev_user",
@@ -70,10 +57,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(!DEV_FAKE_USER);
   const [error, setError] = useState<string | null>(null);
 
-  // Hämtar den fullständiga profilen (inkl. tier) för den som är inloggad
-  // just nu. Används både vid appstart och efter login/register/update,
-  // eftersom /api/auth/login bara sätter session-cookien och svarar
-  // 204 No Content — den skickar INTE med användarobjektet i svaret.
   async function refreshUser(): Promise<AuthUser | null> {
     try {
       const res = await api.get<AuthUser>("/user/me");
@@ -85,9 +68,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }
 
-  // Vid appstart: kolla om det redan finns en aktiv session (cookie).
-  // Hoppas över helt i DEV_FAKE_USER-läge så mock-användaren inte
-  // skrivs över av ett 401 från en riktig backend.
   useEffect(() => {
     if (DEV_FAKE_USER) return;
 
@@ -113,9 +93,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   async function login(email: string, password: string) {
     setError(null);
     try {
-      // OBS: /auth/login svarar 204 No Content (bara cookie, inget body)
-      // — därför hämtar vi profilen separat efteråt istället för att
-      // läsa användaren ur login-svaret.
       await api.post("/auth/login", { email, password });
       await refreshUser();
     } catch (err) {
@@ -128,12 +105,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   async function register(username: string, email: string, password: string) {
     setError(null);
     try {
-      // Registrering går via User-endpointen (POST /api/user, singular
-      // — inte /api/users), enligt routes/user.ts: userRouter.post('/', createUser).
       await api.post("/user", { username, email, password });
-      // Skapar bara kontot, loggar inte in automatiskt (ingen session
-      // sätts av createUser) — så vi loggar in direkt efteråt med samma
-      // uppgifter, vilket också hämtar den färska profilen.
       await login(email, password);
     } catch (err) {
       const message = getErrorMessage(err, "Registrering misslyckades");
@@ -147,14 +119,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       await api.post("/auth/logout");
     } finally {
-      // Nollställ användaren oavsett om servern svarade OK, så UI:t
-      // aldrig fastnar i inloggat läge.
-      setUser(null);
+     setUser(null);
     }
   }
 
-  // Uppdaterar inloggad användares profil (användarnamn/e-post/lösenord).
-  // DEV_FAKE_USER-läget skriver bara till lokal state, ingen backend finns.
   async function updateProfile(data: UpdateProfileInput) {
     setError(null);
 
@@ -170,12 +138,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (!user) throw new Error("Ingen inloggad användare");
 
     try {
-      // routes/user.ts: userRouter.patch('/me', updateMe) — inte
-      // /users/:id längre, det fanns aldrig en session-koppling där.
       await api.patch("/user/me", data);
-      // updateMe kan tänkas svara med olika form (uppdaterad rad,
-      // 204, etc.) — hämta profilen på nytt istället för att lita på
-      // svarskroppen, så vi alltid har rätt tier/createdAt också.
       await refreshUser();
     } catch (err) {
       const message = getErrorMessage(err, "Kunde inte uppdatera profilen");
