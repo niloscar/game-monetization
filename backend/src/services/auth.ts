@@ -1,14 +1,15 @@
 import { pool } from '../database'
 import type { AuthCredentials } from '../types/auth'
 
-export async function getAuthCredentialsByEmail(email: string): Promise<AuthCredentials | null> {
+export async function getAuthCredentialsByEmail(
+    email: string
+): Promise<AuthCredentials | null> {
     const { rows } = await pool.query<AuthCredentials>(
         `SELECT
-            id,
+            id::int AS id,
             password_hash AS "passwordHash"
         FROM users
-        WHERE email = $1
-            AND deleted_at IS NULL`,
+        WHERE email = $1 AND deleted_at IS NULL`,
         [email]
     )
 

@@ -4,7 +4,7 @@ import type { User, UpdateUserData, CreateUserData } from '../types/user'
 export async function getUsers() {
     const { rows } = await pool.query(
         `SELECT
-            u.id,
+            u.id::int AS id,
             u.username,
             u.email,
             json_build_object(
@@ -43,7 +43,7 @@ export async function getUsers() {
 export async function getUser(id: number): Promise<User | null> {
     const { rows } = await pool.query(
         `SELECT
-            u.id,
+            u.id::int AS id,
             u.username,
             u.email,
             json_build_object(
