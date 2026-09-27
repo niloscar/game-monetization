@@ -7,7 +7,6 @@ import comboIcon from '../assets/combo-icon.png'
 import highscoreIcon from '../assets/highscore-icon.png'
 import quarterIcon from '../assets/quarter-icon.png'
 import adminIcon from '../assets/admin-icon.png'
-import { tiers } from '../mock'
 import { getProfileIconKey } from '../lib/profile'
 
 const profileIcons = {
@@ -17,15 +16,14 @@ const profileIcons = {
     admin: adminIcon
 }
 
-const tierSlugById = new Map(tiers.map((t) => [t.id, t.slug]))
-
 const Header = () => {
     const { user, isAuthenticated } = useAuth()
     const isLoggedIn = isAuthenticated
 
-    const iconKey = user
-        ? getProfileIconKey(user, tierSlugById)
-        : 'quarter'
+    // getProfileIconKey tar numera bara { role, tier } direkt från
+    // AuthUser — ingen tierSlugById-map behövs längre, tier-nivån
+    // finns redan på user-objektet.
+    const iconKey = user ? getProfileIconKey(user) : 'quarter'
 
     return (
         <header className={styles.header}>

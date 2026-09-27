@@ -46,7 +46,6 @@ Projektet har en modulär struktur där plattformen och spelen hålls separerade
 │       ├── components/            # Återanvändbara UI-komponenter
 │       ├── context/               # React context, t.ex. autentisering
 │       ├── lib/                   # Hjälpfunktioner och frontendlogik
-│       ├── mock/                  # Mockdata för utveckling
 │       ├── pages/                 # Applikationens sidor
 │       ├── App.tsx
 │       └── main.tsx
