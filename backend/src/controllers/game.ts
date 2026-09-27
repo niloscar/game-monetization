@@ -6,15 +6,26 @@ import type { Request, Response } from 'express'
 import * as service from '../services/game'
 import { validateField, validateId } from '../utils/validation'
 import type { ApiError } from '../types/errors'
-import type { CreateScoreBody, Score, ScoreboardPeriod, ScoreboardResponse } from '../types/game'
+import type {
+    CreateScoreBody,
+    Score,
+    ScoreboardPeriod,
+    ScoreboardResponse
+} from '../types/game'
 
-export const getScores = async (_req: Request, res: Response<Score[] | ApiError>) => {
+export const getScores = async (
+    _req: Request,
+    res: Response<Score[] | ApiError>
+) => {
     const scores = await service.getScores()
 
     res.status(200).json(scores)
 }
 
-export const getScoresByUserId = async (req: Request<{ id: string }>, res: Response<Score[] | ApiError>) => {
+export const getScoresByUserId = async (
+    req: Request<{ id: string }>,
+    res: Response<Score[] | ApiError>
+) => {
     const userId = Number(req.params.id)
 
     const idError = validateId('id', userId)
@@ -28,7 +39,10 @@ export const getScoresByUserId = async (req: Request<{ id: string }>, res: Respo
     res.status(200).json(scores)
 }
 
-export const getMyScores = async (req: Request, res: Response<Score[] | ApiError>) => {
+export const getMyScores = async (
+    req: Request,
+    res: Response<Score[] | ApiError>
+) => {
     const userId = req.session.userId!
 
     const scores = await service.getScoresByUserId(userId)
@@ -36,7 +50,10 @@ export const getMyScores = async (req: Request, res: Response<Score[] | ApiError
     res.status(200).json(scores)
 }
 
-export const getScore = async (req: Request<{ id: string }>, res: Response<Score | ApiError>) => {
+export const getScore = async (
+    req: Request<{ id: string }>,
+    res: Response<Score | ApiError>
+) => {
     const scoreId = Number(req.params.id)
 
     const idError = validateId('id', scoreId)
@@ -55,7 +72,10 @@ export const getScore = async (req: Request<{ id: string }>, res: Response<Score
     res.status(200).json(score)
 }
 
-export const createScore = async (req: Request<{}, {}, CreateScoreBody>, res: Response<Score | ApiError>) => {
+export const createScore = async (
+    req: Request<{}, {}, CreateScoreBody>,
+    res: Response<Score | ApiError>
+) => {
     const userId = req.session.userId!
     const { score } = req.body
 
@@ -75,7 +95,10 @@ export const createScore = async (req: Request<{}, {}, CreateScoreBody>, res: Re
     res.status(201).json(newScore)
 }
 
-export const deleteScore = async (req: Request<{ id: string }>, res: Response<ApiError>) => {
+export const deleteScore = async (
+    req: Request<{ id: string }>,
+    res: Response<ApiError>
+) => {
     const scoreId = Number(req.params.id)
 
     const idError = validateId('id', scoreId)
@@ -94,11 +117,15 @@ export const deleteScore = async (req: Request<{ id: string }>, res: Response<Ap
     res.status(204).send()
 }
 
-const MAX_LEADERBOARD_SIZE = 50
+const MAX_SCOREBOARD_SIZE = 50
 const VALID_PERIODS: ScoreboardPeriod[] = ['today', 'week', 'all']
 
-export const getScoreboard = async (req: Request, res: Response<ScoreboardResponse | ApiError>) => {
-    const periodParam = typeof req.query.period === 'string' ? req.query.period : 'all'
+export const getScoreboard = async (
+    req: Request,
+    res: Response<ScoreboardResponse | ApiError>
+) => {
+    const periodParam =
+        typeof req.query.period === 'string' ? req.query.period : 'all'
 
     if (!VALID_PERIODS.includes(periodParam as ScoreboardPeriod)) {
         res.status(400).json({ message: 'Ogiltig period.', field: 'period' })
@@ -110,11 +137,14 @@ export const getScoreboard = async (req: Request, res: Response<ScoreboardRespon
     const fullBoard = await service.getScoreboard(period)
 
     const userId = req.session.userId
-    const own = userId ? (fullBoard.find((entry) => entry.userId === userId) ?? null) : null
+    const own =
+        userId !== undefined
+            ? (fullBoard.find((entry) => entry.userId === userId) ?? null)
+            : null
 
     res.status(200).json({
         period,
-        scoreboard: fullBoard.slice(0, MAX_LEADERBOARD_SIZE),
+        scoreboard: fullBoard.slice(0, MAX_SCOREBOARD_SIZE),
         own
     })
 }

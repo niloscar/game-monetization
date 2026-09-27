@@ -57,8 +57,8 @@ const ScorePage = () => {
     };
   }, [effectivePeriod]);
 
-  const scoreboard = data?.scoreboard ?? [];
-  const ownEntry = data?.own ?? null;
+  const scoreboard = useMemo(() => data?.scoreboard ?? [], [data]);  
+  const ownEntry = useMemo(() => data?.own ?? null, [data]);
   const ownRank = ownEntry?.rank ?? null;
 
   const top3 = useMemo(() => scoreboard.slice(0, 3), [scoreboard]);
@@ -72,7 +72,10 @@ const ScorePage = () => {
   );
 
   const afterEntries = useMemo(
-    () => scoreboard.filter((entry) => (ownRank ? entry.rank > ownRank : entry.rank > 3)),
+    () =>
+      scoreboard.filter((entry) =>
+        ownRank && ownRank > 3 ? entry.rank > ownRank : entry.rank > 3
+      ),
     [scoreboard, ownRank]
   );
 
