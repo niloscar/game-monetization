@@ -23,16 +23,16 @@ const TEAM: TeamMember[] = [
     {
         name: 'Oscar N',
         role: 'Backend, backa Julia in crazy ideas',
-        bio: 'En glad och snäll filur, som gärna tar sig an nya utmaningar. Har ett stort intresse för spel och spelutveckling, men även för naturen. När han inte sitter framför datorn så kan man hitta honom ute på en springtur eller i en skog.',
-        githubUrl: 'https://github.com/TODO',
+        bio: 'Gillar att förstå hur saker fungerar och har svårt att låta bli att fundera på hur de skulle kunna göras bättre. Har ofta något eget projekt på gång och testar gärna nya idéer. Fritiden går ofta åt till surfing, löpning på skogsstigar och, på senare tid, segling.',
+        githubUrl: 'https://github.com/niloscar',
         linkedinUrl: 'https://linkedin.com/in/TODO',
-        cvUrl: 'https://linkedin.com/in/TODO'
+        cvUrl: 'https://linkedin.com/oscar-nilsson1'
     },
     {
         name: 'Christoffer H',
         role: 'Frontend, stå ut med J och O',
         bio: 'Alltid glad, östgötsk och med ett leende på läpparna. Har ett stort intresse för datorer och utveckling, men även för träning. När han inte sitter framför datorn så kan man hitta honom på gymmet eller framför ett roligt spel.',
-        githubUrl: 'https://github.com/TODO',
+        githubUrl: 'https://github.com/Chrisgainz',
         linkedinUrl: 'https://linkedin.com/in/TODO',
         cvUrl: 'https://linkedin.com/in/TODO'
     }
