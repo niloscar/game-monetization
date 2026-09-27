@@ -99,7 +99,6 @@ h6 {
     filter: invert(1) brightness(2);
 }
 
-
 #root {
     width: 1126px;
     max-width: 100%;
@@ -327,19 +326,22 @@ code {
 
 .row.medal-gold {
     border: 1px solid var(--medal-gold);
-    background: rgba(255, 214, 10, 0.06);
 }
 .row.medal-silver {
     border: 1px solid var(--medal-silver);
-    background: rgba(201, 205, 214, 0.06);
 }
 .row.medal-bronze {
     border: 1px solid var(--medal-bronze);
-    background: rgba(201, 129, 74, 0.06);
 }
-.row.medal-gold .rank { color: var(--medal-gold); }
-.row.medal-silver .rank { color: var(--medal-silver); }
-.row.medal-bronze .rank { color: var(--medal-bronze); }
+.row.medal-gold .rank {
+    color: var(--medal-gold);
+}
+.row.medal-silver .rank {
+    color: var(--medal-silver);
+}
+.row.medal-bronze .rank {
+    color: var(--medal-bronze);
+}
 
 .row.hsa-self {
     border: 1px solid var(--tier-highscore);
@@ -445,10 +447,22 @@ code {
     border-radius: 999px;
     width: fit-content;
 }
-.tier-badge-quarter { border: 1px solid var(--tier-quarter); color: var(--tier-quarter); }
-.tier-badge-combo { border: 1px solid var(--tier-combo); color: var(--tier-combo); }
-.tier-badge-highscore { border: 1px solid var(--tier-highscore); color: var(--tier-highscore); }
-.tier-badge-admin { border: 1px solid var(--accent); color: var(--accent); }
+.tier-badge-quarter {
+    border: 1px solid var(--tier-quarter);
+    color: var(--tier-quarter);
+}
+.tier-badge-combo {
+    border: 1px solid var(--tier-combo);
+    color: var(--tier-combo);
+}
+.tier-badge-highscore {
+    border: 1px solid var(--tier-highscore);
+    color: var(--tier-highscore);
+}
+.tier-badge-admin {
+    border: 1px solid var(--accent);
+    color: var(--accent);
+}
 
 .profile-account-info {
     display: flex;
@@ -616,4 +630,20 @@ code {
     .profile-head-info {
         align-items: center;
     }
+}
+
+/* ---------- about us: teamet ---------- */
+.team-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.team-card {
+    flex: 1 1 240px;
+}
+
+.fake-italic {
+    display: inline-block;
+    transform: skewX(-23deg);
 }
