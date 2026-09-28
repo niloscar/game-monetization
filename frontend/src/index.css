@@ -99,7 +99,6 @@ h6 {
     filter: invert(1) brightness(2);
 }
 
-
 #root {
     width: 1126px;
     max-width: 100%;
@@ -337,9 +336,15 @@ code {
     border: 1px solid var(--medal-bronze);
     background: rgba(201, 129, 74, 0.06);
 }
-.row.medal-gold .rank { color: var(--medal-gold); }
-.row.medal-silver .rank { color: var(--medal-silver); }
-.row.medal-bronze .rank { color: var(--medal-bronze); }
+.row.medal-gold .rank {
+    color: var(--medal-gold);
+}
+.row.medal-silver .rank {
+    color: var(--medal-silver);
+}
+.row.medal-bronze .rank {
+    color: var(--medal-bronze);
+}
 
 .row.hsa-self {
     border: 1px solid var(--tier-highscore);
@@ -445,10 +450,22 @@ code {
     border-radius: 999px;
     width: fit-content;
 }
-.tier-badge-quarter { border: 1px solid var(--tier-quarter); color: var(--tier-quarter); }
-.tier-badge-combo { border: 1px solid var(--tier-combo); color: var(--tier-combo); }
-.tier-badge-highscore { border: 1px solid var(--tier-highscore); color: var(--tier-highscore); }
-.tier-badge-admin { border: 1px solid var(--accent); color: var(--accent); }
+.tier-badge-quarter {
+    border: 1px solid var(--tier-quarter);
+    color: var(--tier-quarter);
+}
+.tier-badge-combo {
+    border: 1px solid var(--tier-combo);
+    color: var(--tier-combo);
+}
+.tier-badge-highscore {
+    border: 1px solid var(--tier-highscore);
+    color: var(--tier-highscore);
+}
+.tier-badge-admin {
+    border: 1px solid var(--accent);
+    color: var(--accent);
+}
 
 .profile-account-info {
     display: flex;
@@ -617,3 +634,46 @@ code {
         align-items: center;
     }
 }
+
+/* ---------- Admin Dashboard ---------- */
+
+.admin-dashboard {
+    width: 100%;
+    max-width: 350px;
+    margin: 5rem auto 20rem;
+    text-align: left;
+}
+
+.admin-links {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.admin-links a {
+    width: 100%;
+    height: 45px;
+    margin-top: 2px;
+    background: var(--accent);
+    color: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 10px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    font-weight: 700;
+    border-radius: 6px;
+    padding: 7px 16px;
+    border: 1px solid var(--border);
+}
+
+.admin-header {
+    font-size: 12px;
+    line-height: 1.4;
+    margin: 0 0 4px;
+}
+
+/* ----------           ---------- */
