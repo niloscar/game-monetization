@@ -22,7 +22,7 @@ export default function GameCanvas({ onPhaseChange }: GameCanvasProps) {
         if (!ctx) return
 
         const state = createInitialGameState()
-        const input = createInput()
+        const input = createInput(canvas)
         const gameLoop = createGameLoop(ctx, state, input.state, onPhaseChange)
 
         input.start()
@@ -34,5 +34,12 @@ export default function GameCanvas({ onPhaseChange }: GameCanvasProps) {
         }
     }, [onPhaseChange])
 
-    return <canvas ref={canvasRef} width={CANVAS_WIDTH} height={CANVAS_HEIGHT} />
+    return (
+        <canvas
+            ref={canvasRef}
+            width={CANVAS_WIDTH}
+            height={CANVAS_HEIGHT}
+            tabIndex={0}
+        />
+    )
 }
