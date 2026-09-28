@@ -9,6 +9,7 @@ interface FormFieldProps {
     required?: boolean
     pattern?: string
     error?: string
+    disabled?: boolean
     onChange: (e: React.ChangeEvent<HTMLInputElement>) => void
 }
 

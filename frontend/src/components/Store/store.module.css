@@ -225,14 +225,26 @@
     }
 
     button.btn-confirm-purchase, button.paypal-button {
+        display: flex;
+        align-items: center;
+        justify-content: center;
         margin-top: 1rem;
         width: 100%;
         background-color: var(--accent);
         color: #0a0a0f;
     }
 
-    button.paypal-button {
+
+    .paypal-button {
         margin-top: 0;
+
+        .loading-dots {
+            display: inline-block;
+
+            .hidden {
+                visibility: hidden;
+            }
+        }
     }
 
     .disclaimer {
