@@ -51,6 +51,18 @@ export const renderGame = (ctx: CanvasRenderingContext2D, state: GameState) => {
         )
     }
 
+    /* Render the world objects */
+    for (const object of state.world.objects) {
+        ctx.fillStyle = '#c0392b'
+
+        ctx.fillRect(
+            object.position.x - object.width / 2,
+            object.position.y - object.height / 2,
+            object.width,
+            object.height
+        )
+    }
+
     /* Render the player */
     ctx.fillStyle = '#ffffff'
     ctx.fillRect(

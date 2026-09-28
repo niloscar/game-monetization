@@ -6,7 +6,7 @@ export const GAME_BOUNDS: GameBounds = {
     left: 150,
     right: 650,
     top: 80,
-    bottom: 550,
+    bottom: 550
 }
 
 const SKATEBOARD: Vehicle = {
@@ -18,7 +18,7 @@ const SKATEBOARD: Vehicle = {
     braking: 160,
     steeringSpeed: 350,
     forwardSpeed: 120,
-    canUseSidewalk: true,
+    canUseSidewalk: true
 }
 
 export const createInitialGameState = (): GameState => ({
@@ -26,13 +26,25 @@ export const createInitialGameState = (): GameState => ({
     player: {
         position: {
             x: 400,
-            y: 500,
+            y: 500
         },
         speed: 0,
         health: 100,
-        vehicle: SKATEBOARD,
+        vehicle: SKATEBOARD
     },
     world: {
         scrollOffset: 0,
-    },
+        objects: [
+            {
+                id: 1,
+                type: 'parkedCar',
+                position: {
+                    x: 200,
+                    y: 150
+                },
+                width: 50,
+                height: 90
+            }
+        ]
+    }
 })

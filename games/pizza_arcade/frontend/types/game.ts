@@ -40,4 +40,15 @@ export interface GameBounds {
 
 export interface World {
     scrollOffset: number
+    objects: WorldObject[]
+}
+
+export type WorldObjectType = 'parkedCar' | 'trashCan' | 'pedestrian'
+
+export interface WorldObject {
+    id: number
+    type: WorldObjectType
+    position: Position
+    width: number
+    height: number
 }

@@ -9,10 +9,16 @@ const CANVAS_HEIGHT = 600
 
 interface GameCanvasProps {
     onPhaseChange: (phase: GamePhase) => void
+    isHovered: boolean
 }
 
-export default function GameCanvas({ onPhaseChange }: GameCanvasProps) {
+export default function GameCanvas({ onPhaseChange, isHovered }: GameCanvasProps) {
     const canvasRef = useRef<HTMLCanvasElement>(null)
+    const isHoveredRef = useRef(isHovered)
+
+    useEffect(() => {
+        isHoveredRef.current = isHovered
+    }, [isHovered])
 
     useEffect(() => {
         const canvas = canvasRef.current
@@ -25,10 +31,22 @@ export default function GameCanvas({ onPhaseChange }: GameCanvasProps) {
         const input = createInput(canvas)
         const gameLoop = createGameLoop(ctx, state, input.state, onPhaseChange)
 
+        const handleKeyDown = (event: KeyboardEvent) => {
+            if (event.code !== 'Space' || !isHoveredRef.current || document.activeElement === canvas)
+                return
+
+            event.preventDefault()
+            canvas.focus()
+            input.state.start = true
+        }
+
+        window.addEventListener('keydown', handleKeyDown)
+
         input.start()
         gameLoop.start()
 
         return () => {
+            window.removeEventListener('keydown', handleKeyDown)
             input.stop()
             gameLoop.stop()
         }
