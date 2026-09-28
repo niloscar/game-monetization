@@ -2,32 +2,37 @@ import { useEffect, useRef } from 'react'
 import { createInitialGameState } from '../engine/gameState'
 import { createInput } from '../engine/input'
 import { createGameLoop } from '../engine/gameLoop'
+import type { GamePhase } from '../types/game'
 
 const CANVAS_WIDTH = 800
 const CANVAS_HEIGHT = 600
 
-export default function GameCanvas() {
-  const canvasRef = useRef<HTMLCanvasElement>(null)
+interface GameCanvasProps {
+    onPhaseChange: (phase: GamePhase) => void
+}
 
-  useEffect(() => {
-    const canvas = canvasRef.current
-    if (!canvas) return
+export default function GameCanvas({ onPhaseChange }: GameCanvasProps) {
+    const canvasRef = useRef<HTMLCanvasElement>(null)
 
-    const ctx = canvas.getContext('2d')
-    if (!ctx) return
+    useEffect(() => {
+        const canvas = canvasRef.current
+        if (!canvas) return
 
-    const state = createInitialGameState()
-    const input = createInput()
-    const gameLoop = createGameLoop(ctx, state, input.state)
+        const ctx = canvas.getContext('2d')
+        if (!ctx) return
 
-    input.start()
-    gameLoop.start()
+        const state = createInitialGameState()
+        const input = createInput()
+        const gameLoop = createGameLoop(ctx, state, input.state, onPhaseChange)
 
-    return () => {
-      input.stop()
-      gameLoop.stop()
-    }
-  }, [])
+        input.start()
+        gameLoop.start()
 
-  return <canvas ref={canvasRef} width={CANVAS_WIDTH} height={CANVAS_HEIGHT} />
+        return () => {
+            input.stop()
+            gameLoop.stop()
+        }
+    }, [onPhaseChange])
+
+    return <canvas ref={canvasRef} width={CANVAS_WIDTH} height={CANVAS_HEIGHT} />
 }

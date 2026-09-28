@@ -1,17 +1,19 @@
 export interface InputState {
-  left: boolean
-  right: boolean
-  accelerate: boolean
-  brake: boolean
+    left: boolean
+    right: boolean
+    accelerate: boolean
+    brake: boolean
+    start: boolean
 }
 
 export const createInput = () => {
-  const state: InputState = {
-    left: false,
-    right: false,
-    accelerate: false,
-    brake: false,
-  }
+    const state: InputState = {
+        left: false,
+        right: false,
+        accelerate: false,
+        brake: false,
+        start: false,
+    }
 
   const handleKeyDown = (event: KeyboardEvent) => {
     switch (event.code) {
@@ -33,6 +35,10 @@ export const createInput = () => {
       case 'ArrowDown':
       case 'KeyS':
         state.brake = true
+        break
+
+    case 'Space':
+        state.start = true
         break
     }
   }
@@ -57,6 +63,10 @@ export const createInput = () => {
       case 'ArrowDown':
       case 'KeyS':
         state.brake = false
+        break
+
+    case 'Space':
+        state.start = false
         break
     }
   }

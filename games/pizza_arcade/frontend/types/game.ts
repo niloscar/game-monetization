@@ -1,28 +1,43 @@
-export interface Position {
-    x: number
-    y: number
+export type GamePhase = 'start' | 'playing' | 'gameOver'
+
+export interface GameState {
+    phase: GamePhase
+    player: Player
+    world: World
 }
 
 export interface Player {
     position: Position
+    speed: number
+    health: number
+    vehicle: Vehicle
+}
+
+export interface Position {
+    x: number
+    y: number
+}
+export interface Vehicle {
+    type: VehicleType
     width: number
     height: number
-    speed: number // Vehicle speed through the world
     maxSpeed: number
     acceleration: number
     braking: number
     steeringSpeed: number
-    forwardSpeed: number // Player's speed of movement in the forward direction (y-axis)
-    health: number
+    forwardSpeed: number
+    canUseSidewalk: boolean
 }
 
-export interface GameState {
-    player: Player
-}
+export type VehicleType = 'skateboard' | 'bike' | 'moped' | 'car' | 'van'
 
 export interface GameBounds {
   left: number
   right: number
   top: number
   bottom: number
+}
+
+export interface World {
+    scrollOffset: number
 }

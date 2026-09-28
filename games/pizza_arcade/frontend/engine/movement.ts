@@ -1,8 +1,6 @@
 import type { GameState } from '../types/game'
 import type { InputState } from './input'
-import { GAME_BOUNDS } from './gameState'
-
-const MIN_MOVING_SPEED = 30
+import { GAME_BOUNDS, SIDEWALK_WIDTH } from './gameState'
 
 export const updateMovement = (
     state: GameState,
@@ -10,39 +8,41 @@ export const updateMovement = (
     deltaTime: number
 ) => {
     const { player } = state
+    const { vehicle } = player
 
-    if (input.accelerate) {
-        player.speed += player.acceleration * deltaTime
-        player.position.y -= player.forwardSpeed * deltaTime
-    }
+    const halfPlayerWidth = vehicle.width / 2
+    const halfPlayerHeight = vehicle.height / 2
 
-    if (input.brake) {
-        player.speed -= player.braking * deltaTime
-        player.position.y += player.forwardSpeed * deltaTime
+    const top = GAME_BOUNDS.top + halfPlayerHeight
+    const bottom = GAME_BOUNDS.bottom - halfPlayerHeight
 
-        const bottom = GAME_BOUNDS.bottom - player.height / 2
-        if (player.position.y < bottom)
-            player.speed = Math.max(player.speed, MIN_MOVING_SPEED)
-    }
+    if (input.accelerate) player.position.y -= vehicle.acceleration * deltaTime
 
-    player.speed = Math.max(0, Math.min(player.speed, player.maxSpeed))
+    if (input.brake) player.position.y += vehicle.braking * deltaTime
 
-    const steeringFactor = player.speed === 0 ? 0 : 0.6 + 0.4 * (player.speed / player.maxSpeed) // Make steering a bit more responsive than if linear.
+    player.position.y = Math.max(top, Math.min(player.position.y, bottom))
+
+    const speedRatio = (bottom - player.position.y) / (bottom - top)
+    player.speed = vehicle.maxSpeed * speedRatio
+
+    const steeringFactor =
+        player.speed === 0 ? 0 : 0.2 + 0.8 * Math.sqrt(speedRatio)
 
     if (input.left)
-        player.position.x -= player.steeringSpeed * steeringFactor * deltaTime
+        player.position.x -= vehicle.steeringSpeed * steeringFactor * deltaTime
     if (input.right)
-        player.position.x += player.steeringSpeed * steeringFactor * deltaTime
+        player.position.x += vehicle.steeringSpeed * steeringFactor * deltaTime
 
-    const halfPlayerWidth = player.width / 2
-    const halfPlayerHeight = player.height / 2
+    const leftBoundary = vehicle.canUseSidewalk
+        ? GAME_BOUNDS.left - SIDEWALK_WIDTH
+        : GAME_BOUNDS.left
+
+    const rightBoundary = vehicle.canUseSidewalk
+        ? GAME_BOUNDS.right + SIDEWALK_WIDTH
+        : GAME_BOUNDS.right
 
     player.position.x = Math.max(
-        GAME_BOUNDS.left + halfPlayerWidth,
-        Math.min(player.position.x, GAME_BOUNDS.right - halfPlayerWidth)
-    )
-    player.position.y = Math.max(
-        GAME_BOUNDS.top + halfPlayerHeight,
-        Math.min(player.position.y, GAME_BOUNDS.bottom - halfPlayerHeight)
+        leftBoundary + halfPlayerWidth,
+        Math.min(player.position.x, rightBoundary - halfPlayerWidth)
     )
 }

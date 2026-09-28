@@ -1,32 +1,47 @@
 import type { GameState } from '../types/game'
 import type { InputState } from './input'
 import { updateMovement } from './movement'
+import { updateWorld } from './world'
 import { renderGame } from './render'
 
-export const createGameLoop = (ctx: CanvasRenderingContext2D, state: GameState, input: InputState) => {
-  let animationFrameId: number
-  let previousTime = 0
+export const createGameLoop = (
+    ctx: CanvasRenderingContext2D,
+    state: GameState,
+    input: InputState,
+    onPhaseChange: (phase: GameState['phase']) => void
+) => {
+    let animationFrameId: number
+    let previousTime = 0
 
-  const loop = (time: number) => {
-    const deltaTime = previousTime ? (time - previousTime) / 1000 : 0
-    previousTime = time
+    const loop = (time: number) => {
+        const deltaTime = previousTime ? (time - previousTime) / 1000 : 0
+        previousTime = time
 
-    updateMovement(state, input, deltaTime)
-    renderGame(ctx, state)
+        if (state.phase === 'start' && input.start) {
+            state.phase = 'playing'
+            onPhaseChange(state.phase)
+        }
 
-    animationFrameId = requestAnimationFrame(loop)
-  }
+        if (state.phase === 'playing') {
+            updateMovement(state, input, deltaTime)
+            updateWorld(state, deltaTime)
+        }
 
-  const start = () => {
-    animationFrameId = requestAnimationFrame(loop)
-  }
+        renderGame(ctx, state)
 
-  const stop = () => {
-    cancelAnimationFrame(animationFrameId)
-  }
+        animationFrameId = requestAnimationFrame(loop)
+    }
 
-  return {
-    start,
-    stop,
-  }
+    const start = () => {
+        animationFrameId = requestAnimationFrame(loop)
+    }
+
+    const stop = () => {
+        cancelAnimationFrame(animationFrameId)
+    }
+
+    return {
+        start,
+        stop
+    }
 }
