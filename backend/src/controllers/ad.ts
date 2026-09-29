@@ -6,7 +6,7 @@ import * as service from '../services/ad'
 import { validateField, validateId } from '../utils/validation'
 
 import type { Request, Response } from 'express'
-import type { Ad, AdPlacement, CreateAdBody, UpdateAdBody } from '../types/ad'
+import type { Ad, CreateAdBody, UpdateAdBody, AdPlacement } from '../types/ad'
 import type { ApiError } from '../types/errors'
 
 export const getAds = async (

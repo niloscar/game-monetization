@@ -3,9 +3,9 @@
  */
 
 import pool from '../database'
-import type { Ad, AdPlacement, CreateAdBody, UpdateAdBody } from '../types/ad'
+import type { Ad, CreateAdBody, UpdateAdBody, AdPlacement } from '../types/ad'
 
-export async function getAds(placement?: AdPlacement): Promise<Ad[]> {
+export async function getAds(placement?: AdPlacement, activeOnly = true): Promise<Ad[]> {
     const { rows } = await pool.query<Ad>(
         `SELECT
             id,
@@ -20,14 +20,15 @@ export async function getAds(placement?: AdPlacement): Promise<Ad[]> {
         FROM ads
         WHERE deleted_at IS NULL
             AND ($1::text IS NULL OR placement = $1)
+            AND ($2::boolean = FALSE OR is_active = TRUE)
         ORDER BY id`,
-        [placement ?? null]
+        [placement ?? null, activeOnly]
     )
 
     return rows
 }
 
-export async function getAd(id: number): Promise<Ad | null> {
+export async function getAd(id: number, activeOnly = true): Promise<Ad | null> {
     const { rows } = await pool.query<Ad>(
         `SELECT
             id,
@@ -40,8 +41,10 @@ export async function getAd(id: number): Promise<Ad | null> {
             title,
             weight
         FROM ads
-        WHERE id = $1 AND deleted_at IS NULL`,
-        [id]
+        WHERE id = $1
+            AND deleted_at IS NULL
+            AND ($2::boolean = FALSE OR is_active = TRUE)`,
+        [id, activeOnly]
     )
 
     return rows[0] ?? null
