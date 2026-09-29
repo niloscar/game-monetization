@@ -4,14 +4,23 @@
 
 import { Router } from 'express'
 import { authenticate } from '../middleware/auth'
-import { getScores, getScore, createScore } from '../controllers/game'
+import {
+    getScore,
+    getScoresByUserId,
+    getMyScores,
+    createScore,
+    getScoreboard,
+} from '../controllers/game'
 
 const gameRouter = Router()
 
-gameRouter.use(authenticate) // Check if the user is authenticated for all routes below
+gameRouter.get('/scoreboard', getScoreboard)
 
-gameRouter.get('/score', getScores)
-gameRouter.get('/score/:id', getScore)
+gameRouter.use(authenticate)
+
+gameRouter.get('/score/me', getMyScores)
+gameRouter.get('/score/user/:userId', getScoresByUserId)
+gameRouter.get('/score/:scoreId', getScore)
 gameRouter.post('/score', createScore)
 
 export default gameRouter

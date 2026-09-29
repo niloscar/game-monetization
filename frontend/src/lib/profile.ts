@@ -1,70 +1,89 @@
-import type { Score, User } from "../mock/types";
-import { getLeaderboard } from "./scoreboard";
+import api from '../api/apiClient'
+import type { ScoreboardEntry } from './scoreboard'
 
-export function findUserByUsername(users: User[], username: string): User | undefined {
-  return users.find((u) => u.username === username);
+export interface UserScore {
+    id: number
+    userId: number
+    productId: number
+    score: number
+    createdAt: string
 }
 
 export interface ProfileStats {
-  gamesPlayed: number;
-  bestScore: number | null;
-  averageScore: number | null;
-  totalPlaytimeSeconds: number;
-  rank: number | null;
+    bestScore: number | null
+    averageScore: number | null
+    gamesPlayed: number
 }
 
-export function getProfileStats(scores: Score[], userId: string): ProfileStats {
-  const own = scores.filter((s) => s.userId === userId);
+export interface ProfileIdentity {
+    userId: number
+    username: string
+    email?: string
+    role?: 'user' | 'admin'
+    tier?: {
+        id: number
+        name: string
+        description: string
+        level: number
+    } | null
+    createdAt?: string
+}
 
-  if (own.length === 0) {
+export async function fetchMyScores(): Promise<UserScore[]> {
+    const res = await api.get<UserScore[]>('/game/score/me')
+    return res.data
+}
+
+export async function fetchScoresForUser(userId: number): Promise<UserScore[]> {
+    const res = await api.get<UserScore[]>(`/game/score/user/${userId}`)
+    return res.data
+}
+
+export function getProfileStats(scores: UserScore[]): ProfileStats {
+    if (scores.length === 0) {
+        return { bestScore: null, averageScore: null, gamesPlayed: 0 }
+    }
+    const values = scores.map((s) => s.score)
+    const bestScore = Math.max(...values)
+    const averageScore = Math.round(
+        values.reduce((a, b) => a + b, 0) / values.length
+    )
+    return { bestScore, averageScore, gamesPlayed: scores.length }
+}
+
+export function findRankInScoreboard(
+    scoreboard: ScoreboardEntry[],
+    userId: number
+): number | null {
+    return scoreboard.find((entry) => entry.userId === userId)?.rank ?? null
+}
+
+export function findIdentityInScoreboard(
+    scoreboard: ScoreboardEntry[],
+    username: string
+): (ProfileIdentity & { bestScoreFromBoard: number }) | null {
+    const entry = scoreboard.find((e) => e.username === username)
+    if (!entry) return null
     return {
-      gamesPlayed: 0,
-      bestScore: null,
-      averageScore: null,
-      totalPlaytimeSeconds: 0,
-      rank: null,
-    };
-  }
-
-  const best = Math.max(...own.map((s) => s.value));
-  const average = Math.round(own.reduce((sum, s) => sum + s.value, 0) / own.length);
-  const totalPlaytimeSeconds = own.reduce((sum, s) => sum + s.playtimeSeconds, 0);
-
-  return {
-    gamesPlayed: own.length,
-    bestScore: best,
-    averageScore: average,
-    totalPlaytimeSeconds,
-    rank: null, // sätts separat via getProfileRank, kräver hela leaderboarden
-  };
+        userId: entry.userId,
+        username: entry.username,
+        bestScoreFromBoard: entry.score
+    }
 }
 
-export function formatPlaytime(totalSeconds: number): string {
-  const hours = Math.floor(totalSeconds / 3600);
-  const minutes = Math.floor((totalSeconds % 3600) / 60);
-  if (hours === 0) return `${minutes}m`;
-  return `${hours}h ${minutes}m`;
+export type ProfileIconKey = 'quarter' | 'combo' | 'highscore' | 'admin'
+
+const TIER_LEVEL_TO_ICON: Record<number, ProfileIconKey> = {
+    1: 'quarter',
+    2: 'combo',
+    3: 'highscore'
 }
 
-export function getProfileRank(scores: Score[], users: User[], userId: string): number | null {
-  const leaderboard = getLeaderboard(scores, users, "all");
-  const entry = leaderboard.find((e) => e.user.id === userId);
-  return entry ? entry.rank : null;
-}
-
-export type ProfileIconKey = "quarter" | "combo" | "highscore" | "admin";
-
-const TIER_SLUG_TO_ICON: Record<string, ProfileIconKey> = {
-  "quarter-pass": "quarter",
-  "combo-pass": "combo",
-  "high-score-access": "highscore",
-};
-
-export function getProfileIconKey(
-  user: Pick<User, "role" | "tierId">,
-  tierSlugById: Map<string, string>
-): ProfileIconKey {
-  if (user.role === "admin") return "admin";
-  const slug = tierSlugById.get(user.tierId);
-  return (slug && TIER_SLUG_TO_ICON[slug]) || "quarter";
+export function getProfileIconKey(identity: {
+    role?: 'user' | 'admin'
+    tier?: { level: number } | null
+}): ProfileIconKey {
+    if (identity.role === 'admin') return 'admin'
+    const level = identity.tier?.level
+    return (level && TIER_LEVEL_TO_ICON[level]) || 'quarter'
 }

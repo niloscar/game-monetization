@@ -47,17 +47,6 @@
     background-color: var(--accent);
 }
 
-.loginButton:hover {
-    color: var(--text-h);
-    border-color: #f5f5f7;
-    background-color: var(--accent-bg);
-}
-
-.registerButton:hover {
-    filter: brightness(1.25);
-    border-color: #f5f5f7;
-}
-
 .loginButton,
 .registerButton,
 .profile {

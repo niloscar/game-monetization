@@ -1,6 +1,6 @@
 import type { ApiError } from '../types/errors'
 
-export function validateField(field: string, value: unknown, type: 'string' | 'number'): ApiError | null {
+export function validateField(field: string, value: unknown, type: 'string' | 'number' | 'boolean'): ApiError | null {
     if (value === undefined || value === null) {
         return { message: `Fältet ${field} är obligatoriskt.`, field }
     }
