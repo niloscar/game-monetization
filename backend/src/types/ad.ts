@@ -1,17 +1,27 @@
 export interface Ad {
     id: number
-    type: 'video' | 'banner'
-    url: string
-    is_active: boolean
     title: string | null
+    media_type: AdMediaType
+    media_url: string
+    target_url: string | null
+    duration_seconds: number | null
+    is_active: boolean
     weight: number | null
+    placement: AdPlacement
 }
+
 export interface CreateAdBody {
-    type: 'video' | 'banner'
-    url: string
-    is_active?: boolean
     title?: string | null
+    media_type: AdMediaType
+    media_url: string
+    target_url?: string | null
+    duration_seconds?: number | null
+    is_active?: boolean
     weight?: number | null
+    placement: AdPlacement
 }
 
 export type UpdateAdBody = Partial<CreateAdBody>
+
+export type AdMediaType = 'image' | 'video'
+export type AdPlacement = 'pre_game' | 'display'
