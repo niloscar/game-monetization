@@ -12,3 +12,8 @@ export interface Ad {
     weight: number | null
     placement: AdPlacement
 }
+
+export interface AdPolicy {
+    preGame: boolean
+    display: boolean
+}

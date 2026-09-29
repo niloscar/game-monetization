@@ -41,6 +41,7 @@ export interface GameBounds {
 export interface World {
     scrollOffset: number
     objects: WorldObject[]
+    billboards: Billboard[]
 }
 
 export type WorldObjectType = 'parkedCar' | 'trashCan' | 'pedestrian'
@@ -51,4 +52,12 @@ export interface WorldObject {
     position: Position
     width: number
     height: number
+}
+
+export interface Billboard {
+    id: number
+    position: Position
+    width: number
+    height: number
+    adIndex: number
 }
