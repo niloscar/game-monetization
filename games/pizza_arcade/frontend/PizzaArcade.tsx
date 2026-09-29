@@ -7,10 +7,13 @@ import styles from './pizza-arcade.module.css'
 
 interface PizzaArcadeProps {
     displayAds: DisplayAd[]
+    canStart: boolean
+    onStartRequest: () => void
 }
 
-export default function PizzaArcade({ displayAds }: PizzaArcadeProps) {
+export default function PizzaArcade({ displayAds, canStart, onStartRequest }: PizzaArcadeProps) {
     const [gamePhase, setGamePhase] = useState<GamePhase>('start')
+
     const [isHovered, setIsHovered] = useState(false)
 
     const handleGamePhaseChange = useCallback((phase: GamePhase) => {
@@ -27,6 +30,8 @@ export default function PizzaArcade({ displayAds }: PizzaArcadeProps) {
                 onPhaseChange={handleGamePhaseChange}
                 isHovered={isHovered}
                 displayAds={displayAds}
+                canStart={canStart}
+                onStartRequest={onStartRequest}
             />
 
             {gamePhase === 'start' && <StartScreen />}

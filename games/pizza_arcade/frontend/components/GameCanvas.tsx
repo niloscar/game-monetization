@@ -9,16 +9,30 @@ interface GameCanvasProps {
     onPhaseChange: (phase: GamePhase) => void
     isHovered: boolean
     displayAds: DisplayAd[]
+    canStart: boolean
+    onStartRequest: () => void
 }
 
 export default function GameCanvas({
     onPhaseChange,
     isHovered,
-    displayAds
+    displayAds,
+    canStart,
+    onStartRequest
 }: GameCanvasProps) {
     const canvasRef = useRef<HTMLCanvasElement>(null)
     const isHoveredRef = useRef(isHovered)
     const displayAdsRef = useRef<LoadedDisplayAd[]>([])
+    const canStartRef = useRef(canStart)
+    const onStartRequestRef = useRef(onStartRequest)
+
+    useEffect(() => {
+        onStartRequestRef.current = onStartRequest
+    }, [onStartRequest])
+
+    useEffect(() => {
+        canStartRef.current = canStart
+    }, [canStart])
 
     useEffect(() => {
         isHoveredRef.current = isHovered
@@ -66,7 +80,9 @@ export default function GameCanvas({
             state,
             input.state,
             onPhaseChange,
-            () => displayAdsRef.current
+            () => displayAdsRef.current,
+            () => canStartRef.current,
+            () => onStartRequestRef.current()
         )
 
         const handleKeyDown = (event: KeyboardEvent) => {

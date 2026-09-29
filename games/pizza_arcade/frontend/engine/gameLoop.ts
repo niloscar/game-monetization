@@ -10,16 +10,43 @@ export const createGameLoop = (
     state: GameState,
     input: InputState,
     onPhaseChange: (phase: GameState['phase']) => void,
-    getDisplayAds: () => LoadedDisplayAd[]
+    getDisplayAds: () => LoadedDisplayAd[],
+    canStart: () => boolean,
+    onStartRequest: () => void
 ) => {
     let animationFrameId: number
     let previousTime = 0
+    let startRequested = false
 
     const loop = (time: number) => {
         const deltaTime = previousTime ? (time - previousTime) / 1000 : 0
         previousTime = time
 
         if (state.phase === 'start' && input.start) {
+            input.start = false
+
+            if (canStart()) {
+                state.phase = 'playing'
+                onPhaseChange(state.phase)
+            } else if (!startRequested) {
+                startRequested = true
+                onStartRequest()
+            }
+        }
+
+        if (state.phase === 'start' && input.start) {
+            input.start = false
+
+            if (canStart()) {
+                state.phase = 'playing'
+                onPhaseChange(state.phase)
+            } else if (!startRequested) {
+                startRequested = true
+                onStartRequest()
+            }
+        }
+
+        if (state.phase === 'start' && startRequested && canStart()) {
             state.phase = 'playing'
             onPhaseChange(state.phase)
         }
