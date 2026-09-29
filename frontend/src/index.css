@@ -635,8 +635,27 @@ code {
     }
 }
 
-/* ---------- Admin Dashboard ---------- */
+/* ---------- Store page ---------- */
+.store-page {
+    max-width: 880px;
+    margin: 0 auto;
+    padding: 25px 20px;
 
+    .page-title {
+        text-align: left;
+
+        h1 {
+            text-transform: uppercase;
+        }
+
+        p {
+            text-transform: lowercase;
+        }
+    }
+
+}
+
+/* ---------- Admin Dashboard ---------- */
 .admin-dashboard {
     width: 100%;
     max-width: 350px;
