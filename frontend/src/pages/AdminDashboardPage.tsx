@@ -7,8 +7,8 @@ const AdminDashboardPage = () => {
                 <h1 className="admin-header">Admin Dashboard</h1>
 
                 <div className="admin-links">
-                    <Link to="/admin/content">Manage Content</Link>
-                    <Link to="/admin/users">Manage Users</Link>
+                    <Link to="/admin/content">hantera innehåll</Link>
+                    <Link to="/admin/users">hantera användare</Link>
                 </div>
             </div>
         </main>
