@@ -7,7 +7,7 @@ export interface Ad {
     duration_seconds: number | null
     is_active: boolean
     weight: number | null
-    placement: AdPlacement[]
+    placement: AdPlacement
 }
 
 export interface CreateAdBody {
@@ -18,7 +18,7 @@ export interface CreateAdBody {
     duration_seconds?: number | null
     is_active?: boolean
     weight?: number | null
-    placement: AdPlacement[]
+    placement: AdPlacement
 }
 
 export type UpdateAdBody = Partial<CreateAdBody>
