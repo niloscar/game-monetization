@@ -3,12 +3,12 @@
  */
 
 import { Router } from "express"
-import { getAd, getAds, createAd, updateAd, deleteAd } from "../../controllers/ad"
+import { createAd, updateAd, deleteAd, getAdminAds, getAdminAd } from "../../controllers/ad"
 
 const adminAdRouter = Router()
 
-adminAdRouter.get('/', getAds)
-adminAdRouter.get('/:id', getAd)
+adminAdRouter.get('/', getAdminAds)
+adminAdRouter.get('/:id', getAdminAd)
 adminAdRouter.post('/', createAd)
 adminAdRouter.patch('/:id', updateAd)
 adminAdRouter.delete('/:id', deleteAd)
