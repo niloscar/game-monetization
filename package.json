@@ -5,7 +5,8 @@
     "description": "Projektet syftar till att utveckla en webbaserad plattform som möjliggör intäktsgenerering kring befintliga spel genom reklam och engångsköp.",
     "workspaces": [
         "frontend",
-        "backend"
+        "backend",
+        "shared"
     ],
     "directories": {
         "doc": "docs"
