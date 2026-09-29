@@ -3,20 +3,25 @@
  */
 
 import pool from '../database'
-import type { Ad, CreateAdBody, UpdateAdBody } from '../types/ad'
+import type { Ad, AdPlacement, CreateAdBody, UpdateAdBody } from '../types/ad'
 
-export async function getAds(): Promise<Ad[]> {
+export async function getAds(placement?: AdPlacement): Promise<Ad[]> {
     const { rows } = await pool.query<Ad>(
         `SELECT
             id,
-            type,
-            url,
+            media_type,
+            media_url,
+            target_url,
+            duration_seconds,
+            placement,
             is_active,
             title,
             weight
         FROM ads
         WHERE deleted_at IS NULL
-        ORDER BY id`
+            AND ($1::text IS NULL OR placement = $1)
+        ORDER BY id`,
+        [placement ?? null]
     )
 
     return rows
@@ -26,8 +31,11 @@ export async function getAd(id: number): Promise<Ad | null> {
     const { rows } = await pool.query<Ad>(
         `SELECT
             id,
-            type,
-            url,
+            media_type,
+            media_url,
+            target_url,
+            duration_seconds,
+            placement,
             is_active,
             title,
             weight
@@ -39,24 +47,39 @@ export async function getAd(id: number): Promise<Ad | null> {
     return rows[0] ?? null
 }
 
-export async function createAd({ type, url, is_active = true, title = null, weight = null }: CreateAdBody): Promise<Ad> {
+export async function createAd({
+    media_type,
+    media_url,
+    target_url = null,
+    duration_seconds = null,
+    placement,
+    is_active = true,
+    title = null,
+    weight = null
+}: CreateAdBody): Promise<Ad> {
     const { rows } = await pool.query<Ad>(
         `INSERT INTO ads (
-            type,
-            url,
+            media_type,
+            media_url,
+            target_url,
+            duration_seconds,
+            placement,
             is_active,
             title,
             weight
         )
-        VALUES ($1, $2, $3, $4, $5)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
         RETURNING
             id,
-            type,
-            url,
+            media_type,
+            media_url,
+            target_url,
+            duration_seconds,
+            placement,
             is_active,
             title,
             weight`,
-        [type, url, is_active, title, weight]
+        [media_type, media_url, target_url, duration_seconds, placement, is_active, title, weight]
     )
 
     const createdAd = rows[0]
@@ -73,14 +96,29 @@ export async function updateAd(id: number, body: UpdateAdBody): Promise<Ad | nul
     const values: unknown[] = []
     let parameter = 1
 
-    if (body.type !== undefined) {
-        updates.push(`type = $${parameter++}`)
-        values.push(body.type)
+    if (body.media_type !== undefined) {
+        updates.push(`media_type = $${parameter++}`)
+        values.push(body.media_type)
     }
 
-    if (body.url !== undefined) {
-        updates.push(`url = $${parameter++}`)
-        values.push(body.url)
+    if (body.media_url !== undefined) {
+        updates.push(`media_url = $${parameter++}`)
+        values.push(body.media_url)
+    }
+
+    if (body.target_url !== undefined) {
+        updates.push(`target_url = $${parameter++}`)
+        values.push(body.target_url)
+    }
+
+    if (body.duration_seconds !== undefined) {
+        updates.push(`duration_seconds = $${parameter++}`)
+        values.push(body.duration_seconds)
+    }
+
+    if (body.placement !== undefined) {
+        updates.push(`placement = $${parameter++}`)
+        values.push(body.placement)
     }
 
     if (body.is_active !== undefined) {
@@ -110,8 +148,11 @@ export async function updateAd(id: number, body: UpdateAdBody): Promise<Ad | nul
         WHERE id = $${parameter} AND deleted_at IS NULL
         RETURNING
             id,
-            type,
-            url,
+            media_type,
+            media_url,
+            target_url,
+            duration_seconds,
+            placement,
             is_active,
             title,
             weight`,
@@ -128,8 +169,11 @@ export async function deleteAd(id: number): Promise<Ad | null> {
         WHERE id = $1 AND deleted_at IS NULL
         RETURNING
             id,
-            type,
-            url,
+            media_type,
+            media_url,
+            target_url,
+            duration_seconds,
+            placement,
             is_active,
             title,
             weight`,
