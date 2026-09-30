@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import type { FormEvent } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
@@ -292,10 +292,7 @@ const ProfilePage = () => {
                             )}
                         </p>
                     ) : (
-                        <p className="profile-meta profile-meta-unknown">
-                            Nivå och medlemsdatum kräver att en publik
-                            profil-endpoint finns.
-                        </p>
+                        <p className="profile-meta profile-meta-unknown"></p>
                     )}
                 </div>
             </div>

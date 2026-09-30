@@ -326,15 +326,12 @@ code {
 
 .row.medal-gold {
     border: 1px solid var(--medal-gold);
-    background: rgba(255, 214, 10, 0.06);
 }
 .row.medal-silver {
     border: 1px solid var(--medal-silver);
-    background: rgba(201, 205, 214, 0.06);
 }
 .row.medal-bronze {
     border: 1px solid var(--medal-bronze);
-    background: rgba(201, 129, 74, 0.06);
 }
 .row.medal-gold .rank {
     color: var(--medal-gold);
@@ -635,6 +632,21 @@ code {
     }
 }
 
+/* ---------- about us: teamet ---------- */
+.team-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.team-card {
+    flex: 1 1 240px;
+}
+
+.fake-italic {
+    display: inline-block;
+    transform: skewX(-23deg);
+}
 /* ---------- Store page ---------- */
 .store-page {
     max-width: 880px;
