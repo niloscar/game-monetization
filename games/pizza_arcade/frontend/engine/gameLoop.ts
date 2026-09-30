@@ -1,14 +1,16 @@
+import { createGameState } from './createGameState'
+import { renderGame } from './render'
+import { handleCollisions } from './collision'
+import { updateBillboards } from './billboards'
+import { updateMovement } from './movement'
+import { updateSurvivalScore } from './score'
+import { updateWorld } from './world'
+import { updateWorldObjectCount } from './worldObjects'
+
+import type { GameAssets } from './assets'
 import type { GameState } from '../types/game'
 import type { LoadedDisplayAd } from '../types/ad'
 import type { InputState } from './input'
-import { updateMovement } from './movement'
-import { updateWorld } from './world'
-import { renderGame } from './render'
-import { handleCollisions } from './collision'
-import type { GameAssets } from './assets'
-import { updateBillboards } from './billboards'
-import { createGameState } from './createGameState'
-import { updateWorldObjectCount } from './worldObjects'
 
 export const createGameLoop = (
     ctx: CanvasRenderingContext2D,
@@ -18,7 +20,8 @@ export const createGameLoop = (
     onPhaseChange: (phase: GameState['phase']) => void,
     getDisplayAds: () => LoadedDisplayAd[],
     canStart: () => boolean,
-    onStartRequest: () => void
+    onStartRequest: () => void,
+    showScore: () => boolean
 ) => {
     let animationFrameId: number
     let previousTime = 0
@@ -34,6 +37,8 @@ export const createGameLoop = (
         }
 
         if (state.phase === 'playing') {
+            updateSurvivalScore(state, deltaTime)
+
             updateMovement(state, input, deltaTime)
 
             const respawnedBillboardIds = updateWorld(state, deltaTime)
@@ -49,7 +54,7 @@ export const createGameLoop = (
             }
         }
 
-        renderGame(ctx, state, getDisplayAds(), assets)
+        renderGame(ctx, state, getDisplayAds(), assets, showScore())
 
         animationFrameId = requestAnimationFrame(loop)
     }
@@ -77,9 +82,11 @@ export const createGameLoop = (
     const restart = () => {
         const initialState = createGameState()
 
+        state.score = initialState.score
         state.phase = initialState.phase
         state.player = initialState.player
         state.world = initialState.world
+        
         startRequested = false
 
         onPhaseChange(state.phase)

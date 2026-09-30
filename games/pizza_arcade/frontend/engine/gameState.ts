@@ -10,11 +10,6 @@ export const WORLD_X = {
     rightScenery: 690
 } as const
 
-export const SIDEWALK_WIDTH = 90
-export const SIDEWALK_EDGE_WIDTH = 30
-export const PARKED_ZONE_WIDTH = 100
-export const CENTER_LINE_OVERLAP = 20
-
 export const GAME_BOUNDS: GameBounds = {
     left: 150,
     right: 650,
@@ -23,6 +18,21 @@ export const GAME_BOUNDS: GameBounds = {
 }
 
 export const ROAD_CENTER_X = (GAME_BOUNDS.left + GAME_BOUNDS.right) / 2
+export const SIDEWALK_WIDTH = 90
+export const SIDEWALK_EDGE_WIDTH = 30
+export const PARKED_ZONE_WIDTH = 100
+export const CENTER_LINE_OVERLAP = 20
+
+export const SCORE_CONFIG = {
+    survivalPerSecond: 10,
+    pizzaDelivered: 500,
+    healthPickupSmall: 50,
+    healthPickupLarge: 100,
+    pedestrianKilled: -500,
+    cyclistKilled: -400,
+    dogKilled: -300,
+    catKilled: -300
+} as const
 
 const SKATEBOARD: Vehicle = {
     type: 'skateboard',
@@ -38,6 +48,13 @@ const SKATEBOARD: Vehicle = {
 
 export const createInitialGameState = (): GameState => ({
     phase: 'start',
+    score: {
+        total: 0,
+        survivalTime: 0,
+        pizzasDelivered: 0,
+        healthPickups: 0,
+        penalties: 0
+    },
     player: {
         position: {
             x: 400,
@@ -48,6 +65,7 @@ export const createInitialGameState = (): GameState => ({
             current: 100,
             max: 100
         },
+        pizzas: 0,
         vehicle: SKATEBOARD
     },
     world: {
@@ -89,6 +107,7 @@ export const createInitialGameState = (): GameState => ({
                 height: 90,
                 adIndex: 2
             }
-        ]
+        ],
+        deliveryTarget: null
     }
 })

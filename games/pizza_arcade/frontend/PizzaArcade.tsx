@@ -9,6 +9,8 @@ import styles from './pizza-arcade.module.css'
 interface PizzaArcadeProps {
     displayAds: DisplayAd[]
     canStart: boolean
+    showScore: boolean
+    canSaveScore: boolean
     onStartRequest: () => void
     onRestartRequest: () => void
 }
@@ -16,6 +18,8 @@ interface PizzaArcadeProps {
 export default function PizzaArcade({
     displayAds,
     canStart,
+    showScore,
+    canSaveScore,
     onStartRequest,
     onRestartRequest
 }: PizzaArcadeProps) {
@@ -69,6 +73,8 @@ export default function PizzaArcade({
                 onPhaseChange={handleGamePhaseChange}
                 displayAds={displayAds}
                 canStart={canStart}
+                showScore={showScore}
+                canSaveScore={canSaveScore}
                 startToken={startToken}
                 restartToken={restartToken}
                 onStartRequest={onStartRequest}

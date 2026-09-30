@@ -11,6 +11,8 @@ interface GameCanvasProps {
     onPhaseChange: (phase: GamePhase) => void
     displayAds: DisplayAd[]
     canStart: boolean
+    showScore: boolean
+    canSaveScore: boolean
     startToken: number
     restartToken: number
     onStartRequest: () => void
@@ -20,6 +22,8 @@ export default function GameCanvas({
     onPhaseChange,
     displayAds,
     canStart,
+    showScore,
+    canSaveScore,
     startToken,
     restartToken,
     onStartRequest
@@ -30,6 +34,9 @@ export default function GameCanvas({
 
     const canStartRef = useRef(canStart)
     canStartRef.current = canStart
+
+    const showScoreRef = useRef(showScore)
+    showScoreRef.current = showScore
 
     const onStartRequestRef = useRef(onStartRequest)
     onStartRequestRef.current = onStartRequest
@@ -82,7 +89,8 @@ export default function GameCanvas({
                 onPhaseChange,
                 () => displayAdsRef.current,
                 () => canStartRef.current,
-                () => onStartRequestRef.current()
+                () => onStartRequestRef.current(),
+                () => showScoreRef.current
             )
 
             gameLoopRef.current = gameLoop

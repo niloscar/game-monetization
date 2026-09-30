@@ -13,7 +13,8 @@ export const renderGame = (
     ctx: CanvasRenderingContext2D,
     state: GameState,
     displayAds: LoadedDisplayAd[],
-    assets: GameAssets
+    assets: GameAssets,
+    showScore: boolean
 ) => {
     const { canvas } = ctx
     const { player } = state
@@ -87,6 +88,9 @@ export const renderGame = (
         ctx.fillRect(x, y, object.width, object.height)
     }
 
+    /* Render the delivery target */
+    renderDeliveryTarget(ctx, state)
+
     /* Render the player */
     ctx.fillStyle = '#ffffff'
     ctx.fillRect(
@@ -101,6 +105,17 @@ export const renderGame = (
 
     /* Render the health bar */
     renderHealthBar(ctx, state)
+
+    /* Render the inventory */
+    renderInventory(ctx, state)
+
+    /* Render the delivered goods count */
+    renderDelivered(ctx, state)
+
+    // Render the score if showScore is true
+    if (showScore) {
+        renderScore(ctx, state)
+    }
 }
 
 function renderHealthBar(ctx: CanvasRenderingContext2D, state: GameState) {
@@ -183,4 +198,86 @@ const renderBillboard = (
 
     /* Ad image */
     ctx.drawImage(ad.image, x, y, billboard.width, billboard.height)
+}
+
+function renderScore(ctx: CanvasRenderingContext2D, state: GameState) {
+    ctx.fillStyle = '#fff'
+    ctx.font = '20px monospace'
+    ctx.textAlign = 'right'
+    ctx.fillText(`${state.score.total}`, ctx.canvas.width - 20, 34)
+}
+
+function renderDeliveryTarget(ctx: CanvasRenderingContext2D, state: GameState) {
+    const target = state.world.deliveryTarget
+    if (!target) return
+
+    const x = target.position.x - target.width / 2
+    const y = target.position.y - target.height / 2
+
+    ctx.fillStyle = '#f1c40f'
+    ctx.fillRect(x, y, target.width, target.height)
+
+    ctx.fillStyle = '#000'
+    ctx.font = '16px monospace'
+    ctx.textAlign = 'center'
+    ctx.textBaseline = 'middle'
+    ctx.fillText('PIZZA', target.position.x, target.position.y)
+}
+
+function renderInventory(ctx: CanvasRenderingContext2D, state: GameState) {
+    const positionY = 50
+    const positionX = 20
+    const lineHeight = 22
+    
+    const inventory = [
+        { Pizza: state.player.pizzas }
+    ]
+
+    ctx.fillStyle = '#fff'
+    ctx.font = 'bold 16px monospace'
+    ctx.textAlign = 'left'
+    ctx.textBaseline = 'top'
+
+    ctx.fillText('Bag', positionX, positionY)
+
+    ctx.font = '16px monospace'
+    inventory.forEach((item, index) => {
+        const itemName = Object.keys(item)[0]
+        const itemCount = Object.values(item)[0]
+
+        ctx.fillText(
+            `${itemName}: ${itemCount}`,
+            positionX,
+            positionY + lineHeight * (index + 1)
+        )
+    })
+}
+
+function renderDelivered(ctx: CanvasRenderingContext2D, state: GameState) {
+    const positionY = 100
+    const positionX = 20
+    const lineHeight = 22
+
+    const delivered = [
+        { Pizza: state.score.pizzasDelivered },
+    ]
+
+    ctx.fillStyle = '#fff'
+    ctx.font = 'bold 16px monospace'
+    ctx.textAlign = 'left'
+    ctx.textBaseline = 'top'
+
+    ctx.fillText('Delivered', positionX, positionY)
+
+    ctx.font = '16px monospace'
+    delivered.forEach((item, index) => {
+        const itemName = Object.keys(item)[0]
+        const itemCount = Object.values(item)[0]
+
+        ctx.fillText(
+            `${itemName}: ${itemCount}`,
+            positionX,
+            positionY + lineHeight * (index + 1)
+        )
+    })
 }

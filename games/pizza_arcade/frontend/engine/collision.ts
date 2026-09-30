@@ -1,7 +1,12 @@
-import type { Player, WorldObject } from '../types/game'
-import { respawnWorldObject, getWorldObjectHealthDelta } from './worldObjects'
+import type { Player, WorldObject, GameState } from '../types/game'
+import {
+    respawnWorldObject,
+    getWorldObjectHealthDelta,
+    getWorldObjectScoreDelta
+} from './worldObjects'
 import { changePlayerHealth } from './health'
-import type { GameState } from '../types/game'
+import { changeScore, registerHealthPickup } from './score'
+import { deliverPizza, pickupPizza } from './pizza'
 
 export function collidesWithObject(player: Player, object: WorldObject) {
     const playerLeft = player.position.x - player.vehicle.width / 2
@@ -25,9 +30,48 @@ export function collidesWithObject(player: Player, object: WorldObject) {
 export function handleCollisions(state: GameState) {
     for (const object of state.world.objects) {
         if (!collidesWithObject(state.player, object)) continue
-        
-        changePlayerHealth(state.player, getWorldObjectHealthDelta(object.type))
+
+        const healthDelta = getWorldObjectHealthDelta(object.type)
+        const scoreDelta = getWorldObjectScoreDelta(object.type)
+
+        changePlayerHealth(state.player, healthDelta)
+
+        if (object.type === 'pizza') pickupPizza(state)
+
+        if (healthDelta > 0) {
+            registerHealthPickup(state, scoreDelta)
+        } else if (scoreDelta !== 0) {
+            changeScore(state, scoreDelta)
+        }
 
         respawnWorldObject(state, object)
     }
+
+    if (collidesWithDeliveryTarget(state)) {
+        deliverPizza(state)
+    }
+}
+
+function collidesWithDeliveryTarget(state: GameState) {
+    const target = state.world.deliveryTarget
+    if (!target) return false
+
+    const player = state.player
+
+    const playerLeft = player.position.x - player.vehicle.width / 2
+    const playerRight = player.position.x + player.vehicle.width / 2
+    const playerTop = player.position.y - player.vehicle.height / 2
+    const playerBottom = player.position.y + player.vehicle.height / 2
+
+    const targetLeft = target.position.x - target.width / 2
+    const targetRight = target.position.x + target.width / 2
+    const targetTop = target.position.y - target.height / 2
+    const targetBottom = target.position.y + target.height / 2
+
+    return (
+        playerLeft < targetRight &&
+        playerRight > targetLeft &&
+        playerTop < targetBottom &&
+        playerBottom > targetTop
+    )
 }
