@@ -13,7 +13,10 @@ import type { CreateUserBody, UpdateUserData, User } from '../types/user'
 const NEW_USER_DEFAULT_ROLE_ID = 1
 // const NEW_USER_DEFAULT_TIER_ID = null
 
-export const getCurrentUser = async (req: Request, res: Response<User | ApiError>) => {
+export const getCurrentUser = async (
+    req: Request,
+    res: Response<User | ApiError>
+) => {
     const user = await service.getUser(req.session.userId!)
 
     if (!user) {
@@ -24,7 +27,10 @@ export const getCurrentUser = async (req: Request, res: Response<User | ApiError
     res.status(200).json(user)
 }
 
-export const updateCurrentUser = async (req: Request, res: Response<User | ApiError>) => {
+export const updateCurrentUser = async (
+    req: Request,
+    res: Response<User | ApiError>
+) => {
     const id = req.session.userId
 
     if (!id) {
@@ -34,7 +40,7 @@ export const updateCurrentUser = async (req: Request, res: Response<User | ApiEr
 
     const { username, email, password } = req.body ?? {}
 
-    if ([username, email, password].every(value => value === undefined)) {
+    if ([username, email, password].every((value) => value === undefined)) {
         res.status(400).json({
             message: 'Minst ett fält måste anges.'
         })
@@ -88,7 +94,10 @@ export const getUsers = async (_req: Request, res: Response<User[]>) => {
     res.status(200).json(users)
 }
 
-export const getUser = async (req: Request<{ id: string }>, res: Response<User | ApiError>) => {
+export const getUser = async (
+    req: Request<{ id: string }>,
+    res: Response<User | ApiError>
+) => {
     const id = Number(req.params.id)
 
     const error = validateId('id', id)
@@ -106,7 +115,30 @@ export const getUser = async (req: Request<{ id: string }>, res: Response<User |
     res.status(200).json(user)
 }
 
-export const createUser = async (req: Request<{}, {}, CreateUserBody>, res: Response<User | ApiError>) => {
+export const getPublicUserProfile = async (
+    req: Request<{ username: string }>,
+    res: Response<Omit<User, 'email'> | ApiError>
+) => {
+    const { username } = req.params
+
+    if (!username) {
+        res.status(400).json({ message: 'Användarnamn måste anges.' })
+        return
+    }
+
+    const user = await service.getPublicUserByUsername(username)
+    if (!user) {
+        res.status(404).json({ message: 'Användare hittades inte.' })
+        return
+    }
+
+    res.status(200).json(user)
+}
+
+export const createUser = async (
+    req: Request<{}, {}, CreateUserBody>,
+    res: Response<User | ApiError>
+) => {
     const { username, email, password } = req.body ?? {}
 
     const usernameError = validateField('username', username, 'string')
@@ -144,7 +176,8 @@ export const createUser = async (req: Request<{}, {}, CreateUserBody>, res: Resp
         if (dbError.code === '23505') {
             if (dbError.constraint === 'uq_users_email_lower') {
                 res.status(409).json({
-                    message: 'E-postadressen används redan av en annan användare.',
+                    message:
+                        'E-postadressen används redan av en annan användare.',
                     field: 'email'
                 })
                 return
@@ -152,7 +185,8 @@ export const createUser = async (req: Request<{}, {}, CreateUserBody>, res: Resp
 
             if (dbError.constraint === 'uq_users_username_lower') {
                 res.status(409).json({
-                    message: 'Användarnamnet används redan av en annan användare.',
+                    message:
+                        'Användarnamnet används redan av en annan användare.',
                     field: 'username'
                 })
                 return
@@ -163,7 +197,10 @@ export const createUser = async (req: Request<{}, {}, CreateUserBody>, res: Resp
     }
 }
 
-export const updateUser = async (req: Request<{ id: string }>, res: Response<User | ApiError>) => {
+export const updateUser = async (
+    req: Request<{ id: string }>,
+    res: Response<User | ApiError>
+) => {
     const id = Number(req.params.id)
     const { username, email, password, roleId } = req.body ?? {}
 
@@ -173,7 +210,11 @@ export const updateUser = async (req: Request<{ id: string }>, res: Response<Use
         return
     }
 
-    if ([username, email, password, roleId].every(value => value === undefined)) {
+    if (
+        [username, email, password, roleId].every(
+            (value) => value === undefined
+        )
+    ) {
         res.status(400).json({
             message: 'Minst ett fält måste anges.'
         })
@@ -215,7 +256,7 @@ export const updateUser = async (req: Request<{ id: string }>, res: Response<Use
     const data: UpdateUserData = { username, email, roleId }
 
     if (password !== undefined) data.passwordHash = await hashPassword(password)
-    
+
     const updatedUser = await service.updateUser(id, data)
 
     if (!updatedUser) {
@@ -226,7 +267,10 @@ export const updateUser = async (req: Request<{ id: string }>, res: Response<Use
     res.status(200).json(updatedUser)
 }
 
-export const deleteUser = async (req: Request<{ id: string }>, res: Response<ApiError>) => {
+export const deleteUser = async (
+    req: Request<{ id: string }>,
+    res: Response<ApiError>
+) => {
     const id = Number(req.params.id)
 
     const error = validateId('id', id)
@@ -245,7 +289,10 @@ export const deleteUser = async (req: Request<{ id: string }>, res: Response<Api
     res.status(204).send()
 }
 
-export const updateUserPassword = async (req: Request<{ id: string }>, res: Response<User | ApiError>) => {
+export const updateUserPassword = async (
+    req: Request<{ id: string }>,
+    res: Response<User | ApiError>
+) => {
     const id = Number(req.session.userId)
     const { password } = req.body ?? {}
 
@@ -256,7 +303,10 @@ export const updateUserPassword = async (req: Request<{ id: string }>, res: Resp
     }
 
     if (password === undefined) {
-        res.status(400).json({ message: 'Lösenord måste anges.', field: 'password' })
+        res.status(400).json({
+            message: 'Lösenord måste anges.',
+            field: 'password'
+        })
         return
     }
 
