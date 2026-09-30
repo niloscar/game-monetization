@@ -6,13 +6,10 @@ import * as service from '../services/ad'
 import { validateField, validateId } from '../utils/validation'
 
 import type { Request, Response } from 'express'
-import type { Ad, AdPlacement, CreateAdBody, UpdateAdBody } from '../types/ad'
+import type { Ad, CreateAdBody, UpdateAdBody, AdPlacement } from '../types/ad'
 import type { ApiError } from '../types/errors'
 
-export const getAds = async (
-    req: Request<{}, {}, {}, { placement?: string }>,
-    res: Response<Ad[] | ApiError>
-) => {
+export const getAds = async (req: Request<{}, {}, {}, { placement?: string }>, res: Response<Ad[] | ApiError>) => {
     const { placement } = req.query
 
     let adPlacement: AdPlacement | undefined
@@ -34,10 +31,7 @@ export const getAds = async (
     res.status(200).json(ads)
 }
 
-export const getAd = async (
-    req: Request<{ id: string }>,
-    res: Response<Ad | ApiError>
-) => {
+export const getAd = async (req: Request<{ id: string }>, res: Response<Ad | ApiError>) => {
     const adId = Number(req.params.id)
 
     const error = validateId('id', adId)
@@ -59,10 +53,51 @@ export const getAd = async (
     res.status(200).json(ad)
 }
 
-export const createAd = async (
-    req: Request<{}, {}, CreateAdBody>,
-    res: Response<Ad | ApiError>
-) => {
+export const getAdminAds = async (req: Request<{}, {}, {}, { placement?: string }>, res: Response<Ad[] | ApiError>) => {
+    const { placement } = req.query
+
+    let adPlacement: AdPlacement | undefined
+
+    if (placement !== undefined) {
+        if (placement !== 'pre_game' && placement !== 'display') {
+            res.status(400).json({
+                message: 'Felaktig annonsplacering.',
+                field: 'placement'
+            })
+            return
+        }
+
+        adPlacement = placement
+    }
+
+    const ads = await service.getAds(adPlacement, false)
+
+    res.status(200).json(ads)
+}
+
+export const getAdminAd = async (req: Request<{ id: string }>, res: Response<Ad | ApiError>) => {
+    const adId = Number(req.params.id)
+
+    const error = validateId('id', adId)
+    if (error) {
+        res.status(400).json(error)
+        return
+    }
+
+    const ad = await service.getAd(adId, false)
+
+    if (!ad) {
+        res.status(404).json({
+            message: 'Annonsen hittades inte.',
+            field: 'id'
+        })
+        return
+    }
+
+    res.status(200).json(ad)
+}
+
+export const createAd = async (req: Request<{}, {}, CreateAdBody>, res: Response<Ad | ApiError>) => {
     const {
         media_type,
         media_url,
@@ -178,10 +213,7 @@ export const createAd = async (
     res.status(201).json(ad)
 }
 
-export const updateAd = async (
-    req: Request<{ id: string }, {}, UpdateAdBody>,
-    res: Response<Ad | ApiError>
-) => {
+export const updateAd = async (req: Request<{ id: string }, {}, UpdateAdBody>, res: Response<Ad | ApiError>) => {
     const adId = Number(req.params.id)
 
     const idError = validateId('id', adId)
@@ -336,10 +368,7 @@ export const updateAd = async (
     res.status(200).json(ad)
 }
 
-export const deleteAd = async (
-    req: Request<{ id: string }>,
-    res: Response<Ad | ApiError>
-) => {
+export const deleteAd = async (req: Request<{ id: string }>, res: Response<Ad | ApiError>) => {
     const adId = Number(req.params.id)
 
     const error = validateId('id', adId)

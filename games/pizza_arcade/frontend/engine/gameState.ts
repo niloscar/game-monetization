@@ -1,5 +1,15 @@
 import type { GameBounds, GameState, Vehicle } from '../types/game'
 
+export const CANVAS_WIDTH = 800
+export const CANVAS_HEIGHT = 600
+
+export const WORLD_STEP = 100
+
+export const WORLD_X = {
+    leftScenery: 110,
+    rightScenery: 690
+} as const
+
 export const SIDEWALK_WIDTH = 90
 
 export const GAME_BOUNDS: GameBounds = {
@@ -44,6 +54,38 @@ export const createInitialGameState = (): GameState => ({
                 },
                 width: 50,
                 height: 90
+            }
+        ],
+        billboards: [
+            {
+                id: 1,
+                position: {
+                    x: WORLD_X.leftScenery,
+                    y: 100
+                },
+                width: 180,
+                height: 90,
+                adIndex: 0
+            },
+            {
+                id: 2,
+                position: {
+                    x: WORLD_X.rightScenery,
+                    y: -300
+                },
+                width: 180,
+                height: 90,
+                adIndex: 1
+            },
+            {
+                id: 3,
+                position: {
+                    x: WORLD_X.leftScenery,
+                    y: -700
+                },
+                width: 180,
+                height: 90,
+                adIndex: 2
             }
         ]
     }

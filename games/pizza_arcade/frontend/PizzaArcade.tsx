@@ -2,14 +2,22 @@ import { useCallback, useState } from 'react'
 import GameCanvas from './components/GameCanvas'
 import StartScreen from './components/StartScreen'
 import type { GamePhase } from './types/game'
+import type { DisplayAd } from './types/ad'
 import styles from './pizza-arcade.module.css'
 
-export default function PizzaArcade() {
-    const [phase, setPhase] = useState<GamePhase>('start')
+interface PizzaArcadeProps {
+    displayAds: DisplayAd[]
+    canStart: boolean
+    onStartRequest: () => void
+}
+
+export default function PizzaArcade({ displayAds, canStart, onStartRequest }: PizzaArcadeProps) {
+    const [gamePhase, setGamePhase] = useState<GamePhase>('start')
+
     const [isHovered, setIsHovered] = useState(false)
 
-    const handlePhaseChange = useCallback((phase: GamePhase) => {
-        setPhase(phase)
+    const handleGamePhaseChange = useCallback((phase: GamePhase) => {
+        setGamePhase(phase)
     }, [])
 
     return (
@@ -19,11 +27,14 @@ export default function PizzaArcade() {
             onMouseLeave={() => setIsHovered(false)}
         >
             <GameCanvas
-                onPhaseChange={handlePhaseChange}
+                onPhaseChange={handleGamePhaseChange}
                 isHovered={isHovered}
+                displayAds={displayAds}
+                canStart={canStart}
+                onStartRequest={onStartRequest}
             />
 
-            {phase === 'start' && <StartScreen />}
+            {gamePhase === 'start' && <StartScreen />}
         </div>
     )
 }
