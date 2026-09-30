@@ -24,7 +24,7 @@ const paymentMethods = [
 
 type PaymentMethod = (typeof paymentMethods)[number]['id']
 
-export default function PaymentSection({ cart }: { cart: Cart }) {
+export default function PaymentSection({ cart, onSubmit }: { cart: Cart; onSubmit: () => void }) {
     const [formData, setFormData] = useState({
         cardNumber: '',
         cardName: '',
@@ -118,7 +118,7 @@ export default function PaymentSection({ cart }: { cart: Cart }) {
 
         if (Object.keys(newErrors).length > 0) return
 
-        // ONTODO: Form submission logic.
+        onSubmit() // ONTODO: Include payment method
     }
 
     const orderSum = cart.items.reduce((acc, item) => acc + item.price, 0)

@@ -33,6 +33,12 @@ const StorePage = () => {
         setSelectedTierId(tier.id)
     }
 
+    const handleOrderSubmit = async () => {
+        console.log('Order submitted for tier:', selectedTier)
+        // ONTODO: Implement order submission logic here.
+        // Must include payment method and customer data.
+    }
+
     return (
         <main className="store-page">
             <div className="page-title">
@@ -46,7 +52,12 @@ const StorePage = () => {
                 onChange={handleTierSelect}
             />
 
-            {selectedTier && <PaymentSection cart={cart} />}
+            {selectedTier && (
+                <PaymentSection 
+                    cart={cart} 
+                    onSubmit={handleOrderSubmit} 
+                />
+            )}
         </main>
     )
 }
