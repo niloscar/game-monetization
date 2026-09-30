@@ -1,8 +1,10 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import TierSection from '../components/Store/TierSection'
 import PaymentSection from '../components/Store/PaymentSection'
+import { getProducts } from '../api/product'
 import type { Cart, Tier } from '../components/Store/storeTypes'
 import { Gamepad, Trophy, Close, Chart, Headphone, CardText} from 'pixelarticons/react'
+import type { Product } from '../types/product'
 
 const MOCK_TIERS = [
     {
@@ -56,6 +58,18 @@ const StorePage = () => {
     const [cart, setCart] = useState<Cart>({
         items: mostPopularTier ? [mostPopularTier] : []
     })
+
+    const [products, setProducts] = useState<Product[]>([])
+
+    useEffect(() => {
+        const fetchProducts = async () => {
+            const products = await getProducts()
+            setProducts(products)
+            console.log('Fetched products:', products)
+        }
+
+        fetchProducts()
+    }, [])
 
     const handleTierSelect = (tier: Tier) => {
         setCart({ items: [tier] })
