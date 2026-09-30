@@ -11,6 +11,9 @@ export const WORLD_X = {
 } as const
 
 export const SIDEWALK_WIDTH = 90
+export const SIDEWALK_EDGE_WIDTH = 30
+export const PARKED_ZONE_WIDTH = 100
+export const CENTER_LINE_OVERLAP = 20
 
 export const GAME_BOUNDS: GameBounds = {
     left: 150,
@@ -18,6 +21,8 @@ export const GAME_BOUNDS: GameBounds = {
     top: 80,
     bottom: 550
 }
+
+export const ROAD_CENTER_X = (GAME_BOUNDS.left + GAME_BOUNDS.right) / 2
 
 const SKATEBOARD: Vehicle = {
     type: 'skateboard',
@@ -39,23 +44,20 @@ export const createInitialGameState = (): GameState => ({
             y: 500
         },
         speed: 0,
-        health: 100,
+        health: {
+            current: 100,
+            max: 100
+        },
         vehicle: SKATEBOARD
     },
     world: {
         scrollOffset: 0,
-        objects: [
-            {
-                id: 1,
-                type: 'parkedCar',
-                position: {
-                    x: 200,
-                    y: 150
-                },
-                width: 50,
-                height: 90
-            }
-        ],
+        elapsedTime: 0,
+        spawn: {
+            lastSide: null,
+            sameSideCount: 0
+        },
+        objects: [],
         billboards: [
             {
                 id: 1,

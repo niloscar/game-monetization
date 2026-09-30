@@ -3,7 +3,6 @@ export interface InputState {
     right: boolean
     accelerate: boolean
     brake: boolean
-    start: boolean
 }
 
 const GAME_KEYS = [
@@ -14,8 +13,7 @@ const GAME_KEYS = [
     'KeyW',
     'KeyA',
     'KeyS',
-    'KeyD',
-    'Space'
+    'KeyD'
 ]
 
 export const createInput = (element: HTMLElement) => {
@@ -23,8 +21,7 @@ export const createInput = (element: HTMLElement) => {
         left: false,
         right: false,
         accelerate: false,
-        brake: false,
-        start: false
+        brake: false
     }
 
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -49,10 +46,6 @@ export const createInput = (element: HTMLElement) => {
             case 'ArrowDown':
             case 'KeyS':
                 state.brake = true
-                break
-
-            case 'Space':
-                state.start = true
                 break
         }
     }
@@ -79,10 +72,6 @@ export const createInput = (element: HTMLElement) => {
             case 'ArrowDown':
             case 'KeyS':
                 state.brake = false
-                break
-
-            case 'Space':
-                state.start = false
                 break
         }
     }

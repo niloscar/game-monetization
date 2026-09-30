@@ -1,13 +1,20 @@
 import { GAME_BOUNDS, SIDEWALK_WIDTH } from './gameState'
+import { getWorldObjectSprite, getWorldObjectHealthDelta } from './worldObjects'
 
 import type { GameState } from '../types/game'
 import type { LoadedDisplayAd } from '../types/ad'
+import type { GameAssets } from './assets'
 
 const ROAD_MARKING_WIDTH = 8
 const ROAD_MARKING_HEIGHT = 50
 const ROAD_MARKING_GAP = 50
 
-export const renderGame = (ctx: CanvasRenderingContext2D, state: GameState, displayAds: LoadedDisplayAd[]) => {
+export const renderGame = (
+    ctx: CanvasRenderingContext2D,
+    state: GameState,
+    displayAds: LoadedDisplayAd[],
+    assets: GameAssets
+) => {
     const { canvas } = ctx
     const { player } = state
     const { vehicle } = player
@@ -44,7 +51,11 @@ export const renderGame = (ctx: CanvasRenderingContext2D, state: GameState, disp
 
     ctx.fillStyle = '#ffffff'
 
-    for (let y = -markingInterval + markingOffset; y < canvas.height; y += markingInterval) {
+    for (
+        let y = -markingInterval + markingOffset;
+        y < canvas.height;
+        y += markingInterval
+    ) {
         ctx.fillRect(
             roadCenter - ROAD_MARKING_WIDTH / 2,
             y,
@@ -55,14 +66,25 @@ export const renderGame = (ctx: CanvasRenderingContext2D, state: GameState, disp
 
     /* Render the world objects */
     for (const object of state.world.objects) {
-        ctx.fillStyle = '#c0392b'
+        const sprite = getWorldObjectSprite(object.type)
+        const healthDelta = getWorldObjectHealthDelta(object.type)
 
-        ctx.fillRect(
-            object.position.x - object.width / 2,
-            object.position.y - object.height / 2,
-            object.width,
-            object.height
-        )
+        const x = object.position.x - object.width / 2
+        const y = object.position.y - object.height / 2
+
+        if (sprite) {
+            ctx.drawImage(assets[sprite], x, y, object.width, object.height)
+
+            continue
+        }
+
+        ctx.fillStyle =
+            healthDelta > 0
+                ? '#27ae60'
+                : healthDelta < 0
+                  ? '#c0392b'
+                  : '#7f8c8d'
+        ctx.fillRect(x, y, object.width, object.height)
     }
 
     /* Render the player */
@@ -76,6 +98,33 @@ export const renderGame = (ctx: CanvasRenderingContext2D, state: GameState, disp
 
     /* Render the ads */
     renderAds(ctx, state, displayAds)
+
+    /* Render the health bar */
+    renderHealthBar(ctx, state)
+}
+
+function renderHealthBar(ctx: CanvasRenderingContext2D, state: GameState) {
+    const { current, max } = state.player.health
+
+    const x = 20
+    const y = 20
+    const width = 180
+    const height = 18
+    const padding = 3
+    const strokeWidth = 2
+    const percentage = Math.max(0, Math.min(1, current / max))
+
+    ctx.fillStyle = '#fff'
+    ctx.fillRect(
+        x + padding,
+        y + padding,
+        (width - padding * 2) * percentage,
+        height - padding * 2
+    )
+
+    ctx.lineWidth = strokeWidth
+    ctx.strokeStyle = '#fff'
+    ctx.strokeRect(x, y, width, height)
 }
 
 const renderAds = (
@@ -107,13 +156,11 @@ const renderBillboard = (
     const poleOffset = 80
 
     const poleTopX = isLeftSide
-        ? (x - poleOffset) + billboard.width * 0.72
-        : (x + poleOffset) + billboard.width * 0.28
+        ? x - poleOffset + billboard.width * 0.72
+        : x + poleOffset + billboard.width * 0.28
 
     const poleTopY = y + billboard.height + 6
-    const poleBaseX = isLeftSide
-        ? poleTopX - poleLean
-        : poleTopX + poleLean
+    const poleBaseX = isLeftSide ? poleTopX - poleLean : poleTopX + poleLean
     const poleBaseY = poleTopY + poleHeight
 
     /* Pole behind billboard */
@@ -135,11 +182,5 @@ const renderBillboard = (
     )
 
     /* Ad image */
-    ctx.drawImage(
-        ad.image,
-        x,
-        y,
-        billboard.width,
-        billboard.height
-    )
+    ctx.drawImage(ad.image, x, y, billboard.width, billboard.height)
 }

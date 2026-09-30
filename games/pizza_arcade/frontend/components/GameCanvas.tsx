@@ -1,60 +1,50 @@
 import { useEffect, useRef } from 'react'
 import { createInput } from '../engine/input'
 import { createGameLoop } from '../engine/gameLoop'
-import { CANVAS_HEIGHT, CANVAS_WIDTH, createInitialGameState } from '../engine/gameState'
+import { CANVAS_HEIGHT, CANVAS_WIDTH } from '../engine/gameState'
+import { loadGameAssets } from '../engine/assets'
 import type { GamePhase } from '../types/game'
 import type { DisplayAd, LoadedDisplayAd } from '../types/ad'
+import { createGameState } from '../engine/createGameState'
 
 interface GameCanvasProps {
     onPhaseChange: (phase: GamePhase) => void
-    isHovered: boolean
     displayAds: DisplayAd[]
     canStart: boolean
+    startToken: number
+    restartToken: number
     onStartRequest: () => void
 }
 
 export default function GameCanvas({
     onPhaseChange,
-    isHovered,
     displayAds,
     canStart,
+    startToken,
+    restartToken,
     onStartRequest
 }: GameCanvasProps) {
     const canvasRef = useRef<HTMLCanvasElement>(null)
-    const isHoveredRef = useRef(isHovered)
     const displayAdsRef = useRef<LoadedDisplayAd[]>([])
+    const gameLoopRef = useRef<ReturnType<typeof createGameLoop> | null>(null)
+
     const canStartRef = useRef(canStart)
+    canStartRef.current = canStart
+
     const onStartRequestRef = useRef(onStartRequest)
-
-    useEffect(() => {
-        onStartRequestRef.current = onStartRequest
-    }, [onStartRequest])
-
-    useEffect(() => {
-        canStartRef.current = canStart
-    }, [canStart])
-
-    useEffect(() => {
-        isHoveredRef.current = isHovered
-    }, [isHovered])
+    onStartRequestRef.current = onStartRequest
 
     useEffect(() => {
         const loadAds = async () => {
             const ads = await Promise.all(
                 displayAds.map(
-                    (ad) =>
-                        new Promise<LoadedDisplayAd | null>((resolve) => {
-                            const image = new Image()
+                    (ad) => new Promise<LoadedDisplayAd | null>((resolve) => {
+                        const image = new Image()
 
-                            image.onload = () =>
-                                resolve({
-                                    id: ad.id,
-                                    image
-                                })
-
-                            image.onerror = () => resolve(null)
-                            image.src = ad.mediaUrl
-                        })
+                        image.onload = () => resolve({ id: ad.id, image })
+                        image.onerror = () => resolve(null)
+                        image.src = ad.mediaUrl
+                    })
                 )
             )
 
@@ -63,7 +53,7 @@ export default function GameCanvas({
             )
         }
 
-        loadAds()
+        void loadAds()
     }, [displayAds])
 
     useEffect(() => {
@@ -73,42 +63,57 @@ export default function GameCanvas({
         const ctx = canvas.getContext('2d')
         if (!ctx) return
 
-        const state = createInitialGameState()
-        const input = createInput(canvas)
-        const gameLoop = createGameLoop(
-            ctx,
-            state,
-            input.state,
-            onPhaseChange,
-            () => displayAdsRef.current,
-            () => canStartRef.current,
-            () => onStartRequestRef.current()
-        )
+        let stopped = false
+        let input: ReturnType<typeof createInput> | null = null
+        let gameLoop: ReturnType<typeof createGameLoop> | null = null
 
-        const handleKeyDown = (event: KeyboardEvent) => {
-            if (
-                event.code !== 'Space' ||
-                !isHoveredRef.current ||
-                document.activeElement === canvas
+        const startGame = async () => {
+            const assets = await loadGameAssets()
+            if (stopped) return
+
+            const state = createGameState()
+
+            input = createInput(canvas)
+            gameLoop = createGameLoop(
+                ctx,
+                state,
+                input.state,
+                assets,
+                onPhaseChange,
+                () => displayAdsRef.current,
+                () => canStartRef.current,
+                () => onStartRequestRef.current()
             )
-                return
 
-            event.preventDefault()
-            canvas.focus()
-            input.state.start = true
+            gameLoopRef.current = gameLoop
+
+            input.start()
+            gameLoop.start()
         }
 
-        window.addEventListener('keydown', handleKeyDown)
-
-        input.start()
-        gameLoop.start()
+        void startGame()
 
         return () => {
-            window.removeEventListener('keydown', handleKeyDown)
-            input.stop()
-            gameLoop.stop()
+            stopped = true
+            input?.stop()
+            gameLoop?.stop()
+            gameLoopRef.current = null
         }
     }, [onPhaseChange])
+
+    useEffect(() => {
+        if (startToken === 0) return
+
+        canvasRef.current?.focus()
+        gameLoopRef.current?.requestStart()
+    }, [startToken])
+
+    useEffect(() => {
+        if (restartToken === 0) return
+
+        canvasRef.current?.focus()
+        gameLoopRef.current?.restart()
+    }, [restartToken])
 
     return (
         <canvas
