@@ -10,13 +10,13 @@ import type { SpawnZone } from './../types/game'
 
 const INITIAL_MIN_GAP = 140
 const INITIAL_MAX_GAP = 240
-const FINAL_MIN_GAP = 30
+const FINAL_MIN_GAP = 20
 const FINAL_MAX_GAP = 60
 
-const INITIAL_OBJECT_COUNT = 6
-const FINAL_OBJECT_COUNT = 99
+const INITIAL_OBJECT_COUNT = 3
+const FINAL_OBJECT_COUNT = 100
 
-const DIFFICULTY_RAMP_DURATION = 30
+const DIFFICULTY_RAMP_DURATION = 300
 
 interface SpawnRule {
     zone: SpawnZone
