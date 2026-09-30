@@ -26,10 +26,15 @@ export async function getUsers() {
                     'description', p.description,
                     'level', t.level
                 ) AS tier
-            FROM user_products up
-            JOIN tiers t ON t.product_id = up.product_id
-            JOIN products p ON p.id = t.product_id
-            WHERE up.user_id = u.id
+            FROM customers c
+            JOIN orders o ON o.customer_id = c.id
+            JOIN order_items oi ON oi.order_id = o.id
+            JOIN tiers t ON t.product_id = oi.product_id
+            JOIN products p ON p.id = oi.product_id
+            WHERE c.user_id = u.id
+                AND o.paid_at IS NOT NULL
+                AND o.deleted_at IS NULL
+                AND o.status = 'paid'
             ORDER BY t.level DESC
             LIMIT 1
         ) tier ON TRUE
@@ -65,10 +70,15 @@ export async function getUser(id: number): Promise<User | null> {
                     'description', p.description,
                     'level', t.level
                 ) AS tier
-            FROM user_products up
-            JOIN tiers t ON t.product_id = up.product_id
-            JOIN products p ON p.id = t.product_id
-            WHERE up.user_id = u.id
+            FROM customers c
+            JOIN orders o ON o.customer_id = c.id
+            JOIN order_items oi ON oi.order_id = o.id
+            JOIN tiers t ON t.product_id = oi.product_id
+            JOIN products p ON p.id = oi.product_id
+            WHERE c.user_id = u.id
+                AND o.paid_at IS NOT NULL
+                AND o.deleted_at IS NULL
+                AND o.status = 'paid'
             ORDER BY t.level DESC
             LIMIT 1
         ) tier ON TRUE
@@ -106,10 +116,15 @@ export async function getPublicUserByUsername(
                     'description', p.description,
                     'level', t.level
                 ) AS tier
-            FROM user_products up
-            JOIN tiers t ON t.product_id = up.product_id
-            JOIN products p ON p.id = t.product_id
-            WHERE up.user_id = u.id
+            FROM customers c
+            JOIN orders o ON o.customer_id = c.id
+            JOIN order_items oi ON oi.order_id = o.id
+            JOIN tiers t ON t.product_id = oi.product_id
+            JOIN products p ON p.id = oi.product_id
+            WHERE c.user_id = u.id
+                AND o.paid_at IS NOT NULL
+                AND o.deleted_at IS NULL
+                AND o.status = 'paid'
             ORDER BY t.level DESC
             LIMIT 1
         ) tier ON TRUE

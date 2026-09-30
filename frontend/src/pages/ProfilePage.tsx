@@ -10,7 +10,6 @@ import {
     fetchPublicProfile,
     getProfileStats,
     findRankInScoreboard,
-    findIdentityInScoreboard,
     getProfileIconKey
 } from '../lib/profile'
 import type { ProfileIdentity, ProfileStats, UserScore } from '../lib/profile'
@@ -108,113 +107,114 @@ const ProfilePage = () => {
     }
 
     // ---- Hämtning av profildata mot riktiga API:et ----
-    useEffect(() => {
-        let cancelled = false
+useEffect(() => {
+    let cancelled = false
 
-        async function load() {
-            setIsLoading(true)
-            setLoadError(null)
-            setNotFound(false)
+    async function load() {
+        setIsLoading(true)
+        setLoadError(null)
+        setNotFound(false)
+        setRank(null)
+        setStats(null)
+        setScores([])
 
-            try {
-                if (isOwnProfile) {
-                    if (!loggedInUser) {
-                        return
-                    }
+        try {
+            if (isOwnProfile) {
+                if (!loggedInUser) return
 
-                    const [myScores, board] = await Promise.all([
-                        fetchMyScores(),
-                        api.get<ScoreboardResponse>('/game/scoreboard', {
-                            params: { period: 'all' }
-                        })
-                    ])
+                const myScores = await fetchMyScores()
+
+                if (cancelled) return
+
+                setIdentity({
+                    userId: loggedInUser.id,
+                    username: loggedInUser.username,
+                    email: loggedInUser.email,
+                    role: loggedInUser.role,
+                    tier: loggedInUser.tier,
+                    createdAt: loggedInUser.createdAt
+                })
+
+                setStats(getProfileStats(myScores))
+                setScores(myScores)
+
+                try {
+                    const board = await api.get<ScoreboardResponse>('/game/scoreboard', {
+                        params: { period: 'all' }
+                    })
 
                     if (cancelled) return
 
-                    setIdentity({
-                        userId: loggedInUser.id,
-                        username: loggedInUser.username,
-                        email: loggedInUser.email,
-                        role: loggedInUser.role,
-                        tier: loggedInUser.tier,
-                        createdAt: loggedInUser.createdAt
-                    })
-                    setStats(getProfileStats(myScores))
-                    setScores(myScores)
                     setRank(
                         board.data.own?.rank ??
-                            findRankInScoreboard(
-                                board.data.scoreboard,
-                                loggedInUser.id
-                            )
-                    )
-                } else {
-                    const [board, publicProfile] = await Promise.all([
-                        api.get<ScoreboardResponse>('/game/scoreboard', {
-                            params: { period: 'all' }
-                        }),
-                        fetchPublicProfile(username!)
-                    ])
-                    if (cancelled) return
-
-                    const found = findIdentityInScoreboard(
-                        board.data.scoreboard,
-                        username!
-                    )
-                    if (!found) {
-                        setNotFound(true)
-                        return
-                    }
-
-                    // publicProfile kan bli null om anropet misslyckas (t.ex.
-                    // användaren hann bli raderad) — då faller vi tillbaka på
-                    // "Okänd nivå" istället för att krascha hela profilsidan.
-                    setIdentity({
-                        userId: found.userId,
-                        username: found.username,
-                        role: publicProfile?.role,
-                        tier: publicProfile?.tier,
-                        createdAt: publicProfile?.createdAt
-                    })
-                    setRank(
                         findRankInScoreboard(
                             board.data.scoreboard,
-                            found.userId
+                            loggedInUser.id
                         )
                     )
+                } catch {
+                    if (!cancelled) setRank(null)
+                }
 
-                    try {
-                        const otherScores = await fetchScoresForUser(
-                            found.userId
-                        )
-                        if (!cancelled) {
-                            setStats(getProfileStats(otherScores))
-                            setScores(otherScores)
-                        }
-                    } catch {
-                        if (!cancelled) {
-                            setStats({
-                                bestScore: found.bestScoreFromBoard,
-                                averageScore: null,
-                                gamesPlayed: 0
-                            })
-                            setScores([])
-                        }
-                    }
+                return
+            }
+
+            const publicProfile = await fetchPublicProfile(username!)
+
+            if (cancelled) return
+
+            if (!publicProfile) {
+                setNotFound(true)
+                return
+            }
+
+            setIdentity(publicProfile)
+
+            try {
+                const otherScores = await fetchScoresForUser(publicProfile.userId)
+
+                if (!cancelled) {
+                    setStats(getProfileStats(otherScores))
+                    setScores(otherScores)
                 }
             } catch {
-                if (!cancelled)
-                    setLoadError('Kunde inte hämta profildata just nu.')
-            } finally {
-                if (!cancelled) setIsLoading(false)
+                if (!cancelled) {
+                    setStats(null)
+                    setScores([])
+                }
             }
-        }
 
-        load()
-        return () => {
-            cancelled = true
+            try {
+                const board = await api.get<ScoreboardResponse>('/game/scoreboard', {
+                    params: { period: 'all' }
+                })
+
+                if (cancelled) return
+
+                setRank(
+                    findRankInScoreboard(
+                        board.data.scoreboard,
+                        publicProfile.userId
+                    )
+                )
+            } catch {
+                if (!cancelled) setRank(null)
+            }
+        } catch {
+            if (!cancelled) {
+                setLoadError('Kunde inte hämta profildata just nu.')
+            }
+        } finally {
+            if (!cancelled) setIsLoading(false)
         }
-    }, [isOwnProfile, username, loggedInUser])
+    }
+
+    load()
+
+    return () => {
+        cancelled = true
+    }
+}, [isOwnProfile, username, loggedInUser])
 
     if (isOwnProfile && !loggedInUser) {
         return (
