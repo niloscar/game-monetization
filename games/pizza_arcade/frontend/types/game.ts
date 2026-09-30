@@ -9,13 +9,17 @@ export interface GameState {
 export interface Player {
     position: Position
     speed: number
-    health: number
+    health: Health
     vehicle: Vehicle
 }
 
 export interface Position {
     x: number
     y: number
+}
+export interface Health {
+    current: number
+    max: number
 }
 export interface Vehicle {
     type: VehicleType
@@ -44,7 +48,22 @@ export interface World {
     billboards: Billboard[]
 }
 
-export type WorldObjectType = 'parkedCar' | 'trashCan' | 'pedestrian'
+export type WorldObjectType = 
+    'rat' | 
+    'cat' | 
+    'dog' | 
+    'trashCan' | 
+    'mailBox' | 
+    'pedestrian' | 
+    'cyclist' | 
+    'lightPole' | 
+    'streetSign' | 
+    'car' | 
+    'concreteBarrier' | 
+    'container' | 
+    'schoolBus' | 
+    'concreteTruck' | 
+    'manhole'
 
 export interface WorldObject {
     id: number

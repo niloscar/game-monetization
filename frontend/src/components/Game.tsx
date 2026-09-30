@@ -53,6 +53,11 @@ export default function Game() {
         setShowPreGameAd(true)
     }
 
+    const handleRestartRequest = () => {
+        setShowPreGameAd(false)
+        setCanStart(!adPolicy?.preGame || !preGameAd)
+    }
+
     const handlePreGameAdComplete = () => {
         setShowPreGameAd(false)
         setCanStart(true)
@@ -69,6 +74,7 @@ export default function Game() {
                 displayAds={pizzaArcadeAds}
                 canStart={canStart}
                 onStartRequest={handleStartRequest}
+                onRestartRequest={handleRestartRequest}
             />
 
             {showPreGameAd && preGameAd && (

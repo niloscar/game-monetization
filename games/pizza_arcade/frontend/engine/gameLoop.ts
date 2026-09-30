@@ -1,14 +1,19 @@
 import type { GameState } from '../types/game'
 import type { LoadedDisplayAd } from '../types/ad'
 import type { InputState } from './input'
+import { createInitialGameState } from './gameState'
 import { updateMovement } from './movement'
 import { updateWorld } from './world'
 import { renderGame } from './render'
+import { handleCollisions } from './collision'
+import type { GameAssets } from './assets'
+import { updateBillboards } from './billboards'
 
 export const createGameLoop = (
     ctx: CanvasRenderingContext2D,
     state: GameState,
     input: InputState,
+    assets: GameAssets,
     onPhaseChange: (phase: GameState['phase']) => void,
     getDisplayAds: () => LoadedDisplayAd[],
     canStart: () => boolean,
@@ -22,30 +27,6 @@ export const createGameLoop = (
         const deltaTime = previousTime ? (time - previousTime) / 1000 : 0
         previousTime = time
 
-        if (state.phase === 'start' && input.start) {
-            input.start = false
-
-            if (canStart()) {
-                state.phase = 'playing'
-                onPhaseChange(state.phase)
-            } else if (!startRequested) {
-                startRequested = true
-                onStartRequest()
-            }
-        }
-
-        if (state.phase === 'start' && input.start) {
-            input.start = false
-
-            if (canStart()) {
-                state.phase = 'playing'
-                onPhaseChange(state.phase)
-            } else if (!startRequested) {
-                startRequested = true
-                onStartRequest()
-            }
-        }
-
         if (state.phase === 'start' && startRequested && canStart()) {
             state.phase = 'playing'
             onPhaseChange(state.phase)
@@ -55,24 +36,32 @@ export const createGameLoop = (
             updateMovement(state, input, deltaTime)
 
             const respawnedBillboardIds = updateWorld(state, deltaTime)
-            const displayAds = getDisplayAds()
 
-            for (const billboardId of respawnedBillboardIds) {
-                const billboard = state.world.billboards.find(
-                    (billboard) => billboard.id === billboardId
-                )
-                if (!billboard || displayAds.length === 0) continue
+            updateBillboards(state, respawnedBillboardIds, getDisplayAds().length)
+            handleCollisions(state)
 
-                billboard.adIndex = getNextAdIndex(
-                    billboard.adIndex,
-                    displayAds.length
-                )
+            if (state.player.health.current === 0) {
+                state.phase = 'gameOver'
+                onPhaseChange(state.phase)
+                console.log('Game Over: Player health reached 0')
             }
         }
 
-        renderGame(ctx, state, getDisplayAds())
+        renderGame(ctx, state, getDisplayAds(), assets)
 
         animationFrameId = requestAnimationFrame(loop)
+    }
+
+    const requestStart = () => {
+        if (state.phase !== 'start') return
+
+        if (canStart()) {
+            state.phase = 'playing'
+            onPhaseChange(state.phase)
+        } else if (!startRequested) {
+            startRequested = true
+            onStartRequest()
+        }
     }
 
     const start = () => {
@@ -83,20 +72,22 @@ export const createGameLoop = (
         cancelAnimationFrame(animationFrameId)
     }
 
+    const restart = () => {
+        const initialState = createInitialGameState()
+
+        state.phase = initialState.phase
+        state.player = initialState.player
+        state.world = initialState.world
+        startRequested = false
+
+        onPhaseChange(state.phase)
+        requestStart()
+    }
+
     return {
         start,
-        stop
+        stop,
+        requestStart,
+        restart
     }
-}
-
-const getNextAdIndex = (currentIndex: number, adCount: number) => {
-    if (adCount <= 1) return 0
-
-    let nextIndex = currentIndex
-
-    while (nextIndex === currentIndex) {
-        nextIndex = Math.floor(Math.random() * adCount)
-    }
-
-    return nextIndex
 }

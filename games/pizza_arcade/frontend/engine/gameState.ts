@@ -11,6 +11,9 @@ export const WORLD_X = {
 } as const
 
 export const SIDEWALK_WIDTH = 90
+export const SIDEWALK_EDGE_WIDTH = 30
+export const PARKED_ZONE_WIDTH = 100
+export const CENTER_LINE_CLEARANCE = 10
 
 export const GAME_BOUNDS: GameBounds = {
     left: 150,
@@ -18,6 +21,8 @@ export const GAME_BOUNDS: GameBounds = {
     top: 80,
     bottom: 550
 }
+
+export const ROAD_CENTER_X = (GAME_BOUNDS.left + GAME_BOUNDS.right) / 2
 
 const SKATEBOARD: Vehicle = {
     type: 'skateboard',
@@ -39,7 +44,10 @@ export const createInitialGameState = (): GameState => ({
             y: 500
         },
         speed: 0,
-        health: 100,
+        health: {
+            current: 100,
+            max: 100
+        },
         vehicle: SKATEBOARD
     },
     world: {
@@ -47,14 +55,54 @@ export const createInitialGameState = (): GameState => ({
         objects: [
             {
                 id: 1,
-                type: 'parkedCar',
+                type: 'car',
                 position: {
                     x: 200,
                     y: 150
                 },
-                width: 50,
-                height: 90
-            }
+                width: 80,
+                height: 160
+            },
+            {
+                id: 2,
+                type: 'car',
+                position: {
+                    x: 600,
+                    y: 150
+                },
+                width: 80,
+                height: 160
+            },
+            {
+                id: 3,
+                type: 'schoolBus',
+                position: {
+                    x: 480,
+                    y: 250
+                },
+                width: 100,
+                height: 300
+            },
+            {
+                id: 4,
+                type: 'trashCan',
+                position: {
+                    x: 80,
+                    y: 350
+                },
+                width: 30,
+                height: 30
+            },
+            {
+                id: 5,
+                type: 'pedestrian',
+                position: {
+                    x: 100,
+                    y: 250
+                },
+                width: 40,
+                height: 30
+            },
         ],
         billboards: [
             {
