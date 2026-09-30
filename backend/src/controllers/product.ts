@@ -2,10 +2,14 @@
  * Product controller
  */
 
+import * as service from '../services/product'
 import type { Request, Response } from 'express'
+import type { Product } from '../types/product'
 
-export const getProducts = (_req: Request, res: Response<{ message: string }>) => {
-    res.json({ message: 'Products-route' })
+export const getProducts = async (_req: Request, res: Response<Product[]>) => {
+    const products = await service.getProducts()
+
+    res.status(200).json(products)
 }
 
 export const getProduct = (req: Request<{ productId: string }>, res: Response<{ message: string }>) => {

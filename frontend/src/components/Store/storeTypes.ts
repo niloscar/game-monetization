@@ -2,7 +2,7 @@ import type { ChangeEvent, ComponentType, SVGProps } from 'react'
 
 export interface TierFeature {
     name: string
-    included: boolean
+    key: string
     icon: ComponentType<SVGProps<SVGSVGElement>> | null
 }
 

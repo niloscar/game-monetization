@@ -12,13 +12,17 @@ export default function TierCard({ tier, selected, onChange }: TierCardProps) {
     ].filter(Boolean).join(' ')
 
     const tierColors = [
-        { name: 'Quarter pass', color: '--tier-quarter' },
-        { name: 'Combo pass', color: '--tier-combo' },
-        { name: 'High score access', color: '--tier-highscore' }
+        { name: 'Quarter Pass', color: '--tier-quarter' },
+        { name: 'Combo Pass', color: '--tier-combo' },
+        { name: 'High Score Access', color: '--tier-highscore' }
     ]
 
+    const normalizeTierName = (tierName: string) => {
+        return tierName.toLowerCase().replace(/\s+/g, '')
+    }
+
     const tierColor = (tierName: string) => {
-        return `var(${tierColors.find((t) => t.name === tierName)?.color})`
+        return `var(${tierColors.find((t) => normalizeTierName(t.name) === normalizeTierName(tierName))?.color})`
     }
 
     return (
@@ -37,10 +41,10 @@ export default function TierCard({ tier, selected, onChange }: TierCardProps) {
                 <span className={styles['tier-price-period']}>/{period}</span>
             </p>
             <ul>
-                {features.map(({ name, included, icon: Icon }) => (
+                {features.map(({ name, icon: Icon }) => (
                     <li
                         key={name}
-                        className={included ? styles['included'] : styles['not-included']}
+                        className="included"
                     >
                         {Icon && <Icon className={styles['feature-icon']} />}
                         <span>{name}</span>

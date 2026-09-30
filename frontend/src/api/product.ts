@@ -2,7 +2,7 @@ import api from './apiClient'
 import type { Product } from './../types/product'
 
 export async function getProducts(): Promise<Product[]> {
-    const response = await api.get<Product[]>('/products')
+    const response = await api.get<Product[]>('/product')
 
     return response.data
 }
