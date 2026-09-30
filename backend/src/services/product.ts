@@ -7,6 +7,7 @@ const productSelect = `
         p.name,
         p.description,
         p.is_available_for_purchase AS "isPurchasable",
+        p.is_most_popular AS "isMostPopular",
 
         (
             SELECT pr.price::float8
