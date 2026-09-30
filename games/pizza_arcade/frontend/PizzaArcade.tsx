@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import GameCanvas from './components/GameCanvas'
 import StartScreen from './components/StartScreen'
 import GameOverScreen from './components/GameOverScreen'
@@ -24,9 +24,10 @@ export default function PizzaArcade({
     onGameOver
 }: PizzaArcadeProps) {
     const [gamePhase, setGamePhase] = useState<GamePhase>('start')
-    const [isHovered, setIsHovered] = useState(false)
     const [startToken, setStartToken] = useState(0)
     const [restartToken, setRestartToken] = useState(0)
+
+    const gameRef = useRef<HTMLDivElement>(null)
 
     const handleGamePhaseChange = useCallback((phase: GamePhase) => {
         setGamePhase(phase)
@@ -43,7 +44,7 @@ export default function PizzaArcade({
 
     useEffect(() => {
         const handleKeyDown = (event: KeyboardEvent) => {
-            if (event.code !== 'Space' || !isHovered || event.repeat) return
+            if (event.code !== 'Space' || !gameRef.current?.matches(':hover') || event.repeat) return
 
             if (gamePhase === 'start') {
                 event.preventDefault()
@@ -61,13 +62,12 @@ export default function PizzaArcade({
         return () => {
             window.removeEventListener('keydown', handleKeyDown)
         }
-    }, [gamePhase, isHovered, handleStart, handleRestart])
+    }, [gamePhase, handleStart, handleRestart])
 
     return (
         <div
             className={styles.game}
-            onMouseEnter={() => setIsHovered(true)}
-            onMouseLeave={() => setIsHovered(false)}
+            ref={gameRef}
         >
             <GameCanvas
                 onPhaseChange={handleGamePhaseChange}
