@@ -6,3 +6,7 @@ export async function getGameAccess(): Promise<GameAccess> {
 
     return data
 }
+
+export async function saveScore(score: number): Promise<void> {
+    await apiClient.post('/game/score', { score })
+}

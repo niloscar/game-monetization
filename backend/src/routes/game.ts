@@ -16,6 +16,8 @@ import {
 
 const gameRouter = Router()
 
+gameRouter.get('/access', getGameAccess)
+
 gameRouter.use(authenticate)
 
 gameRouter.get('/scoreboard', getScoreboard)
@@ -24,7 +26,5 @@ gameRouter.get('/score/me/high-score', getMyHighScore)
 gameRouter.get('/score/user/:userId', getScoresByUserId)
 gameRouter.get('/score/:scoreId', getScore)
 gameRouter.post('/score', createScore)
-
-gameRouter.get('/access', getGameAccess)
 
 export default gameRouter

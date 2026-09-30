@@ -10,18 +10,18 @@ interface PizzaArcadeProps {
     displayAds: DisplayAd[]
     canStart: boolean
     showScore: boolean
-    canSaveScore: boolean
     onStartRequest: () => void
     onRestartRequest: () => void
+    onGameOver: (score: number) => void
 }
 
 export default function PizzaArcade({
     displayAds,
     canStart,
     showScore,
-    canSaveScore,
     onStartRequest,
-    onRestartRequest
+    onRestartRequest,
+    onGameOver
 }: PizzaArcadeProps) {
     const [gamePhase, setGamePhase] = useState<GamePhase>('start')
     const [isHovered, setIsHovered] = useState(false)
@@ -71,10 +71,10 @@ export default function PizzaArcade({
         >
             <GameCanvas
                 onPhaseChange={handleGamePhaseChange}
+                onGameOver={onGameOver}
                 displayAds={displayAds}
                 canStart={canStart}
                 showScore={showScore}
-                canSaveScore={canSaveScore}
                 startToken={startToken}
                 restartToken={restartToken}
                 onStartRequest={onStartRequest}

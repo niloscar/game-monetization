@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import PizzaArcade from '../../../games/pizza_arcade/frontend/PizzaArcade'
 import PreGameAd from './Ads/PreGameAd'
 import { getAds } from '../api/ad'
-import { getGameAccess } from '../api/game'
+import { getGameAccess, saveScore } from '../api/game'
 import { selectWeightedAds } from '../utils/selectWeightedAds'
 import type { GameAccess } from '../types/gameAccess'
 import type { Ad } from '@assignment/shared/types/ad'
@@ -66,6 +66,17 @@ export default function Game() {
         setCanStart(true)
     }
 
+    const handleGameOver = async (score: number) => {
+        if (!gameAccess?.canSaveScore) return
+
+        try {
+            await saveScore(score)
+            console.log('Score saved:', score)
+        } catch (error) {
+            console.error('Failed to save score:', error)
+        }
+    }
+
     const pizzaArcadeAds = displayAds.map((ad) => ({
         id: ad.id,
         mediaUrl: ad.media_url
@@ -77,9 +88,9 @@ export default function Game() {
                 displayAds={pizzaArcadeAds}
                 canStart={canStart}
                 showScore={gameAccess?.showCurrentScore ?? false}
-                canSaveScore={gameAccess?.canSaveScore ?? false}
                 onStartRequest={handleStartRequest}
                 onRestartRequest={handleRestartRequest}
+                onGameOver={handleGameOver}
             />
 
             {showPreGameAd && preGameAd && (

@@ -3,9 +3,10 @@ import { renderGame } from './render'
 import { handleCollisions } from './collision'
 import { updateBillboards } from './billboards'
 import { updateMovement } from './movement'
-import { updateSurvivalScore } from './score'
+import { getScore, updateSurvivalScore } from './score'
 import { updateWorld } from './world'
 import { updateWorldObjectCount } from './worldObjects'
+
 
 import type { GameAssets } from './assets'
 import type { GameState } from '../types/game'
@@ -21,7 +22,8 @@ export const createGameLoop = (
     getDisplayAds: () => LoadedDisplayAd[],
     canStart: () => boolean,
     onStartRequest: () => void,
-    showScore: () => boolean
+    showScore: () => boolean,
+    onGameOver: (score: number) => void
 ) => {
     let animationFrameId: number
     let previousTime = 0
@@ -50,6 +52,7 @@ export const createGameLoop = (
             if (state.player.health.current === 0) {
                 state.phase = 'gameOver'
                 onPhaseChange(state.phase)
+                onGameOver(getScore(state))
                 console.log('Game Over: Player health reached 0')
             }
         }
