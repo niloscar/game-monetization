@@ -164,11 +164,7 @@ code {
     border: 0.5px solid var(--border);
 }
 
-/* ============================================================
-   SCOREBOARD — delade klasser för topplista, tier-gating m.m.
-   Text-align på #root är center; dessa klasser sätter egen
-   text-align: left där det behövs för läsbarhet i listor.
-   ============================================================ */
+/* ============== SCOREBOARD ============== */
 
 .score-page {
     max-width: 880px;
@@ -347,11 +343,22 @@ code {
     border: 1px solid var(--tier-highscore);
     background: rgba(255, 214, 10, 0.06);
 }
-
-/* Extra cyan ring ovanpå medaljfärgen för att markera "det här är du"
-   när du själv ligger i topp 3. */
 .row.row-self {
     box-shadow: inset 0 0 0 2px var(--tier-quarter);
+}
+.row-clickable {
+    cursor: pointer;
+    transition:
+        background 0.12s ease,
+        border-color 0.12s ease;
+}
+.row-clickable:hover,
+.row-clickable:focus-visible {
+    background: rgba(255, 255, 255, 0.06);
+}
+.row-clickable:focus-visible {
+    outline: 2px solid var(--tier-quarter);
+    outline-offset: -2px;
 }
 
 .btn {
@@ -794,5 +801,3 @@ code {
         flex-direction: row;
     }
 }
-
-/* ----------  ---------- */

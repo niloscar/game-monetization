@@ -15,11 +15,21 @@ export interface ProfileStats {
     gamesPlayed: number
 }
 
+// role kommer från backend som ett objekt (json_build_object i
+// services/user.ts: { id, name, description }), inte en ren sträng
+// "user"/"admin" — döljer man det bakom en unionstyp av strängar matchar
+// TypeScript aldrig verklig data.
+export interface ProfileRole {
+    id: number
+    name: string
+    description: string | null
+}
+
 export interface ProfileIdentity {
     userId: number
     username: string
     email?: string
-    role?: 'user' | 'admin'
+    role?: ProfileRole | null
     tier?: {
         id: number
         name: string
@@ -37,6 +47,26 @@ export async function fetchMyScores(): Promise<UserScore[]> {
 export async function fetchScoresForUser(userId: number): Promise<UserScore[]> {
     const res = await api.get<UserScore[]>(`/game/score/user/${userId}`)
     return res.data
+}
+
+// Hämtar tier/role/createdAt för en ANNAN användares profil (via
+// /api/user/username/:username, som medvetet inte skickar med e-post).
+// Behövs eftersom scoreboard-svaret bara innehåller rank/userId/username/
+// score — inget tier-fält — så "Okänd nivå" på andras profiler kommer
+// härifrån om anropet misslyckas eller användaren saknar produkt/tier.
+export async function fetchPublicProfile(
+    username: string
+): Promise<Pick<ProfileIdentity, 'role' | 'tier' | 'createdAt'> | null> {
+    try {
+        const res = await api.get(`/user/username/${username}`)
+        return {
+            role: res.data.role,
+            tier: res.data.tier,
+            createdAt: res.data.created_at ?? res.data.createdAt
+        }
+    } catch {
+        return null
+    }
 }
 
 export function getProfileStats(scores: UserScore[]): ProfileStats {
@@ -80,10 +110,10 @@ const TIER_LEVEL_TO_ICON: Record<number, ProfileIconKey> = {
 }
 
 export function getProfileIconKey(identity: {
-    role?: 'user' | 'admin'
+    role?: ProfileRole | null
     tier?: { level: number } | null
 }): ProfileIconKey {
-    if (identity.role === 'admin') return 'admin'
+    if (identity.role?.name === 'admin') return 'admin'
     const level = identity.tier?.level
     return (level && TIER_LEVEL_TO_ICON[level]) || 'quarter'
 }

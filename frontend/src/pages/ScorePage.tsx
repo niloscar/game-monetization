@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { TierGate } from "../components/TierGate";
 import api from "../api/apiClient";
@@ -15,11 +16,28 @@ const PERIOD_LABELS: Record<Period, string> = {
   all: "Totalt",
 };
 
+// Nivån för High Score Access i products/tiers (se seed-datan: tier.level
+// 3 = High Score Access). OBS: kräver att useAuth()'s user har ett
+// `tier: { level: number } | null`-fält, matchande vad GET /api/user/me
+// faktiskt returnerar. Om AuthContext.tsx inte är uppdaterad för det
+// ännu kommer user.tier vara undefined och hasHSA alltid falla tillbaka
+// till false — hör av dig så uppdaterar jag AuthContext.tsx också.
 const HIGH_SCORE_ACCESS_LEVEL = 3;
+
+// Hur många blurrade platshållarrader som visas bakom TierGate:s
+// "kräver High Score Access"-overlay, oavsett hur många placeringar som
+// faktiskt är dolda — annars kan luckan bli väldigt lång att scrolla
+// igenom med bara en rad per dold placering. Själva 50-gränsen sätts nu
+// på backend (services/game.ts), inte här.
 const GAP_PLACEHOLDER_ROWS = 3;
+
+// Route-mönster för en spelares profilsida — matchar
+// <Route path="/profile/:username" element={<ProfilePage />} /> i App.tsx.
+const PROFILE_ROUTE = (username: string) => `/profile/${username}`;
 
 const ScorePage = () => {
   const { user, isAuthenticated } = useAuth();
+  const navigate = useNavigate();
   const [period, setPeriod] = useState<Period>("all");
   const [data, setData] = useState<ScoreboardResponse | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -57,12 +75,18 @@ const ScorePage = () => {
     };
   }, [effectivePeriod]);
 
-  const scoreboard = useMemo(() => data?.scoreboard ?? [], [data]);  
-  const ownEntry = useMemo(() => data?.own ?? null, [data]);
+  // scoreboard kommer redan begränsad till topp 50 från backend. own är
+  // din egen placering oavsett var den ligger, uträknad server-side mot
+  // den ofiltrerade listan — så rangen stämmer även utanför topp 50.
+  const scoreboard = data?.scoreboard ?? [];
+  const ownEntry = data?.own ?? null;
   const ownRank = ownEntry?.rank ?? null;
 
   const top3 = useMemo(() => scoreboard.slice(0, 3), [scoreboard]);
 
+  // Platser mellan topp 3 och din egen placering — infällda, kräver High
+  // Score Access för att visas. Baseras på entry.rank (inte array-index),
+  // så det spelar ingen roll om listan skulle ha luckor.
   const gapEntries = useMemo(
     () =>
       ownRank && ownRank > 4
@@ -71,6 +95,11 @@ const ScorePage = () => {
     [scoreboard, ownRank]
   );
 
+  // Resten av listan, efter din egen placering (eller hela listan efter
+  // topp 3 om du ligger i topp 3 / inte är inloggad). Måste kolla
+  // "ownRank > 3" här, inte bara att ownRank finns — annars filtrerar vi
+  // på entry.rank > ownRank även när ownRank är 1–3, vilket duplicerar
+  // t.ex. plats 3 (redan i top3) om man själv ligger på plats 2.
   const afterEntries = useMemo(
     () =>
       scoreboard.filter((entry) =>
@@ -87,6 +116,20 @@ const ScorePage = () => {
     const base =
       rank === 1 ? "row medal-gold" : rank === 2 ? "row medal-silver" : rank === 3 ? "row medal-bronze" : "row";
     return self ? `${base} row-self` : base;
+  }
+
+  // Klick/tangentbord-hanterare för raderna som ska gå till en spelares
+  // profil. Self-raden i topp 3 är också klickbar — det är fortfarande en
+  // giltig profil, bara att den råkar vara din egen.
+  function goToProfile(entry: ScoreboardEntry) {
+    navigate(PROFILE_ROUTE(entry.username));
+  }
+
+  function handleRowKeyDown(event: React.KeyboardEvent, entry: ScoreboardEntry) {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      goToProfile(entry);
+    }
   }
 
   return (
@@ -145,7 +188,14 @@ const ScorePage = () => {
         >
           <div className="board">
             {top3.map((entry) => (
-              <div key={entry.userId} className={medalClass(entry.rank, isSelf(entry))}>
+              <div
+                key={entry.userId}
+                className={`${medalClass(entry.rank, isSelf(entry))} row-clickable`}
+                role="button"
+                tabIndex={0}
+                onClick={() => goToProfile(entry)}
+                onKeyDown={(e) => handleRowKeyDown(e, entry)}
+              >
                 <span className="rank">#{entry.rank}</span>
                 <span className="name">
                   {entry.username}
@@ -182,7 +232,14 @@ const ScorePage = () => {
           >
             <div className="board">
               {gapEntries.map((entry) => (
-                <div key={entry.userId} className="row">
+                <div
+                  key={entry.userId}
+                  className="row row-clickable"
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => goToProfile(entry)}
+                  onKeyDown={(e) => handleRowKeyDown(e, entry)}
+                >
                   <span className="rank">#{entry.rank}</span>
                   <span className="name">{entry.username}</span>
                   <span className="score">{formatPoints(entry.score)}</span>
@@ -193,7 +250,9 @@ const ScorePage = () => {
         )}
 
         {/* Egen placering — kräver inloggning, oavsett nivå. Visas inte om
-            du redan syns i topp 3 ovanför, då skulle du synas dubbelt. */}
+            du redan syns i topp 3 ovanför, då skulle du synas dubbelt.
+            Inte klickbar — det är redan du, ingen anledning att navigera
+            till din egen profil härifrån. */}
         {isAuthenticated && ownEntry && ownRank && ownRank > 3 ? (
           <div className="own-row">
             <div className="rank">#{ownEntry.rank}</div>
@@ -231,7 +290,14 @@ const ScorePage = () => {
           >
             <div className="board">
               {afterEntries.map((entry) => (
-                <div key={entry.userId} className="row">
+                <div
+                  key={entry.userId}
+                  className="row row-clickable"
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => goToProfile(entry)}
+                  onKeyDown={(e) => handleRowKeyDown(e, entry)}
+                >
                   <span className="rank">#{entry.rank}</span>
                   <span className="name">{entry.username}</span>
                   <span className="score">{formatPoints(entry.score)}</span>

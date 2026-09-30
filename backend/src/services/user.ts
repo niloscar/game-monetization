@@ -80,6 +80,47 @@ export async function getUser(id: number): Promise<User | null> {
     return rows[0] ?? null
 }
 
+export async function getPublicUserByUsername(
+    username: string
+): Promise<Omit<User, 'email'> | null> {
+    const { rows } = await pool.query(
+        `SELECT
+            u.id::int AS id,
+            u.username,
+            json_build_object(
+                'id', r.id,
+                'name', r.name,
+                'description', r.description
+            ) AS role,
+            tier.tier,
+            u.created_at
+        FROM users u
+
+        LEFT JOIN roles r ON r.id = u.role_id
+
+        LEFT JOIN LATERAL (
+            SELECT
+                json_build_object(
+                    'id', t.id,
+                    'name', p.name,
+                    'description', p.description,
+                    'level', t.level
+                ) AS tier
+            FROM user_products up
+            JOIN tiers t ON t.product_id = up.product_id
+            JOIN products p ON p.id = t.product_id
+            WHERE up.user_id = u.id
+            ORDER BY t.level DESC
+            LIMIT 1
+        ) tier ON TRUE
+
+        WHERE u.deleted_at IS NULL AND u.username = $1`,
+        [username]
+    )
+
+    return rows[0] ?? null
+}
+
 export async function createUser({
     username,
     email,
@@ -142,7 +183,11 @@ export async function getUserPasswordHash(id: number): Promise<string | null> {
     return rows[0]?.passwordHash ?? null
 }
 
-export async function updateUserPassword(id: number, passwordHash: string, previousHash: string): Promise<User | null> {
+export async function updateUserPassword(
+    id: number,
+    passwordHash: string,
+    previousHash: string
+): Promise<User | null> {
     const { rows } = await pool.query(
         `UPDATE users
         SET password_hash = $1

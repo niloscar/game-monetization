@@ -7,6 +7,7 @@ import api from '../api/apiClient'
 import {
     fetchMyScores,
     fetchScoresForUser,
+    fetchPublicProfile,
     getProfileStats,
     findRankInScoreboard,
     findIdentityInScoreboard,
@@ -148,12 +149,12 @@ const ProfilePage = () => {
                             )
                     )
                 } else {
-                    const board = await api.get<ScoreboardResponse>(
-                        '/game/scoreboard',
-                        {
+                    const [board, publicProfile] = await Promise.all([
+                        api.get<ScoreboardResponse>('/game/scoreboard', {
                             params: { period: 'all' }
-                        }
-                    )
+                        }),
+                        fetchPublicProfile(username!)
+                    ])
                     if (cancelled) return
 
                     const found = findIdentityInScoreboard(
@@ -165,9 +166,15 @@ const ProfilePage = () => {
                         return
                     }
 
+                    // publicProfile kan bli null om anropet misslyckas (t.ex.
+                    // användaren hann bli raderad) — då faller vi tillbaka på
+                    // "Okänd nivå" istället för att krascha hela profilsidan.
                     setIdentity({
                         userId: found.userId,
-                        username: found.username
+                        username: found.username,
+                        role: publicProfile?.role,
+                        tier: publicProfile?.tier,
+                        createdAt: publicProfile?.createdAt
                     })
                     setRank(
                         findRankInScoreboard(
