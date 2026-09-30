@@ -7,7 +7,11 @@ export interface AuthUser {
     id: number
     username: string
     email: string
-    role: 'user' | 'admin'
+    role: {
+        id: number
+        name: string
+        description: string | null
+    }
     tier: {
         id: number
         name: string
@@ -24,7 +28,11 @@ const FAKE_USER: AuthUser = {
     id: 1,
     username: 'dev_user',
     email: 'dev@example.com',
-    role: 'user',
+    role: {
+        id: 1,
+        name: 'user',
+        description: ''
+    },
     tier: { id: 3, name: 'High Score Access', description: '', level: 3 },
     createdAt: new Date().toISOString()
 }
@@ -175,7 +183,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         logout,
         updateProfile,
         isAuthenticated: user !== null,
-        isAdmin: user?.role === 'admin'
+        isAdmin: user?.role.name === 'admin'
     }
 
     return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

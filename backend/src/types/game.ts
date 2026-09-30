@@ -1,3 +1,4 @@
+export type { AdPolicy } from '@assignment/shared/types/ad'
 export interface Score {
     id: number
     userId: number

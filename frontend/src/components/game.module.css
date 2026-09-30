@@ -1,0 +1,17 @@
+.game-container {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    & > * {
+        width: 100%;
+        height: auto;
+    }
+
+    img {
+        display: block;
+        max-width: 100%;
+        max-height: 80px;
+    }
+}

@@ -6,17 +6,9 @@ import type { Request, Response } from 'express'
 import * as service from '../services/game'
 import { validateField, validateId } from '../utils/validation'
 import type { ApiError } from '../types/errors'
-import type {
-    CreateScoreBody,
-    Score,
-    ScoreboardPeriod,
-    ScoreboardResponse
-} from '../types/game'
+import type { AdPolicy, CreateScoreBody, Score, ScoreboardPeriod, ScoreboardResponse } from '../types/game'
 
-export const getScores = async (
-    _req: Request,
-    res: Response<Score[] | ApiError>
-) => {
+export const getScores = async (_req: Request, res: Response<Score[] | ApiError>) => {
     const scores = await service.getScores()
 
     res.status(200).json(scores)
@@ -147,4 +139,17 @@ export const getScoreboard = async (
         scoreboard: fullBoard.slice(0, MAX_SCOREBOARD_SIZE),
         own
     })
+}
+
+export const getAdPolicy = async (req: Request, res: Response<AdPolicy | ApiError>) => {
+    const userId = req.session.userId!
+
+    const policy = await service.getAdPolicy(userId)
+
+    if (!policy) {
+        res.status(409).json({ message: 'Användaren har ingen produktnivå.' })
+        return
+    }
+
+    res.status(200).json(policy)
 }

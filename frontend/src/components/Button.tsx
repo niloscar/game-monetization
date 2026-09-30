@@ -1,11 +1,19 @@
-type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement>;
+import type { ButtonHTMLAttributes, ReactNode } from 'react'
 
-const Button = ({ className = "", children, ...props }: ButtonProps) => {
-  return (
-    <button className={`btn ${className}`} {...props}>
-      {children}
-    </button>
-  );
-};
+interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+    children: ReactNode
+}
 
-export default Button;
+const Button = ({ type = 'button', className = '', children, ...props }: ButtonProps) => {
+    return (
+        <button
+            type={type}
+            className={`btn ${className}`}
+            {...props}
+        >
+            {children}
+        </button>
+    )
+}
+
+export default Button

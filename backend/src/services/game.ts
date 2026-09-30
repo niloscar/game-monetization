@@ -1,5 +1,8 @@
 import pool from '../database'
+import { getProduct } from './product'
 import type { CreateScoreData, ScoreboardEntry, ScoreboardPeriod, Score } from '../types/game'
+import type { Product } from '../types/product'
+import type { AdPolicy } from '../types/game'
 
 export async function getScores(): Promise<Score[]> {
     const { rows } = await pool.query(
@@ -139,4 +142,36 @@ export async function getScoreboard(period: ScoreboardPeriod): Promise<Scoreboar
     )
 
     return rows
+}
+
+export async function getAdPolicy(userId: number): Promise<AdPolicy | null> {
+    const { rows } = await pool.query<{ productId: number }>(
+        `SELECT up.product_id::int AS "productId"
+        FROM user_products up
+        JOIN tiers t ON t.product_id = up.product_id
+        WHERE up.user_id = $1
+        ORDER BY t.level DESC
+        LIMIT 1`,
+        [userId]
+    )
+
+    const currentProduct = rows[0]
+    if (!currentProduct) return null
+
+    const product = await getProduct(currentProduct.productId)
+    if (!product) return null
+
+    return getAdPolicyFromProduct(product)
+}
+
+const getAdPolicyFromProduct = (product: Product): AdPolicy => {
+    const featureKeys = product.features.map((feature) => feature.key)
+
+    const adFree = featureKeys.includes('ad_free')
+    const skipPreGameAds = featureKeys.includes('skip_pre_game_ads')
+
+    return {
+        preGame: !adFree && !skipPreGameAds,
+        display: !adFree
+    }
 }
