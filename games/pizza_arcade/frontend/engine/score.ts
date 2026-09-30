@@ -4,7 +4,7 @@ const SURVIVAL_SCORE_PER_SECOND = 10
 const PIZZA_DELIVERY_SCORE = 500
 
 export function changeScore(state: GameState, delta: number) {
-    state.score.total += delta
+    state.score.total = Math.max(0, state.score.total + delta)
 
     if (delta < 0) {
         state.score.penalties += Math.abs(delta)
