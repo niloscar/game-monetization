@@ -1,10 +1,11 @@
 import { useEffect, useRef } from 'react'
 import { createInput } from '../engine/input'
 import { createGameLoop } from '../engine/gameLoop'
-import { CANVAS_HEIGHT, CANVAS_WIDTH, createInitialGameState } from '../engine/gameState'
+import { CANVAS_HEIGHT, CANVAS_WIDTH } from '../engine/gameState'
 import { loadGameAssets } from '../engine/assets'
 import type { GamePhase } from '../types/game'
 import type { DisplayAd, LoadedDisplayAd } from '../types/ad'
+import { createGameState } from '../engine/createGameState'
 
 interface GameCanvasProps {
     onPhaseChange: (phase: GamePhase) => void
@@ -70,7 +71,7 @@ export default function GameCanvas({
             const assets = await loadGameAssets()
             if (stopped) return
 
-            const state = createInitialGameState()
+            const state = createGameState()
 
             input = createInput(canvas)
             gameLoop = createGameLoop(

@@ -41,14 +41,22 @@ export interface GameBounds {
   top: number
   bottom: number
 }
-
 export interface World {
     scrollOffset: number
+    elapsedTime: number
     objects: WorldObject[]
     billboards: Billboard[]
+    spawn: {
+        lastSide: WorldSide | null
+        sameSideCount: number
+    }
 }
 
+export type WorldSide = 'left' | 'right'
+
 export type WorldObjectType = 
+    'soda' |
+    'pizza' |
     'rat' | 
     'cat' | 
     'dog' | 
@@ -65,12 +73,21 @@ export type WorldObjectType =
     'concreteTruck' | 
     'manhole'
 
+export interface InitialWorldObject {
+    type: WorldObjectType
+    width: number
+    height: number
+    count: number
+}
+
 export interface WorldObject {
     id: number
     type: WorldObjectType
     position: Position
     width: number
     height: number
+    spawnZone?: SpawnZone
+    spawnSide?: WorldSide
 }
 
 export interface Billboard {
@@ -80,3 +97,10 @@ export interface Billboard {
     height: number
     adIndex: number
 }
+
+export type SpawnZone =
+    | 'grass'
+    | 'sidewalkEdge'
+    | 'sidewalk'
+    | 'parked'
+    | 'lane'

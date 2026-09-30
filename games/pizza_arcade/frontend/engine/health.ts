@@ -8,6 +8,10 @@ export function healPlayer(player: Player, amount: number) {
     player.health.current = Math.min(player.health.max, player.health.current + amount)
 }
 
+export function changePlayerHealth(player: Player, amount: number) {
+    player.health.current = Math.max(0, Math.min(player.health.max, player.health.current + amount))
+}
+
 export function increaseMaxHealth(player: Player, amount: number) {
     player.health.max += amount
 }

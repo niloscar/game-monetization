@@ -13,7 +13,7 @@ export const WORLD_X = {
 export const SIDEWALK_WIDTH = 90
 export const SIDEWALK_EDGE_WIDTH = 30
 export const PARKED_ZONE_WIDTH = 100
-export const CENTER_LINE_CLEARANCE = 10
+export const CENTER_LINE_OVERLAP = 20
 
 export const GAME_BOUNDS: GameBounds = {
     left: 150,
@@ -52,58 +52,12 @@ export const createInitialGameState = (): GameState => ({
     },
     world: {
         scrollOffset: 0,
-        objects: [
-            {
-                id: 1,
-                type: 'car',
-                position: {
-                    x: 200,
-                    y: 150
-                },
-                width: 80,
-                height: 160
-            },
-            {
-                id: 2,
-                type: 'car',
-                position: {
-                    x: 600,
-                    y: 150
-                },
-                width: 80,
-                height: 160
-            },
-            {
-                id: 3,
-                type: 'schoolBus',
-                position: {
-                    x: 480,
-                    y: 250
-                },
-                width: 100,
-                height: 300
-            },
-            {
-                id: 4,
-                type: 'trashCan',
-                position: {
-                    x: 80,
-                    y: 350
-                },
-                width: 30,
-                height: 30
-            },
-            {
-                id: 5,
-                type: 'pedestrian',
-                position: {
-                    x: 100,
-                    y: 250
-                },
-                width: 40,
-                height: 30
-            },
-        ],
+        elapsedTime: 0,
+        spawn: {
+            lastSide: null,
+            sameSideCount: 0
+        },
+        objects: [],
         billboards: [
             {
                 id: 1,

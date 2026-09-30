@@ -1,4 +1,5 @@
 import { CANVAS_HEIGHT, WORLD_STEP, WORLD_X } from './gameState'
+import { respawnWorldObject } from './worldObjects'
 
 import type { Billboard, GameState } from '../types/game'
 
@@ -12,9 +13,14 @@ export const updateWorld = (state: GameState, deltaTime: number): number[] => {
     const respawnedBillboardIds: number[] = []
 
     state.world.scrollOffset += distance
+    state.world.elapsedTime += deltaTime
 
     for (const object of state.world.objects) {
         object.position.y += distance
+
+        if (object.position.y - object.height / 2 > CANVAS_HEIGHT) {
+            respawnWorldObject(state, object)
+        }
     }
 
     for (const billboard of state.world.billboards) {

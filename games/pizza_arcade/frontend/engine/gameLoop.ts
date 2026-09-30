@@ -1,13 +1,14 @@
 import type { GameState } from '../types/game'
 import type { LoadedDisplayAd } from '../types/ad'
 import type { InputState } from './input'
-import { createInitialGameState } from './gameState'
 import { updateMovement } from './movement'
 import { updateWorld } from './world'
 import { renderGame } from './render'
 import { handleCollisions } from './collision'
 import type { GameAssets } from './assets'
 import { updateBillboards } from './billboards'
+import { createGameState } from './createGameState'
+import { updateWorldObjectCount } from './worldObjects'
 
 export const createGameLoop = (
     ctx: CanvasRenderingContext2D,
@@ -37,6 +38,7 @@ export const createGameLoop = (
 
             const respawnedBillboardIds = updateWorld(state, deltaTime)
 
+            updateWorldObjectCount(state)
             updateBillboards(state, respawnedBillboardIds, getDisplayAds().length)
             handleCollisions(state)
 
@@ -73,7 +75,7 @@ export const createGameLoop = (
     }
 
     const restart = () => {
-        const initialState = createInitialGameState()
+        const initialState = createGameState()
 
         state.phase = initialState.phase
         state.player = initialState.player

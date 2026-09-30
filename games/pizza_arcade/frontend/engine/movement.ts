@@ -17,16 +17,17 @@ export const updateMovement = (
     const bottom = GAME_BOUNDS.bottom - halfPlayerHeight
 
     if (input.accelerate) player.position.y -= vehicle.acceleration * deltaTime
-
     if (input.brake) player.position.y += vehicle.braking * deltaTime
 
     player.position.y = Math.max(top, Math.min(player.position.y, bottom))
 
-    const speedRatio = (bottom - player.position.y) / (bottom - top)
+    const positionRatio = (bottom - player.position.y) / (bottom - top)
+    const speedRatio = Math.sqrt(positionRatio)
+
     player.speed = vehicle.maxSpeed * speedRatio
 
     const steeringFactor =
-        player.speed === 0 ? 0 : 0.2 + 0.8 * Math.sqrt(speedRatio)
+        player.speed === 0 ? 0 : 0.2 + 0.8 * Math.sqrt(positionRatio)
 
     if (input.left)
         player.position.x -= vehicle.steeringSpeed * steeringFactor * deltaTime

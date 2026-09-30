@@ -1,6 +1,6 @@
 import type { Player, WorldObject } from '../types/game'
-import { respawnWorldObject, WORLD_OBJECT_DAMAGE } from './worldObjects'
-import { damagePlayer } from './health'
+import { respawnWorldObject, getWorldObjectHealthDelta } from './worldObjects'
+import { changePlayerHealth } from './health'
 import type { GameState } from '../types/game'
 
 export function collidesWithObject(player: Player, object: WorldObject) {
@@ -25,8 +25,9 @@ export function collidesWithObject(player: Player, object: WorldObject) {
 export function handleCollisions(state: GameState) {
     for (const object of state.world.objects) {
         if (!collidesWithObject(state.player, object)) continue
+        
+        changePlayerHealth(state.player, getWorldObjectHealthDelta(object.type))
 
-        damagePlayer(state.player, WORLD_OBJECT_DAMAGE[object.type])
         respawnWorldObject(state, object)
     }
 }

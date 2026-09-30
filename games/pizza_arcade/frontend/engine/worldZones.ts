@@ -3,18 +3,10 @@ import {
     SIDEWALK_WIDTH,
     SIDEWALK_EDGE_WIDTH,
     PARKED_ZONE_WIDTH,
-    CENTER_LINE_CLEARANCE,
+    CENTER_LINE_OVERLAP,
     ROAD_CENTER_X
 } from './gameState'
-
-export type SpawnZone =
-    | 'grass'
-    | 'sidewalkEdge'
-    | 'sidewalk'
-    | 'parked'
-    | 'lane'
-
-export type WorldSide = 'left' | 'right'
+import type { SpawnZone, WorldSide } from '../types/game'
 
 interface ZoneBounds {
     minX: number
@@ -40,7 +32,7 @@ const LEFT_ZONE_BOUNDS: Record<SpawnZone, ZoneBounds> = {
     },
     lane: {
         minX: GAME_BOUNDS.left + PARKED_ZONE_WIDTH,
-        maxX: ROAD_CENTER_X - CENTER_LINE_CLEARANCE
+        maxX: ROAD_CENTER_X + CENTER_LINE_OVERLAP
     }
 }
 
