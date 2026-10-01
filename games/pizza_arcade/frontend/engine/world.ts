@@ -1,5 +1,6 @@
 import { CANVAS_HEIGHT, WORLD_STEP, WORLD_X } from './gameState'
 import { respawnWorldObject } from './worldObjects'
+import { spawnDeliveryTarget } from './pizza'
 
 import type { Billboard, GameState } from '../types/game'
 
@@ -20,6 +21,18 @@ export const updateWorld = (state: GameState, deltaTime: number): number[] => {
 
         if (object.position.y - object.height / 2 > CANVAS_HEIGHT) {
             respawnWorldObject(state, object)
+        }
+    }
+
+    if (state.world.deliveryTarget) {
+        state.world.deliveryTarget.position.y += distance
+
+        if (
+            state.world.deliveryTarget.position.y -
+            state.world.deliveryTarget.height / 2 >
+            CANVAS_HEIGHT
+        ) {
+            spawnDeliveryTarget(state)
         }
     }
 

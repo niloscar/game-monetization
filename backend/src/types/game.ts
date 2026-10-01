@@ -32,3 +32,17 @@ export interface ScoreboardResponse {
     scoreboard: ScoreboardEntry[]
     own: ScoreboardEntry | null
 }
+
+export type ScoreboardAccess = 'none' | 'top3' | 'full'
+
+export interface GameAccess {
+    canSaveScore: boolean
+    showCurrentScore: boolean
+    showPersonalHighScore: boolean
+    scoreboardAccess: ScoreboardAccess
+    showOwnRanking: boolean
+    ads: {
+        preGame: boolean
+        display: boolean
+    }
+}

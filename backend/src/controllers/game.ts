@@ -6,7 +6,7 @@ import type { Request, Response } from 'express'
 import * as service from '../services/game'
 import { validateField, validateId } from '../utils/validation'
 import type { ApiError } from '../types/errors'
-import type { AdPolicy, CreateScoreBody, Score, ScoreboardPeriod, ScoreboardResponse } from '../types/game'
+import type { CreateScoreBody, GameAccess, Score, ScoreboardPeriod, ScoreboardResponse } from '../types/game'
 
 export const getScores = async (_req: Request, res: Response<Score[] | ApiError>) => {
     const scores = await service.getScores()
@@ -40,6 +40,23 @@ export const getMyScores = async (
     const scores = await service.getScoresByUserId(userId)
 
     res.status(200).json(scores)
+}
+
+export const getMyHighScore = async (
+    req: Request,
+    res: Response<Score | null | ApiError>
+) => {
+    const userId = req.session.userId!
+    const access = await service.getGameAccess(userId)
+
+    if (!access.showPersonalHighScore) {
+        res.status(403).json({ message: 'Du har inte tillgång till personlig high score.' })
+        return
+    }
+
+    const highScore = await service.getHighScoreByUserId(userId)
+
+    res.status(200).json(highScore)
 }
 
 export const getScore = async (
@@ -80,7 +97,7 @@ export const createScore = async (
     const newScore = await service.createScore({ userId, score })
 
     if (!newScore) {
-        res.status(409).json({ message: 'Användaren har ingen produktnivå.' })
+        res.status(403).json({ message: 'Du har ingen produkt som tillåter sparade resultat.' })
         return
     }
 
@@ -125,31 +142,40 @@ export const getScoreboard = async (
     }
 
     const period = periodParam as ScoreboardPeriod
+    const access = await service.getGameAccess(req.session.userId)
+
+    console.log('User access:', access)
+
+    if (access.scoreboardAccess === 'none') {
+        res.status(403).json({ message: 'Du har inte tillgång till topplistan.' })
+        return
+    }
 
     const fullBoard = await service.getScoreboard(period)
 
+    const scoreboard =
+        access.scoreboardAccess === 'top3'
+            ? fullBoard.slice(0, 3)
+            : fullBoard
+
     const userId = req.session.userId
     const own =
-        userId !== undefined
+        access.showOwnRanking && userId !== undefined
             ? (fullBoard.find((entry) => entry.userId === userId) ?? null)
             : null
 
     res.status(200).json({
         period,
-        scoreboard: fullBoard.slice(0, MAX_SCOREBOARD_SIZE),
+        scoreboard,
         own
     })
 }
 
-export const getAdPolicy = async (req: Request, res: Response<AdPolicy | ApiError>) => {
-    const userId = req.session.userId!
+export const getGameAccess = async (
+    req: Request,
+    res: Response<GameAccess>
+) => {
+    const access = await service.getGameAccess(req.session.userId)
 
-    const policy = await service.getAdPolicy(userId)
-
-    if (!policy) {
-        res.status(409).json({ message: 'Användaren har ingen produktnivå.' })
-        return
-    }
-
-    res.status(200).json(policy)
+    res.status(200).json(access)
 }

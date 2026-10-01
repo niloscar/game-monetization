@@ -1,8 +1,6 @@
 import pool from '../database'
 import { getProduct } from './product'
-import type { CreateScoreData, ScoreboardEntry, ScoreboardPeriod, Score } from '../types/game'
-import type { Product } from '../types/product'
-import type { AdPolicy } from '../types/game'
+import type { CreateScoreData, GameAccess, ScoreboardEntry, ScoreboardPeriod, Score } from '../types/game'
 
 export async function getScores(): Promise<Score[]> {
     const { rows } = await pool.query(
@@ -62,24 +60,40 @@ export async function getScoresByUserId(userId: number): Promise<Score[]> {
     return rows
 }
 
+export async function getHighScoreByUserId(userId: number): Promise<Score | null> {
+    const { rows } = await pool.query<Score>(
+        `SELECT
+            s.id::int AS id,
+            s.user_id::int AS "userId",
+            u.username,
+            s.product_id::int AS "productId",
+            s.tier_level_snapshot AS "tierLevelSnapshot",
+            s.score::int AS score,
+            s.created_at AS "createdAt"
+        FROM scores s
+        JOIN users u ON u.id = s.user_id
+        WHERE s.user_id = $1
+            AND s.deleted_at IS NULL
+        ORDER BY s.score DESC, s.created_at ASC
+        LIMIT 1`,
+        [userId]
+    )
+
+    return rows[0] ?? null
+}
+
 export async function createScore({ userId, score }: CreateScoreData): Promise<Score | null> {
-    const { rows } = await pool.query(
+    const product = await getUserProduct(userId)
+    if (!product) return null
+
+    const { rows } = await pool.query<Score>(
         `INSERT INTO scores (
             user_id,
             product_id,
             tier_level_snapshot,
             score
         )
-        SELECT
-            $1,
-            up.product_id,
-            t.level,
-            $2
-        FROM user_products up
-        JOIN tiers t ON t.product_id = up.product_id
-        WHERE up.user_id = $1
-        ORDER BY t.level DESC
-        LIMIT 1
+        VALUES ($1, $2, $3, $4)
         RETURNING
             id::int AS id,
             user_id::int AS "userId",
@@ -87,7 +101,7 @@ export async function createScore({ userId, score }: CreateScoreData): Promise<S
             tier_level_snapshot AS "tierLevelSnapshot",
             score::int AS score,
             created_at AS "createdAt"`,
-        [userId, score]
+        [userId, product.productId, product.tierLevel, score]
     )
 
     return rows[0] ?? null
@@ -144,34 +158,68 @@ export async function getScoreboard(period: ScoreboardPeriod): Promise<Scoreboar
     return rows
 }
 
-export async function getAdPolicy(userId: number): Promise<AdPolicy | null> {
-    const { rows } = await pool.query<{ productId: number }>(
-        `SELECT up.product_id::int AS "productId"
-        FROM user_products up
-        JOIN tiers t ON t.product_id = up.product_id
-        WHERE up.user_id = $1
-        ORDER BY t.level DESC
+const GUEST_GAME_ACCESS: GameAccess = {
+    canSaveScore: false,
+    showCurrentScore: false,
+    showPersonalHighScore: false,
+    scoreboardAccess: 'none',
+    showOwnRanking: false,
+    ads: {
+        preGame: true,
+        display: true
+    }
+}
+
+export async function getGameAccess(userId?: number): Promise<GameAccess> {
+    if (!userId) return GUEST_GAME_ACCESS
+
+    const userProduct = await getUserProduct(userId)
+    if (!userProduct) return GUEST_GAME_ACCESS
+
+    const product = await getProduct(userProduct.productId)
+    if (!product) return GUEST_GAME_ACCESS
+
+    const features = new Set(product.features.map((feature) => feature.key))
+    const hasFeature = (key: string) => features.has(key)
+
+    return {
+        canSaveScore: true,
+        showCurrentScore: hasFeature('show_current_score'),
+        showPersonalHighScore: hasFeature('show_personal_high_score'),
+        scoreboardAccess: hasFeature('scoreboard_full')
+            ? 'full'
+            : hasFeature('scoreboard_top_3')
+                ? 'top3'
+                : 'none',
+        showOwnRanking: hasFeature('show_own_ranking'),
+        ads: {
+            preGame: !hasFeature('disable_pre_game_ads'),
+            display: !hasFeature('disable_display_ads')
+        }
+    }
+}
+
+interface UserProduct {
+    productId: number
+    tierLevel: number
+}
+
+async function getUserProduct(userId: number): Promise<UserProduct | null> {
+    const { rows } = await pool.query<UserProduct>(
+        `SELECT
+            oi.product_id::int AS "productId",
+            t.level::int AS "tierLevel"
+        FROM customers c
+        JOIN orders o ON o.customer_id = c.id
+        JOIN order_items oi ON oi.order_id = o.id
+        JOIN tiers t ON t.product_id = oi.product_id
+        WHERE c.user_id = $1
+            AND o.paid_at IS NOT NULL
+            AND o.deleted_at IS NULL
+        ORDER BY t.level DESC, o.paid_at DESC
         LIMIT 1`,
         [userId]
     )
 
-    const currentProduct = rows[0]
-    if (!currentProduct) return null
-
-    const product = await getProduct(currentProduct.productId)
-    if (!product) return null
-
-    return getAdPolicyFromProduct(product)
-}
-
-const getAdPolicyFromProduct = (product: Product): AdPolicy => {
-    const featureKeys = product.features.map((feature) => feature.key)
-
-    const adFree = featureKeys.includes('ad_free')
-    const skipPreGameAds = featureKeys.includes('skip_pre_game_ads')
-
-    return {
-        preGame: !adFree && !skipPreGameAds,
-        display: !adFree
-    }
+    return rows[0] ?? null
 }

@@ -9,8 +9,10 @@ import { createGameState } from '../engine/createGameState'
 
 interface GameCanvasProps {
     onPhaseChange: (phase: GamePhase) => void
+    onGameOver: (score: number) => void
     displayAds: DisplayAd[]
     canStart: boolean
+    showScore: boolean
     startToken: number
     restartToken: number
     onStartRequest: () => void
@@ -18,8 +20,10 @@ interface GameCanvasProps {
 
 export default function GameCanvas({
     onPhaseChange,
+    onGameOver,
     displayAds,
     canStart,
+    showScore,
     startToken,
     restartToken,
     onStartRequest
@@ -31,8 +35,14 @@ export default function GameCanvas({
     const canStartRef = useRef(canStart)
     canStartRef.current = canStart
 
+    const showScoreRef = useRef(showScore)
+    showScoreRef.current = showScore
+
     const onStartRequestRef = useRef(onStartRequest)
     onStartRequestRef.current = onStartRequest
+
+    const onGameOverRef = useRef(onGameOver)
+    onGameOverRef.current = onGameOver
 
     useEffect(() => {
         const loadAds = async () => {
@@ -82,7 +92,9 @@ export default function GameCanvas({
                 onPhaseChange,
                 () => displayAdsRef.current,
                 () => canStartRef.current,
-                () => onStartRequestRef.current()
+                () => onStartRequestRef.current(),
+                () => showScoreRef.current,
+                (score) => onGameOverRef.current(score)
             )
 
             gameLoopRef.current = gameLoop
