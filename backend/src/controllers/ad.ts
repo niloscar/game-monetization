@@ -9,7 +9,10 @@ import type { Request, Response } from 'express'
 import type { Ad, CreateAdBody, UpdateAdBody, AdPlacement } from '../types/ad'
 import type { ApiError } from '../types/errors'
 
-export const getAds = async (req: Request<{}, {}, {}, { placement?: string }>, res: Response<Ad[] | ApiError>) => {
+export const getAds = async (
+    req: Request<{}, {}, {}, { placement?: string }>,
+    res: Response<Ad[] | ApiError>
+) => {
     const { placement } = req.query
 
     let adPlacement: AdPlacement | undefined
@@ -31,7 +34,10 @@ export const getAds = async (req: Request<{}, {}, {}, { placement?: string }>, r
     res.status(200).json(ads)
 }
 
-export const getAd = async (req: Request<{ id: string }>, res: Response<Ad | ApiError>) => {
+export const getAd = async (
+    req: Request<{ id: string }>,
+    res: Response<Ad | ApiError>
+) => {
     const adId = Number(req.params.id)
 
     const error = validateId('id', adId)
@@ -53,7 +59,10 @@ export const getAd = async (req: Request<{ id: string }>, res: Response<Ad | Api
     res.status(200).json(ad)
 }
 
-export const getAdminAds = async (req: Request<{}, {}, {}, { placement?: string }>, res: Response<Ad[] | ApiError>) => {
+export const getAdminAds = async (
+    req: Request<{}, {}, {}, { placement?: string }>,
+    res: Response<Ad[] | ApiError>
+) => {
     const { placement } = req.query
 
     let adPlacement: AdPlacement | undefined
@@ -75,7 +84,10 @@ export const getAdminAds = async (req: Request<{}, {}, {}, { placement?: string 
     res.status(200).json(ads)
 }
 
-export const getAdminAd = async (req: Request<{ id: string }>, res: Response<Ad | ApiError>) => {
+export const getAdminAd = async (
+    req: Request<{ id: string }>,
+    res: Response<Ad | ApiError>
+) => {
     const adId = Number(req.params.id)
 
     const error = validateId('id', adId)
@@ -97,10 +109,12 @@ export const getAdminAd = async (req: Request<{ id: string }>, res: Response<Ad 
     res.status(200).json(ad)
 }
 
-export const createAd = async (req: Request<{}, {}, CreateAdBody>, res: Response<Ad | ApiError>) => {
+export const createAd = async (
+    req: Request<{}, {}, Record<string, string>>,
+    res: Response<Ad | ApiError>
+) => {
     const {
         media_type,
-        media_url,
         target_url,
         duration_seconds,
         placement,
@@ -108,6 +122,26 @@ export const createAd = async (req: Request<{}, {}, CreateAdBody>, res: Response
         title,
         weight
     } = req.body
+
+    const durationSeconds =
+        duration_seconds !== undefined && duration_seconds !== ''
+            ? Number(duration_seconds)
+            : null
+
+    const adWeight =
+        weight !== undefined && weight !== '' ? Number(weight) : null
+
+    const isActive = is_active === 'true'
+
+    if (!req.file) {
+        res.status(400).json({
+            message: 'En mediafil måste laddas upp.',
+            field: 'media'
+        })
+        return
+    }
+
+    const mediaUrl = `/mock/ads/${req.file.filename}`
 
     const mediaTypeError = validateField('media_type', media_type, 'string')
     if (mediaTypeError) {
@@ -123,12 +157,6 @@ export const createAd = async (req: Request<{}, {}, CreateAdBody>, res: Response
         return
     }
 
-    const mediaUrlError = validateField('media_url', media_url, 'string')
-    if (mediaUrlError) {
-        res.status(400).json(mediaUrlError)
-        return
-    }
-
     if (target_url !== undefined && target_url !== null) {
         const error = validateField('target_url', target_url, 'string')
 
@@ -138,10 +166,10 @@ export const createAd = async (req: Request<{}, {}, CreateAdBody>, res: Response
         }
     }
 
-    if (duration_seconds !== undefined && duration_seconds !== null) {
+    if (durationSeconds !== null) {
         const error = validateField(
             'duration_seconds',
-            duration_seconds,
+            durationSeconds,
             'number'
         )
 
@@ -150,7 +178,7 @@ export const createAd = async (req: Request<{}, {}, CreateAdBody>, res: Response
             return
         }
 
-        if (!Number.isInteger(duration_seconds) || duration_seconds <= 0) {
+        if (!Number.isInteger(durationSeconds) || durationSeconds <= 0) {
             res.status(400).json({
                 message: 'Varaktighet måste vara ett positivt heltal.',
                 field: 'duration_seconds'
@@ -173,8 +201,8 @@ export const createAd = async (req: Request<{}, {}, CreateAdBody>, res: Response
         return
     }
 
-    if (is_active !== undefined) {
-        const error = validateField('is_active', is_active, 'boolean')
+    if (isActive !== undefined) {
+        const error = validateField('is_active', isActive, 'boolean')
 
         if (error) {
             res.status(400).json(error)
@@ -191,15 +219,15 @@ export const createAd = async (req: Request<{}, {}, CreateAdBody>, res: Response
         }
     }
 
-    if (weight !== undefined && weight !== null) {
-        const error = validateField('weight', weight, 'number')
+    if (adWeight !== null) {
+        const error = validateField('weight', adWeight, 'number')
 
         if (error) {
             res.status(400).json(error)
             return
         }
 
-        if (!Number.isInteger(weight)) {
+        if (!Number.isInteger(adWeight)) {
             res.status(400).json({
                 message: 'Vikt måste vara ett heltal.',
                 field: 'weight'
@@ -208,12 +236,24 @@ export const createAd = async (req: Request<{}, {}, CreateAdBody>, res: Response
         }
     }
 
-    const ad = await service.createAd(req.body)
+    const ad = await service.createAd({
+        media_type,
+        media_url: mediaUrl,
+        target_url: target_url || null,
+        duration_seconds: durationSeconds,
+        placement,
+        is_active: isActive,
+        title: title || null,
+        weight: adWeight
+    })
 
     res.status(201).json(ad)
 }
 
-export const updateAd = async (req: Request<{ id: string }, {}, UpdateAdBody>, res: Response<Ad | ApiError>) => {
+export const updateAd = async (
+    req: Request<{ id: string }, {}, UpdateAdBody>,
+    res: Response<Ad | ApiError>
+) => {
     const adId = Number(req.params.id)
 
     const idError = validateId('id', adId)
@@ -368,7 +408,10 @@ export const updateAd = async (req: Request<{ id: string }, {}, UpdateAdBody>, r
     res.status(200).json(ad)
 }
 
-export const deleteAd = async (req: Request<{ id: string }>, res: Response<Ad | ApiError>) => {
+export const deleteAd = async (
+    req: Request<{ id: string }>,
+    res: Response<Ad | ApiError>
+) => {
     const adId = Number(req.params.id)
 
     const error = validateId('id', adId)

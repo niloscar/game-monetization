@@ -6,12 +6,13 @@ import * as service from '../services/powerUp'
 import { validateField, validateId } from '../utils/validation'
 import type { Request, Response } from 'express'
 import type { ApiError } from '../types/errors'
-import type { CreatePowerUpBody, PowerUp, UpdatePowerUpBody } from '../types/powerUp'
+import type {
+    CreatePowerUpBody,
+    PowerUp,
+    UpdatePowerUpBody
+} from '../types/powerUp'
 
-export const getPowerUps = async (
-    _req: Request,
-    res: Response<PowerUp[]>
-) => {
+export const getPowerUps = async (_req: Request, res: Response<PowerUp[]>) => {
     const powerUps = await service.getPowerUps()
 
     res.status(200).json(powerUps)
@@ -50,7 +51,6 @@ export const createPowerUp = async (
         key,
         name,
         description,
-        imageUrl,
         isActive,
         width,
         height,
@@ -62,6 +62,20 @@ export const createPowerUp = async (
         spawnWeight
     } = req.body ?? {}
 
+    const imageUrl = req.file
+        ? `/mock/powerups/${req.file.filename}`
+        : undefined
+
+    const parsedIsActive = String(isActive) === 'true'
+    const parsedWidth = Number(width)
+    const parsedHeight = Number(height)
+    const parsedHealthDelta = Number(healthDelta)
+    const parsedScoreDelta = Number(scoreDelta)
+    const parsedSpeedMultiplier = Number(speedMultiplier)
+    const parsedScoreMultiplier = Number(scoreMultiplier)
+    const parsedDurationSeconds = Number(durationSeconds)
+    const parsedSpawnWeight = Number(spawnWeight)
+
     const keyError = validateField('key', key, 'string')
     if (keyError) {
         res.status(400).json(keyError)
@@ -70,7 +84,8 @@ export const createPowerUp = async (
 
     if (!/^[a-z0-9_]+$/.test(key)) {
         res.status(400).json({
-            message: 'Key får endast innehålla små bokstäver, siffror och understreck.',
+            message:
+                'Key får endast innehålla små bokstäver, siffror och understreck.',
             field: 'key'
         })
         return
@@ -99,7 +114,7 @@ export const createPowerUp = async (
     }
 
     if (isActive !== undefined) {
-        const error = validateField('isActive', isActive, 'boolean')
+        const error = validateField('isActive', parsedIsActive, 'boolean')
         if (error) {
             res.status(400).json(error)
             return
@@ -107,13 +122,13 @@ export const createPowerUp = async (
     }
 
     if (width !== undefined) {
-        const error = validateField('width', width, 'number')
+        const error = validateField('width', parsedWidth, 'number')
         if (error) {
             res.status(400).json(error)
             return
         }
 
-        if (!Number.isInteger(width) || width <= 0) {
+        if (!Number.isInteger(parsedWidth) || parsedWidth <= 0) {
             res.status(400).json({
                 message: 'Bredd måste vara ett positivt heltal.',
                 field: 'width'
@@ -123,13 +138,13 @@ export const createPowerUp = async (
     }
 
     if (height !== undefined) {
-        const error = validateField('height', height, 'number')
+        const error = validateField('height', parsedHeight, 'number')
         if (error) {
             res.status(400).json(error)
             return
         }
 
-        if (!Number.isInteger(height) || height <= 0) {
+        if (!Number.isInteger(parsedHeight) || parsedHeight <= 0) {
             res.status(400).json({
                 message: 'Höjd måste vara ett positivt heltal.',
                 field: 'height'
@@ -139,13 +154,13 @@ export const createPowerUp = async (
     }
 
     if (healthDelta !== undefined) {
-        const error = validateField('healthDelta', healthDelta, 'number')
+        const error = validateField('healthDelta', parsedHealthDelta, 'number')
         if (error) {
             res.status(400).json(error)
             return
         }
 
-        if (!Number.isInteger(healthDelta)) {
+        if (!Number.isInteger(parsedHealthDelta)) {
             res.status(400).json({
                 message: 'Förändring av hälsa måste vara ett heltal.',
                 field: 'healthDelta'
@@ -155,13 +170,13 @@ export const createPowerUp = async (
     }
 
     if (scoreDelta !== undefined) {
-        const error = validateField('scoreDelta', scoreDelta, 'number')
+        const error = validateField('scoreDelta', parsedScoreDelta, 'number')
         if (error) {
             res.status(400).json(error)
             return
         }
 
-        if (!Number.isInteger(scoreDelta)) {
+        if (!Number.isInteger(parsedScoreDelta)) {
             res.status(400).json({
                 message: 'Poängförändring måste vara ett heltal.',
                 field: 'scoreDelta'
@@ -170,14 +185,18 @@ export const createPowerUp = async (
         }
     }
 
-    if (speedMultiplier !== undefined) {
-        const error = validateField('speedMultiplier', speedMultiplier, 'number')
+    if (parsedSpeedMultiplier !== undefined) {
+        const error = validateField(
+            'speedMultiplier',
+            parsedSpeedMultiplier,
+            'number'
+        )
         if (error) {
             res.status(400).json(error)
             return
         }
 
-        if (speedMultiplier <= 0) {
+        if (parsedSpeedMultiplier <= 0) {
             res.status(400).json({
                 message: 'Hastighetsmultiplikator måste vara större än 0.',
                 field: 'speedMultiplier'
@@ -186,14 +205,18 @@ export const createPowerUp = async (
         }
     }
 
-    if (scoreMultiplier !== undefined) {
-        const error = validateField('scoreMultiplier', scoreMultiplier, 'number')
+    if (parsedScoreMultiplier !== undefined) {
+        const error = validateField(
+            'scoreMultiplier',
+            parsedScoreMultiplier,
+            'number'
+        )
         if (error) {
             res.status(400).json(error)
             return
         }
 
-        if (scoreMultiplier < 0) {
+        if (parsedScoreMultiplier < 0) {
             res.status(400).json({
                 message: 'Poängmultiplikator får inte vara negativ.',
                 field: 'scoreMultiplier'
@@ -202,30 +225,38 @@ export const createPowerUp = async (
         }
     }
 
-    if (durationSeconds !== undefined) {
-        const error = validateField('durationSeconds', durationSeconds, 'number')
+    if (parsedDurationSeconds !== undefined) {
+        const error = validateField(
+            'durationSeconds',
+            parsedDurationSeconds,
+            'number'
+        )
         if (error) {
             res.status(400).json(error)
             return
         }
 
-        if (!Number.isInteger(durationSeconds) || durationSeconds < 0) {
+        if (
+            !Number.isInteger(parsedDurationSeconds) ||
+            parsedDurationSeconds < 0
+        ) {
             res.status(400).json({
-                message: 'Varaktighet måste vara ett heltal som är 0 eller större.',
+                message:
+                    'Varaktighet måste vara ett heltal som är 0 eller större.',
                 field: 'durationSeconds'
             })
             return
         }
     }
 
-    if (spawnWeight !== undefined) {
-        const error = validateField('spawnWeight', spawnWeight, 'number')
+    if (parsedSpawnWeight !== undefined) {
+        const error = validateField('spawnWeight', parsedSpawnWeight, 'number')
         if (error) {
             res.status(400).json(error)
             return
         }
 
-        if (!Number.isInteger(spawnWeight) || spawnWeight <= 0) {
+        if (!Number.isInteger(parsedSpawnWeight) || parsedSpawnWeight <= 0) {
             res.status(400).json({
                 message: 'Spawn-vikt måste vara ett positivt heltal.',
                 field: 'spawnWeight'
@@ -234,7 +265,21 @@ export const createPowerUp = async (
         }
     }
 
-    const powerUp = await service.createPowerUp(req.body)
+    const powerUp = await service.createPowerUp({
+        key,
+        name,
+        description: description ?? null,
+        imageUrl: imageUrl ?? null,
+        isActive: parsedIsActive,
+        width: parsedWidth,
+        height: parsedHeight,
+        healthDelta: parsedHealthDelta,
+        scoreDelta: parsedScoreDelta,
+        speedMultiplier: parsedSpeedMultiplier,
+        scoreMultiplier: parsedScoreMultiplier,
+        durationSeconds: parsedDurationSeconds,
+        spawnWeight: parsedSpawnWeight
+    })
 
     res.status(201).json(powerUp)
 }
@@ -299,7 +344,8 @@ export const updatePowerUp = async (
 
         if (!/^[a-z0-9_]+$/.test(key)) {
             res.status(400).json({
-                message: 'Key får endast innehålla små bokstäver, siffror och understreck.',
+                message:
+                    'Key får endast innehålla små bokstäver, siffror och understreck.',
                 field: 'key'
             })
             return
@@ -403,7 +449,11 @@ export const updatePowerUp = async (
     }
 
     if (speedMultiplier !== undefined) {
-        const error = validateField('speedMultiplier', speedMultiplier, 'number')
+        const error = validateField(
+            'speedMultiplier',
+            speedMultiplier,
+            'number'
+        )
         if (error) {
             res.status(400).json(error)
             return
@@ -419,7 +469,11 @@ export const updatePowerUp = async (
     }
 
     if (scoreMultiplier !== undefined) {
-        const error = validateField('scoreMultiplier', scoreMultiplier, 'number')
+        const error = validateField(
+            'scoreMultiplier',
+            scoreMultiplier,
+            'number'
+        )
         if (error) {
             res.status(400).json(error)
             return
@@ -435,7 +489,11 @@ export const updatePowerUp = async (
     }
 
     if (durationSeconds !== undefined) {
-        const error = validateField('durationSeconds', durationSeconds, 'number')
+        const error = validateField(
+            'durationSeconds',
+            durationSeconds,
+            'number'
+        )
         if (error) {
             res.status(400).json(error)
             return
@@ -443,7 +501,8 @@ export const updatePowerUp = async (
 
         if (!Number.isInteger(durationSeconds) || durationSeconds < 0) {
             res.status(400).json({
-                message: 'Varaktighet måste vara ett heltal som är 0 eller större.',
+                message:
+                    'Varaktighet måste vara ett heltal som är 0 eller större.',
                 field: 'durationSeconds'
             })
             return
