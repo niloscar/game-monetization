@@ -8,6 +8,7 @@ import adminPowerUpRouter from './powerUp'
 import adminProductRouter from './product'
 import adminUserRouter from './user'
 
+
 const adminRouter = Router()
 
 adminRouter.use(authenticate)
@@ -19,5 +20,6 @@ adminRouter.use('/order', adminOrderRouter)
 adminRouter.use('/power-up', adminPowerUpRouter)
 adminRouter.use('/product', adminProductRouter)
 adminRouter.use('/user', adminUserRouter)
+
 
 export default adminRouter
