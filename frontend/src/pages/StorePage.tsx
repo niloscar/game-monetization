@@ -1,64 +1,82 @@
-import { useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
+import { Navigate, useNavigate } from 'react-router-dom'
+import { useAuth } from '../context/AuthContext'
+import { createOrder } from '../api/order'
+import { getProducts } from '../api/product'
+import { productToTier } from '../components/Store/productToTier'
 import TierSection from '../components/Store/TierSection'
 import PaymentSection from '../components/Store/PaymentSection'
-import type { Cart, Tier } from '../components/Store/storeTypes'
-import { Gamepad, Trophy, Close, Chart, Headphone, CardText} from 'pixelarticons/react'
 
-const MOCK_TIERS = [
-    {
-        id: 1,
-        name: 'Quarter pass',
-        price: 29,
-        period: 'mån',
-        features: [
-            { name: 'Full spelåtkomst', included: true, icon: Gamepad },
-            { name: 'Mycket reklam', included: true, icon: CardText },
-            { name: 'Ser maxpoäng', included: true, icon: Trophy },
-            { name: 'Ej speltid/high score', included: false, icon: Close }
-        ],
-        mostPopular: false
-    },
-    {
-        id: 2,
-        name: 'Combo pass',
-        price: 59,
-        period: 'mån',
-        features: [
-            { name: 'Full spelåtkomst', included: true, icon: Gamepad },
-            { name: 'En del reklam', included: true, icon: CardText },
-            { name: 'Maxpoäng + speltid', included: true, icon: Trophy },
-            { name: 'Ej high score/support', included: true, icon: Close }
-        ],
-        mostPopular: true
-    },
-    {
-        id: 3,
-        name: 'High score access',
-        price: 99,
-        period: 'mån',
-        features: [
-            { name: 'Full spelåtkomst', included: true, icon: Gamepad },
-            { name: 'Ingen reklam', included: true, icon: CardText },
-            {
-                name: 'Full statistik + high score',
-                included: true,
-                icon: Chart
-            },
-            { name: 'Prioriterad support', included: true, icon: Headphone }
-        ],
-        mostPopular: false
-    }
-]
-
-const mostPopularTier = MOCK_TIERS.find((tier) => tier.mostPopular)
+import type { Tier } from '../components/Store/storeTypes'
+import type { Product } from '../types/product'
+import type { PaymentMethod } from '@assignment/shared/types/order'
 
 const StorePage = () => {
-    const [cart, setCart] = useState<Cart>({
-        items: mostPopularTier ? [mostPopularTier] : []
-    })
+    const [products, setProducts] = useState<Product[]>([])
+    const [loadingProducts, setLoadingProducts] = useState(true)
+    const [selectedTierId, setSelectedTierId] = useState<number>()
+
+    const { isAuthenticated, loading: loadingAuth } = useAuth()
+    const navigate = useNavigate()
+
+    useEffect(() => {
+        if (loadingAuth || !isAuthenticated) return
+
+        const fetchProducts = async () => {
+            try {
+                const products = await getProducts()
+                setProducts(products)
+            } catch (error) {
+                console.error('Fel när produkter skulle hämtas:', error)
+            } finally {
+                setLoadingProducts(false)
+            }
+        }
+
+        const simulatedLoadingTime = setTimeout(() => {
+            fetchProducts()
+        }, 1000) // Simulate a delay for loading state
+
+        return () => clearTimeout(simulatedLoadingTime)
+    }, [loadingAuth, isAuthenticated])
+
+    const tiers = useMemo(
+        () => products.filter((product) => product.price !== null).map(productToTier),
+        [products]
+    )
+
+    const activeTierId = selectedTierId ?? tiers.find((tier) => tier.mostPopular)?.id
+    const selectedTier = tiers.find((tier) => tier.id === activeTierId)
+    const cart = { items: selectedTier ? [selectedTier] : [] }
 
     const handleTierSelect = (tier: Tier) => {
-        setCart({ items: [tier] })
+        setSelectedTierId(tier.id)
+    }
+
+    const handleOrderSubmit = async (paymentMethod: PaymentMethod) => {
+        if (!selectedTier) return
+
+        try {
+            const order = await createOrder({
+                productId: selectedTier.id,
+                paymentMethod
+            })
+
+            navigate('/store/confirmation', {
+                state: {
+                    orderId: order.id,
+                    productName: selectedTier.name
+                }
+            })
+        } catch (error) {
+            console.error('Error creating order:', error)
+        }
+    }
+
+    if (loadingAuth) return null
+
+    if (!isAuthenticated) {
+        return <Navigate to="/login" replace />
     }
 
     return (
@@ -68,12 +86,19 @@ const StorePage = () => {
                 <p>Avsluta eller byt nivå när du vill</p>
             </div>
 
-            <TierSection 
-                tiers={MOCK_TIERS}
-                selectedTierId={cart.items[0]?.id}
+            <TierSection
+                loading={loadingProducts}
+                products={tiers}
+                selectedTierId={activeTierId}
                 onChange={handleTierSelect}
-             />
-            {cart.items.length > 0 && <PaymentSection cart={cart} />}
+            />
+
+            {selectedTier && (
+                <PaymentSection 
+                    cart={cart} 
+                    onSubmit={handleOrderSubmit} 
+                />
+            )}
         </main>
     )
 }

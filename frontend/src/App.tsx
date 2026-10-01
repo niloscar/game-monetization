@@ -14,10 +14,10 @@ import AdminUsersPage from './pages/AdminUsersPage'
 import ReceiptPage from './pages/ReceiptPage'
 import ProfilePage from './pages/ProfilePage'
 import StorePage from './pages/StorePage'
-import ApiTestPage from './pages/ApiTestPage' // Remove this page later, it's just for testing the API connection
 import ContactPage from './pages/ContactPage'
 import TermsPage from './pages/TermsPage'
 import AdminRoute from './components/AdminRoute'
+import OrderConfirmationPage from './pages/OrderConfirmationPage'
 
 const App = () => {
     return (
@@ -35,7 +35,7 @@ const App = () => {
                 <Route path="/profile/:username" element={<ProfilePage />} /> //
                 publik profil, öppen för alla
                 <Route path="/store" element={<StorePage />}></Route>
-                <Route path="/api-test" element={<ApiTestPage />}></Route>
+                <Route path="/store/confirmation" element={<OrderConfirmationPage />}></Route>
                 <Route path="/contact" element={<ContactPage />}></Route>
                 <Route path="/terms" element={<TermsPage />}></Route>
                 <Route element={<AdminRoute />}>

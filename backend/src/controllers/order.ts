@@ -6,7 +6,8 @@ import * as service from '../services/order'
 import { OrderServiceError } from '../services/order'
 import { validateField, validateId } from '../utils/validation'
 import type { Request, Response } from 'express'
-import type { Order, CreateOrderBody, UpdateOrderBody } from '../types/order'
+import type { Order, UpdateOrderBody } from '../types/order'
+import type { CreateOrderBody, CreateOrderResponse } from '@assignment/shared/types/order'
 import type { ApiError } from '../types/errors'
 
 export const getOrders = async (_req: Request, res: Response<Order[]>) => {
@@ -62,73 +63,35 @@ export const getCurrentUserOrder = async (req: Request<{ id: string }>, res: Res
     res.status(200).json(order)
 }
 
-export const createOrder = async (req: Request<{}, {}, CreateOrderBody>, res: Response<Order | ApiError>) => {
-    const userId = req.session.userId!
+export const createOrder = async (req: Request<{}, {}, CreateOrderBody>, res: Response<CreateOrderResponse | ApiError>) => {
+    const userId = req.session.userId
 
-    const { paymentMethodId, address, items } = req.body
-
-    if (paymentMethodId !== undefined && paymentMethodId !== null) {
-        const error = validateId('paymentMethodId', paymentMethodId)
-
-        if (error) {
-            res.status(400).json(error)
-            return
-        }
-    }
-
-    if (!address) {
-        res.status(400).json({ message: 'Adress måste anges.', field: 'address' })
+    if (!userId) {
+        res.status(401).json({ message: 'Du måste vara inloggad.' })
         return
     }
 
-    const addressFields = [
-        'fname',
-        'lname',
-        'street',
-        'zipcode',
-        'city',
-        'country'
-    ] as const
+    const { productId, paymentMethod } = req.body
 
-    for (const field of addressFields) {
-        const error = validateField(`address.${field}`, address[field], 'string')
+    const productIdError = validateId('productId', productId)
 
-        if (error) {
-            res.status(400).json(error)
-            return
-        }
-    }
-
-    if (!Array.isArray(items) || items.length === 0) {
-        res.status(400).json({ message: 'Ordern måste innehålla minst en produkt.', field: 'items' })
+    if (productIdError) {
+        res.status(400).json(productIdError)
         return
     }
 
-    for (const [i, item] of items.entries()) {
-        const productIdError = validateId(`items.${i}.productId`, item.productId)
+    const paymentMethodError = validateField('paymentMethod', paymentMethod, 'string')
 
-        if (productIdError) {
-            res.status(400).json(productIdError)
-            return
-        }
-
-        const quantityError = validateField(`items.${i}.quantity`, item.quantity, 'number')
-
-        if (quantityError) {
-            res.status(400).json(quantityError)
-            return
-        }
-
-        if (!Number.isInteger(item.quantity) || item.quantity < 1) {
-            res.status(400).json({ message: 'Antal måste vara ett positivt heltal.', field: `items.${i}.quantity` })
-            return
-        }
+    if (paymentMethodError) {
+        res.status(400).json(paymentMethodError)
+        return
     }
 
-    const productIds = items.map(item => item.productId) // Check for duplicate product IDs in the order
-
-    if (new Set(productIds).size !== productIds.length) {
-        res.status(400).json({ message: 'Samma produkt får inte förekomma flera gånger i ordern.', field: 'items' })
+    if (!['card', 'swish', 'paypal'].includes(paymentMethod)) {
+        res.status(400).json({
+            message: 'Ogiltig betalningsmetod.',
+            field: 'paymentMethod'
+        })
         return
     }
 
@@ -139,12 +102,25 @@ export const createOrder = async (req: Request<{}, {}, CreateOrderBody>, res: Re
     } catch (error) {
         if (error instanceof OrderServiceError) {
             if (error.code === 'PAYMENT_METHOD_NOT_AVAILABLE') {
-                res.status(400).json({ message: 'Betalningsmetoden är inte tillgänglig.', field: 'paymentMethodId' })
+                res.status(400).json({
+                    message: 'Betalningsmetoden är inte tillgänglig.',
+                    field: 'paymentMethod'
+                })
                 return
             }
 
             if (error.code === 'PRODUCT_NOT_AVAILABLE') {
-                res.status(409).json({ message: `Produkt ${error.productId} är inte tillgänglig för köp.`, field: 'items' })
+                res.status(409).json({
+                    message: `Produkt ${error.productId} är inte tillgänglig för köp.`,
+                    field: 'productId'
+                })
+                return
+            }
+
+            if (error.code === 'CUSTOMER_NOT_FOUND') {
+                res.status(404).json({
+                    message: 'Ingen kundprofil hittades för användaren.'
+                })
                 return
             }
         }
