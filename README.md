@@ -206,19 +206,13 @@ Fyll i databasuppgifter från Neon och generera egna säkerhetsnycklar. Känslig
 
 ### Starta utvecklingsmiljön
 
-Starta backend:
+Starta både frontend och backend från projektets rot:
 
 ```bash
-npm run dev --prefix backend
+npm run dev
 ```
 
-Starta frontend i en separat terminal:
-
-```bash
-npm run dev --prefix frontend
-```
-
-Kommandona körs från projektets rot.
+Kommandot startar utvecklingsservrarna för både frontend och backend parallellt.
 
 ## 6. Utvecklingskonventioner
 
