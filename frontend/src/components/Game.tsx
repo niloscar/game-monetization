@@ -114,7 +114,7 @@ export default function Game() {
                 />
             )}
 
-            {gameAccess && <UpgradeAlert showPreGameAd={showPreGameAd} />}
+            {gameAccess && <UpgradeAlert />}
         </div>
     )
 }
