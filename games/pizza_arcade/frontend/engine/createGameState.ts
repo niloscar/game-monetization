@@ -15,7 +15,6 @@ export function createGameState(powerUps: PowerUp[]): GameState {
     spawnInitialWorldObjects(state)
 
     spawnPowerUp(state)
-    console.log('Spawned power-ups:', state.world.powerUps)
 
     return state
 }

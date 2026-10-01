@@ -3,6 +3,10 @@
     display: flex;
     justify-content: center;
     align-items: center;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    overflow: hidden;
+    margin: 1rem;
 
     & > * {
         width: 100%;

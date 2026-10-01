@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/useAuth'
 
 export type TierSlug = 'quarter-pass' | 'combo-pass' | 'high-score-access'
@@ -24,6 +25,7 @@ interface TierGateProps {
 
 export function TierGate({ requiredTier, children, fallback }: TierGateProps) {
     const { user, isAuthenticated } = useAuth()
+    const navigate = useNavigate()
     const required = TIER_INFO[requiredTier]
 
     if (!required) return null
@@ -85,9 +87,7 @@ export function TierGate({ requiredTier, children, fallback }: TierGateProps) {
                         padding: '8px 18px',
                         borderRadius: 8
                     }}
-                    onClick={() => {
-                        // koppla till navigation, t.ex. navigate("/store")
-                    }}
+                    onClick={() => {navigate('/store')}}
                 >
                     Uppgradera nu
                 </button>

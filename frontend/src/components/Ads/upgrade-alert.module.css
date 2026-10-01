@@ -4,10 +4,8 @@
     align-items: center;
     justify-content: space-between;
     gap: 1rem;
-    bottom: 24px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: calc(100% - 32px);
+    width: calc(100% - 2rem);
+    bottom: 1rem;
     margin: 0;
     text-align: center;
     z-index: 200;
@@ -20,9 +18,9 @@
     line-height: 1rem;
     text-align: left;
 
-    .upgrade-link {
+    .upgrade-link, .login-link, .register-link {
         display: inline-block;
-        padding: 0.5rem 1rem;
+        padding: 0.25rem 1rem;
         border-radius: 6px;
         font-size: 10px;
         font-weight: 700;
@@ -32,5 +30,16 @@
         background-color: var(--accent);
         color: #0a0a0f;
         white-space: nowrap;
+    }
+
+     .login-link {
+        background-color: var(--surface);
+        color: var(--text);
+        border: 1px solid var(--border);
+    }
+
+    .button-group {
+        display: flex;
+        gap: 1rem;
     }
 }

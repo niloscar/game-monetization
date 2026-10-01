@@ -26,4 +26,8 @@
         margin-top: 0.25rem;
         text-align: center;
     }
+
+    &:last-child {
+        margin-bottom: 0;
+    }
 }
