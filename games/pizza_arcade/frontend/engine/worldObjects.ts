@@ -224,7 +224,46 @@ const WORLD_OBJECT_CONFIG: Record<WorldObjectType, WorldObjectConfig> = {
         spawnRules: [
             { zone: 'lane', weight: 1 }
         ]
-    }
+    },
+    dogPoo: {
+        width: 5,
+        height: 5,
+        healthDelta: -5,
+        scoreDelta: -50,
+        spawnWeight: 3,
+        spawnRules: [
+            { zone: 'sidewalkEdge', weight: 5 },
+            { zone: 'sidewalk', weight: 5 },
+            { zone: 'parked', weight: 2 },
+            { zone: 'lane', weight: 1 }
+        ]
+    },
+    tireFire: {
+        width: 20,
+        height: 20,
+        healthDelta: -20,
+        scoreDelta: -100,
+        spawnWeight: 2,
+        spawnRules: [
+            { zone: 'sidewalkEdge', weight: 3 },
+            { zone: 'sidewalk', weight: 3 },
+            { zone: 'parked', weight: 1 },
+            { zone: 'lane', weight: 1 }
+        ]
+    },
+    tires: {
+        width: 30,
+        height: 30,
+        healthDelta: -15,
+        scoreDelta: -80,
+        spawnWeight: 1,
+        spawnRules: [
+            { zone: 'sidewalkEdge', weight: 2 },
+            { zone: 'sidewalk', weight: 2 },
+            { zone: 'parked', weight: 1 },
+            { zone: 'lane', weight: 1 }
+        ]
+    },
 }
 
 export function createWorldObjects(): WorldObject[] {

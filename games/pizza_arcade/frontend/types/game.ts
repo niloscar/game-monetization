@@ -65,24 +65,27 @@ export interface World {
 
 export type WorldSide = 'left' | 'right'
 
-export type WorldObjectType =
-    | 'soda'
-    | 'pizza'
-    | 'rat'
-    | 'cat'
-    | 'dog'
-    | 'trashCan'
-    | 'mailBox'
-    | 'pedestrian'
-    | 'cyclist'
-    | 'lightPole'
-    | 'streetSign'
-    | 'car'
-    | 'concreteBarrier'
-    | 'container'
-    | 'schoolBus'
-    | 'concreteTruck'
-    | 'manhole'
+export type WorldObjectType = 
+    'soda' |
+    'pizza' |
+    'dogPoo' |
+    'tireFire' |
+    'tires' |
+    'rat' | 
+    'cat' | 
+    'dog' | 
+    'trashCan' | 
+    'mailBox' | 
+    'pedestrian' | 
+    'cyclist' | 
+    'lightPole' | 
+    'streetSign' | 
+    'car' | 
+    'concreteBarrier' | 
+    'container' | 
+    'schoolBus' | 
+    'concreteTruck' | 
+    'manhole'
 
 export interface InitialWorldObject {
     type: WorldObjectType
