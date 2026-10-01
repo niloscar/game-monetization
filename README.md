@@ -2,20 +2,22 @@
 
 ## 1. Projektbeskrivning
 
-Projektet syftar till att utveckla en speloberoende webbplattform som möjliggör intäktsgenerering kring befintliga spel genom reklam och engångsköp.
+Projektet är en webbplattform för monetisering av spelet **Pizza Arcade** genom produktnivåer, annonser, power-ups och åtkomststyrd funktionalitet.
 
-Fokus ligger på användarhantering, betalningar och åtkomst till innehåll snarare än på spelutveckling. Plattformen utformas för att spel ska kunna bytas ut med så få ändringar som möjligt. *Pizza Arcade* används som exempelspel.
+Plattformen hanterar användarkonton, produkter, beställningar, annonser, power-ups, spelåtkomst, resultat och administration. Pizza Arcade är implementerat som en separat spelmodul med egen spellogik och rendering, medan användarhantering, affärslogik och datalagring hanteras av plattformens frontend och backend.
 
-### Planerad funktionalitet
+### Funktionalitet
 
-- **Användarhantering:** Registrering, inloggning och kunduppgifter.
-- **Produktpaket:** Engångsköp av funktioner och power-ups.
-- **Beställningar:** Betalningar, orderhantering och prishistorik.
-- **Åtkomstkontroll:** Behörighet baserad på köpta paket.
-- **Reklam:** Hantering och visning av annonser.
-- **Topplistor:** Registrering och visning av spelresultat.
-- **Administration:** Hantering av användare, produkter, innehåll och annonser.
-- **Spelintegration:** Stöd för utbytbara spelmoduler genom gemensamma gränssnitt.
+- **Användarhantering:** Registrering, inloggning, profilsidor och kunduppgifter.
+- **Produktnivåer:** Produkter med olika nivåer, funktioner och power-ups.
+- **Beställningar:** Köp, orderhistorik och lagring av historiska priser.
+- **Åtkomstkontroll:** Spel- och funktionsåtkomst baserad på användarens produktnivå.
+- **Reklam:** Pre-game-annonser och displayannonser med åtkomststyrning.
+- **Power-ups:** Databasstyrda power-ups som kan kopplas till produkter och användas i spelet.
+- **Topplista:** Lagring av spelresultat, high score och scoreboard.
+- **Administration:** Hantering av användare, och villka annonser och power-ups.
+- **Spelintegration:** Pizza Arcade är separerat från plattformens övriga frontendkod och använder gemensamma typer för kommunikationen med plattformen.
+
 
 ## 2. Förhandsvisning
 
@@ -35,83 +37,126 @@ Applikationen driftsätts via Vercel.
 
 ## 4. Projektstruktur
 
-Projektet har en modulär struktur där plattformen och spelen hålls separerade genom tydligt definierade gränssnitt.
+Projektet är ett monorepo där plattformens frontend och backend, spelet och gemensamma TypeScript-typer hålls separerade.
 
+```text
 /
-├── frontend/                      # Plattformens React/Vite-applikation
-│   ├── public/                    # Statiska filer, fonter och ikoner
+├── backend/
+│   ├── build.mjs
 │   └── src/
-│       ├── api/                   # API-klient och API-anrop
-│       ├── assets/                # Bilder och grafiska resurser
-│       ├── components/            # Återanvändbara UI-komponenter
-│       ├── context/               # React context, t.ex. autentisering
-│       ├── lib/                   # Hjälpfunktioner och frontendlogik
-│       ├── pages/                 # Applikationens sidor
-│       ├── App.tsx
-│       └── main.tsx
-│
-├── backend/                       # Plattformens Express API
-│   ├── build.mjs                  # Backend-build med esbuild
-│   └── src/
-│       ├── controllers/           # Hantering av HTTP-anrop och svar
-│       ├── middleware/            # Auth, felhantering och 404-hantering
-│       ├── routes/                # Publika API-routes
-│       │   └── admin/             # Administrativa API-routes
-│       ├── seed/                  # Seeddata
-│       ├── services/              # Databasåtkomst och applikationslogik
+│       ├── controllers/           # HTTP-hantering för API-resurser
+│       ├── middleware/            # Auth, uploads och felhantering
+│       ├── routes/                # Publika och autentiserade routes
+│       │   └── admin/             # Administrativa routes
+│       ├── services/              # Databasåtkomst och affärslogik
 │       ├── types/                 # Backend-specifika TypeScript-typer
-│       ├── utils/                 # Validering, lösenordshantering m.m.
+│       ├── utils/                 # Validering och lösenordshantering
 │       ├── database.ts            # PostgreSQL-anslutning
 │       └── server.mts             # Express-serverns entry point
 │
-├── games/                         # Utbytbara spelmoduler
+├── frontend/
+│   ├── public/                    # Statiska filer och uppladdade resurser
+│   └── src/
+│       ├── api/                   # API-klient och API-anrop
+│       ├── assets/                # Bilder och grafiska resurser
+│       ├── components/            # UI-komponenter och plattformsintegration
+│       ├── context/               # React context, bl.a. autentisering
+│       ├── lib/                   # Frontendlogik och hjälpfunktioner
+│       ├── pages/                 # Applikationens sidor
+│       ├── types/                 # Frontend-specifika typer
+│       ├── utils/                 # Hjälpfunktioner
+│       ├── App.tsx
+│       └── main.tsx
+│
+├── games/
 │   └── pizza_arcade/
-│       ├── frontend/              # Spelspecifik frontend
-│       └── backend/               # Spelspecifik backend
+│       └── frontend/
+│           ├── assets/            # Sprites och spelgrafik
+│           ├── components/        # Canvas, HUD och spelvyer
+│           ├── engine/            # Spellogik, rendering och game loop
+│           ├── types/             # Spelspecifika typer
+│           └── PizzaArcade.tsx    # Spelmodulens entry point
 │
-├── shared/                        # Gemensamma typer för plattform och spel
-│   └── game.ts
+├── shared/
+│   └── src/
+│       └── types/                 # Delade kontrakt mellan projektets delar
+│           ├── ad.ts
+│           ├── game.ts
+│           ├── order.ts
+│           └── powerUp.ts
 │
-├── docs/                          # Projektdokumentation
-│   ├── openapi.yaml               # API-specifikation
-│   ├── database-design.md         # Databasdesign
-│   ├── er-diagram.png             # ER-diagram
+├── docs/
+│   ├── assignment-checklist.md
+│   ├── assignment-description.md
+│   ├── database-design.md
+│   ├── er-diagram.png
+│   ├── openapi.yaml
 │   └── ...                        # Wireframes och övrig dokumentation
 │
-├── package.json                   # Root workspace-konfiguration
+├── package.json
 ├── package-lock.json
-├── vercel.json                    # Vercel-konfiguration
+├── vercel.json
 └── README.md
+```
 
 ### Arkitektur och ansvarsfördelning
 
-**Plattformen** ansvarar för användare, köp, behörigheter, reklam, spelomgångar och resultatlagring.
+Applikationen består huvudsakligen av fyra delar:
 
-**Spelmodulerna** ansvarar för sin egen presentation, spellogik och spelspecifika funktioner.
+**Frontend** ansvarar för webbapplikationens användargränssnitt, autentiseringsstate, butik, profiler, scoreboard, administration och integrationen mellan plattformen och spelet.
 
-**Gemensamma kontrakt** i `shared/` definierar hur plattformen och spelen kommunicerar.
+**Pizza Arcade** ligger separat under `games/pizza_arcade/`. Spelmodulen innehåller bland annat game loop, rendering, inputhantering, rörelse, kollisionshantering, power-ups, annonser i spelvärlden och poängberäkning.
 
-Frontend kommunicerar med backend via ett REST API. Backend hanterar affärslogik, behörighet och kommunikationen med PostgreSQL-databasen på Neon.
+**Backend** är ett centralt Express-API som hanterar autentisering, användare, produkter, beställningar, annonser, power-ups, spelåtkomst och resultat. Backend ansvarar även för validering, behörighetskontroll och kommunikation med PostgreSQL-databasen.
+
+**Shared** innehåller TypeScript-typer som används av flera delar av projektet och fungerar som gemensamma kontrakt mellan frontend, backend och spelet.
+
+```text
+Frontend
+   |
+   ├── Plattformens UI
+   |
+   └── Pizza Arcade
+          |
+          v
+       REST API
+          |
+          v
+       Backend
+          |
+          v
+   PostgreSQL / Neon
+```
 
 ### Spelintegration
 
-Spelen integreras genom ett gemensamt gränssnitt. Plattformen startar spelet och skickar nödvändig information, exempelvis spelomgångens ID och tillgängliga power-ups.
+`frontend/src/components/Game.tsx` fungerar som integrationslager mellan plattformen och Pizza Arcade.
 
-Spelet rapporterar tillbaka resultat och avslut genom definierade callbacks.
+Plattformen hämtar bland annat användarens spelåtkomst, annonser och annan data från backend och skickar den vidare till spelmodulen.
 
-Varje spel registreras i plattformens spelregister och beskriver sitt innehåll genom ett manifest.
+Pizza Arcade ansvarar därefter för själva spelupplevelsen, exempelvis:
 
-Spelmoduler ska inte vara direkt beroende av plattformens interna implementationer.
+- game loop
+- input och rörelse
+- rendering
+- världsgenerering
+- kollisioner
+- hälsa
+- poäng
+- power-ups
+- in-game-annonser
+
+När en spelomgång avslutas skickas resultatet till plattformens API för lagring.
 
 ### Power-ups
 
-Plattformen hanterar köp, ägande och behörighet till power-ups. Vid spelstart kontrollerar backend användarens tillgång och skapar en spelomgång med godkända power-ups.
+Power-ups lagras i databasen och kan kopplas till produkter.
 
-Spelet tar emot dessa som identifierare och ansvarar för att implementera deras effekter.
+Backend ansvarar för att lagra och exponera konfigurationen för power-ups, exempelvis namn, bild, effekt, varaktighet och spawn-vikt.
 
-Backend ansvarar för att kontrollera behörighet och förbrukning samt verifiera spelresultat enligt den valideringsmetod som implementeras.
+Pizza Arcade använder konfigurationen för att skapa power-ups i spelvärlden och implementerar deras effekter i spelmotorn.
 
-Detta gör det möjligt att byta spel utan att förändra plattformens grundläggande köp- och behörighetssystem.
+Det gör att egenskaper för power-ups kan ändras från plattformens data utan att motsvarande värden behöver hårdkodas direkt i spelmotorn.
 
 ## 5. Kom igång
 
@@ -237,6 +282,7 @@ Kompletterande dokumentation finns i `docs/`.
 
 - [Uppgiftsbeskrivning](docs/assignment-description.md)
 - [Checklista för uppgiftskrav](docs/assignment-checklist.md)
+- [Utvecklingsplan och ansvarsfördelning](docs/development-plan.md)
 - [Databasdesign](docs/database-design.md)
 - [ER-diagram](docs/er-diagram.png)
 - [OpenAPI-specifikation](docs/openapi.yaml) – API-endpoints och request/response-strukturer
