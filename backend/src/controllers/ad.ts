@@ -157,7 +157,7 @@ export const createAd = async (
         return
     }
 
-    if (target_url !== undefined && target_url !== null) {
+    if (target_url !== undefined && target_url !== null && target_url !== '') {
         const error = validateField('target_url', target_url, 'string')
 
         if (error) {
