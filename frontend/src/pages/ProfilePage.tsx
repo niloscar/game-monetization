@@ -269,7 +269,7 @@ useEffect(() => {
     if (!identity) return null
 
     const iconKey = getProfileIconKey(identity)
-    const tierName = identity.tier?.name ?? 'Okänd nivå'
+    const tierName = identity.tier?.name ?? 'Gratiskonto'
 
     return (
         <div className="score-page">
