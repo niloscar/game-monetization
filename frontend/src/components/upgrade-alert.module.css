@@ -1,0 +1,36 @@
+.upgrade-alert {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: calc(100% - 32px);
+    margin: 0;
+    text-align: center;
+    z-index: 200;
+    color: var(--text);
+    background-color: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1rem;
+    font-size: 11px;
+    line-height: 1rem;
+    text-align: left;
+
+    .upgrade-link {
+        display: inline-block;
+        padding: 0.5rem 1rem;
+        border-radius: 6px;
+        font-size: 10px;
+        font-weight: 700;
+        cursor: pointer;
+        text-transform: lowercase;
+        user-select: none;
+        background-color: var(--accent);
+        color: #0a0a0f;
+        white-space: nowrap;
+    }
+}

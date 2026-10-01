@@ -7,6 +7,7 @@ import { selectWeightedAds } from '../utils/selectWeightedAds'
 import type { GameAccess } from '../types/gameAccess'
 import type { Ad } from '@assignment/shared/types/ad'
 import styles from './game.module.css'
+import UpgradeAlert from './UpgradeAlert'
 
 
 export default function Game() {
@@ -106,12 +107,14 @@ export default function Game() {
                 />
             )}
 
-            {showPreGameAd && preGameAd && (
+            {gameAccess && showPreGameAd && preGameAd && (
                 <PreGameAd
                     ad={preGameAd}
                     onComplete={handlePreGameAdComplete}
                 />
             )}
+
+            {gameAccess && <UpgradeAlert showPreGameAd={showPreGameAd} />}
         </div>
     )
 }
