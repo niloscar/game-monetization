@@ -3,6 +3,9 @@ import { WORLD_UNITS_PER_METER } from './gameState'
 import type { GameState, SpawnedPowerUp } from '../types/game'
 import type { PowerUp } from '@assignment/shared/types/powerUp'
 
+const POWER_UP_MIN_GAP_METERS = 15
+const POWER_UP_MAX_GAP_METERS = 150
+
 let nextPowerUpId = 1
 
 function getRandomPowerUp(powerUps: PowerUp[]): PowerUp | null {
@@ -57,7 +60,7 @@ export function spawnPowerUp(state: GameState) {
         powerUp,
         position: {
             x: getSpawnX('lane', side, powerUp.width),
-            y: -powerUp.height / 2
+            y: getSpawnY(powerUp),
         }
     })
 }
@@ -70,8 +73,7 @@ export function respawnPowerUp(state: GameState, spawnedPowerUp: SpawnedPowerUp)
 
     spawnedPowerUp.powerUp = powerUp
     spawnedPowerUp.position.x = getSpawnX('lane', side, powerUp.width)
-    spawnedPowerUp.position.y =
-        -powerUp.height / 2 - getPowerUpGap()
+    spawnedPowerUp.position.y = getSpawnY(powerUp)
 }
 
 export function applyPowerUpEffects(state: GameState, powerUp: PowerUp) {
@@ -115,8 +117,9 @@ export function updatePowerUpEffects(state: GameState) {
     }
 }
 
-const POWER_UP_MIN_GAP_METERS = 20
-const POWER_UP_MAX_GAP_METERS = 40
+function getSpawnY(powerUp: PowerUp) {
+    return -powerUp.height / 2 - getPowerUpGap()
+}
 
 function getPowerUpGap() {
     const gapMeters =
