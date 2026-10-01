@@ -1,10 +1,12 @@
 import { GAME_BOUNDS, SIDEWALK_WIDTH } from './gameState'
 import { getWorldObjectSprite, getWorldObjectHealthDelta } from './worldObjects'
+import { getPowerUpImage } from './powerUps'
 
 import type { GameState } from '../types/game'
 import type { LoadedDisplayAd } from '../types/ad'
-import type { GameAssets } from './assets'
-import { getPowerUpImage } from './powerUps'
+import type { GameAssets, AssetName } from './assets'
+import { SPRITE_SHEETS } from './assets'
+
 
 const ROAD_MARKING_WIDTH = 8
 const ROAD_MARKING_HEIGHT = 50
@@ -68,24 +70,35 @@ export const renderGame = (
 
     /* Render the world objects */
     for (const object of state.world.objects) {
-        const sprite = getWorldObjectSprite(object.type)
-        const healthDelta = getWorldObjectHealthDelta(object.type)
-
         const x = object.position.x - object.width / 2
         const y = object.position.y - object.height / 2
 
+        const sprite = getWorldObjectSprite(object.type)
+
         if (sprite) {
-            ctx.drawImage(assets[sprite], x, y, object.width, object.height)
+            drawSprite(
+                ctx,
+                assets,
+                sprite.asset,
+                object.spriteFrame,
+                x,
+                y,
+                object.width,
+                object.height
+            )
 
             continue
         }
+
+        const healthDelta = getWorldObjectHealthDelta(object.type)
 
         ctx.fillStyle =
             healthDelta > 0
                 ? '#27ae60'
                 : healthDelta < 0
-                  ? '#c0392b'
-                  : '#7f8c8d'
+                ? '#c0392b'
+                : '#7f8c8d'
+
         ctx.fillRect(x, y, object.width, object.height)
     }
 
@@ -371,4 +384,38 @@ function renderPowerUpStatus(ctx: CanvasRenderingContext2D, state: GameState) {
             160 + index * 22
         )
     })
+}
+
+function drawSprite(
+    ctx: CanvasRenderingContext2D,
+    assets: GameAssets,
+    asset: AssetName,
+    frame: number,
+    x: number,
+    y: number,
+    width: number,
+    height: number
+) {
+    const image = assets[asset]
+
+    if (!SPRITE_SHEETS.has(asset)) {
+        ctx.drawImage(image, x, y, width, height)
+        return
+    }
+
+    const frameCount = 3
+    const sourceWidth = image.naturalWidth / frameCount
+    const sourceHeight = image.naturalHeight
+
+    ctx.drawImage(
+        image,
+        frame * sourceWidth,
+        0,
+        sourceWidth,
+        sourceHeight,
+        x,
+        y,
+        width,
+        height
+    )
 }

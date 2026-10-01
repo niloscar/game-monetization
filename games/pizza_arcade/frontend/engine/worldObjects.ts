@@ -18,13 +18,17 @@ interface SpawnRule {
     weight: number
 }
 
+export type SpriteConfig = {
+    asset: AssetName
+}
+
 interface WorldObjectConfig {
     width: number
     height: number
     healthDelta: number
     scoreDelta: number
     spawnWeight: number
-    sprite?: AssetName
+    sprite?: SpriteConfig
     spawnRules: SpawnRule[]
 }
 
@@ -35,6 +39,9 @@ const WORLD_OBJECT_CONFIG: Record<WorldObjectType, WorldObjectConfig> = {
         healthDelta: 5,
         scoreDelta: 50,
         spawnWeight: 1,
+        sprite: {
+            asset: 'sodaSmall'
+        },
         spawnRules: [
             { zone: 'sidewalk', weight: 5 },
             { zone: 'parked', weight: 5 },
@@ -47,6 +54,9 @@ const WORLD_OBJECT_CONFIG: Record<WorldObjectType, WorldObjectConfig> = {
         healthDelta: 10,
         scoreDelta: 0,
         spawnWeight: 1,
+        sprite: {
+            asset: 'pizza'
+        },
         spawnRules: [
             { zone: 'sidewalk', weight: 5 },
             { zone: 'parked', weight: 5 },
@@ -59,6 +69,9 @@ const WORLD_OBJECT_CONFIG: Record<WorldObjectType, WorldObjectConfig> = {
         healthDelta: -2,
         scoreDelta: -50,
         spawnWeight: 1,
+        sprite: {
+            asset: 'rats'
+        },
         spawnRules: [
             { zone: 'sidewalk', weight: 4 },
             { zone: 'parked', weight: 4 },
@@ -71,6 +84,9 @@ const WORLD_OBJECT_CONFIG: Record<WorldObjectType, WorldObjectConfig> = {
         healthDelta: -5,
         scoreDelta: -300,
         spawnWeight: 1,
+        sprite: {
+            asset: 'cats'
+        },
         spawnRules: [
             { zone: 'sidewalk', weight: 5 },
             { zone: 'parked', weight: 3 },
@@ -83,6 +99,9 @@ const WORLD_OBJECT_CONFIG: Record<WorldObjectType, WorldObjectConfig> = {
         healthDelta: -8,
         scoreDelta: -300,
         spawnWeight: 1,
+        sprite: {
+            asset: 'dogs'
+        },
         spawnRules: [
             { zone: 'sidewalk', weight: 5 },
             { zone: 'parked', weight: 2 },
@@ -95,6 +114,9 @@ const WORLD_OBJECT_CONFIG: Record<WorldObjectType, WorldObjectConfig> = {
         width: 30,
         height: 30,
         spawnWeight: 2,
+        sprite: {
+            asset: 'trashcan'
+        },
         spawnRules: [
             { zone: 'sidewalkEdge', weight: 5 },
             { zone: 'sidewalk', weight: 2 },
@@ -108,6 +130,9 @@ const WORLD_OBJECT_CONFIG: Record<WorldObjectType, WorldObjectConfig> = {
         width: 30,
         height: 15,
         spawnWeight: 2,
+        sprite: {
+            asset: 'mailbox'
+        },
         spawnRules: [
             { zone: 'sidewalkEdge', weight: 1 }
         ]
@@ -118,6 +143,9 @@ const WORLD_OBJECT_CONFIG: Record<WorldObjectType, WorldObjectConfig> = {
         width: 40,
         height: 30,
         spawnWeight: 4,
+        sprite: {
+            asset: 'pedestrians'
+        },
         spawnRules: [
             { zone: 'sidewalk', weight: 5 },
             { zone: 'parked', weight: 2 },
@@ -130,6 +158,9 @@ const WORLD_OBJECT_CONFIG: Record<WorldObjectType, WorldObjectConfig> = {
         width: 35,
         height: 80,
         spawnWeight: 3,
+        sprite: {
+            asset: 'cyclist'
+        },
         spawnRules: [
             { zone: 'sidewalk', weight: 2 },
             { zone: 'parked', weight: 2 },
@@ -142,6 +173,9 @@ const WORLD_OBJECT_CONFIG: Record<WorldObjectType, WorldObjectConfig> = {
         width: 20,
         height: 20,
         spawnWeight: 2,
+        sprite: {
+            asset: 'lamppost'
+        },
         spawnRules: [
             { zone: 'sidewalkEdge', weight: 1 }
         ]
@@ -162,6 +196,9 @@ const WORLD_OBJECT_CONFIG: Record<WorldObjectType, WorldObjectConfig> = {
         width: 80,
         height: 160,
         spawnWeight: 5,
+        sprite: {
+            asset: 'cars'
+        },
         spawnRules: [
             { zone: 'parked', weight: 4 },
             { zone: 'lane', weight: 1 }
@@ -173,6 +210,9 @@ const WORLD_OBJECT_CONFIG: Record<WorldObjectType, WorldObjectConfig> = {
         width: 60,
         height: 30,
         spawnWeight: 1,
+        sprite: {
+            asset: 'concreteBarrier'
+        },
         spawnRules: [
             { zone: 'parked', weight: 1 },
             { zone: 'lane', weight: 3 }
@@ -184,6 +224,9 @@ const WORLD_OBJECT_CONFIG: Record<WorldObjectType, WorldObjectConfig> = {
         width: 60,
         height: 120,
         spawnWeight: 1,
+        sprite: {
+            asset: 'container'
+        },
         spawnRules: [
             { zone: 'parked', weight: 3 },
             { zone: 'lane', weight: 1 }
@@ -195,6 +238,9 @@ const WORLD_OBJECT_CONFIG: Record<WorldObjectType, WorldObjectConfig> = {
         width: 100,
         height: 300,
         spawnWeight: 1,
+        sprite: {
+            asset: 'schoolbus'
+        },
         spawnRules: [
             { zone: 'parked', weight: 2 },
             { zone: 'lane', weight: 3 }
@@ -206,6 +252,9 @@ const WORLD_OBJECT_CONFIG: Record<WorldObjectType, WorldObjectConfig> = {
         width: 120,
         height: 200,
         spawnWeight: 1,
+        sprite: {
+            asset: 'concreteTruck'
+        },
         spawnRules: [
             { zone: 'lane', weight: 4 }
         ]
@@ -216,6 +265,9 @@ const WORLD_OBJECT_CONFIG: Record<WorldObjectType, WorldObjectConfig> = {
         width: 30,
         height: 30,
         spawnWeight: 1,
+        sprite: {
+            asset: 'manhole'
+        },
         spawnRules: [
             { zone: 'lane', weight: 1 }
         ]
@@ -226,6 +278,9 @@ const WORLD_OBJECT_CONFIG: Record<WorldObjectType, WorldObjectConfig> = {
         healthDelta: -5,
         scoreDelta: -50,
         spawnWeight: 3,
+        sprite: {
+            asset: 'dogPoo'
+        },
         spawnRules: [
             { zone: 'sidewalkEdge', weight: 5 },
             { zone: 'sidewalk', weight: 5 },
@@ -239,6 +294,9 @@ const WORLD_OBJECT_CONFIG: Record<WorldObjectType, WorldObjectConfig> = {
         healthDelta: -20,
         scoreDelta: -100,
         spawnWeight: 2,
+        sprite: {
+            asset: 'tireFire'
+        },
         spawnRules: [
             { zone: 'sidewalkEdge', weight: 3 },
             { zone: 'sidewalk', weight: 3 },
@@ -252,6 +310,9 @@ const WORLD_OBJECT_CONFIG: Record<WorldObjectType, WorldObjectConfig> = {
         healthDelta: -15,
         scoreDelta: -80,
         spawnWeight: 1,
+        sprite: {
+            asset: 'tires'
+        },
         spawnRules: [
             { zone: 'sidewalkEdge', weight: 2 },
             { zone: 'sidewalk', weight: 2 },
@@ -352,6 +413,7 @@ function randomizeWorldObject(object: WorldObject) {
     object.type = type
     object.width = config.width
     object.height = config.height
+    object.spriteFrame = getRandomSpriteFrame()
 }
 
 function getTargetObjectCount(state: GameState) {
@@ -396,7 +458,8 @@ function createWorldObject(id: number): WorldObject {
             y: 0
         },
         width: config.width,
-        height: config.height
+        height: config.height,
+        spriteFrame: getRandomSpriteFrame()
     }
 }
 
@@ -420,4 +483,8 @@ function getDifficultyProgress(state: GameState) {
 
 export function getWorldObjectScoreDelta(type: WorldObjectType) {
     return WORLD_OBJECT_CONFIG[type].scoreDelta
+}
+
+function getRandomSpriteFrame() {
+    return Math.floor(Math.random() * 3)
 }
