@@ -1,19 +1,34 @@
 import TierCard from './TierCard'
 import type { Tier } from './storeTypes'
 import styles from './store.module.css'
+import LoadingDots from '../LoadingDots'
 
-export default function TierSection({ tiers, selectedTierId, onChange }: { tiers: Tier[], selectedTierId: number | undefined, onChange: (tier: Tier) => void }) {
+interface TierSectionProps {
+    loading: boolean
+    products: Tier[]
+    selectedTierId: number | undefined
+    onChange: (tier: Tier) => void
+}
+
+export default function TierSection({ loading, products, selectedTierId, onChange }: TierSectionProps) {
 
     return (
         <section className={styles['tier-grid']}>
-            {tiers.map((tier) => (
-                <TierCard 
-                    key={tier.name}
-                    tier={tier} 
-                    selected={tier.id === selectedTierId}
-                    onChange={onChange} 
-                />
-            ))}
+            {loading ? (
+                <p className={styles['loading']}>
+                    Laddar produkter
+                    <LoadingDots />
+                </p>
+            ) : (
+                products.map((tier) => (
+                    <TierCard 
+                        key={tier.name}
+                        tier={tier} 
+                        selected={tier.id === selectedTierId}
+                        onChange={onChange} 
+                    />
+                ))
+            )}
         </section>
     )
 }

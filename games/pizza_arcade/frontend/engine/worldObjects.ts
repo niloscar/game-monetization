@@ -27,6 +27,7 @@ interface WorldObjectConfig {
     width: number
     height: number
     healthDelta: number
+    scoreDelta: number
     spawnWeight: number
     sprite?: AssetName
     spawnRules: SpawnRule[]
@@ -37,6 +38,7 @@ const WORLD_OBJECT_CONFIG: Record<WorldObjectType, WorldObjectConfig> = {
         width: 5,
         height: 10,
         healthDelta: 5,
+        scoreDelta: 50,
         spawnWeight: 1,
         spawnRules: [
             { zone: 'sidewalk', weight: 5 },
@@ -48,6 +50,7 @@ const WORLD_OBJECT_CONFIG: Record<WorldObjectType, WorldObjectConfig> = {
         width: 20,
         height: 20,
         healthDelta: 10,
+        scoreDelta: 0,
         spawnWeight: 1,
         spawnRules: [
             { zone: 'sidewalk', weight: 5 },
@@ -59,6 +62,7 @@ const WORLD_OBJECT_CONFIG: Record<WorldObjectType, WorldObjectConfig> = {
         width: 20,
         height: 10,
         healthDelta: -2,
+        scoreDelta: -50,
         spawnWeight: 1,
         spawnRules: [
             { zone: 'sidewalk', weight: 4 },
@@ -70,6 +74,7 @@ const WORLD_OBJECT_CONFIG: Record<WorldObjectType, WorldObjectConfig> = {
         width: 30,
         height: 20,
         healthDelta: -5,
+        scoreDelta: -300,
         spawnWeight: 1,
         spawnRules: [
             { zone: 'sidewalk', weight: 5 },
@@ -81,6 +86,7 @@ const WORLD_OBJECT_CONFIG: Record<WorldObjectType, WorldObjectConfig> = {
         width: 40,
         height: 20,
         healthDelta: -8,
+        scoreDelta: -300,
         spawnWeight: 1,
         spawnRules: [
             { zone: 'sidewalk', weight: 5 },
@@ -90,6 +96,7 @@ const WORLD_OBJECT_CONFIG: Record<WorldObjectType, WorldObjectConfig> = {
     },
     trashCan: {
         healthDelta: -10,
+        scoreDelta: 0,
         width: 30,
         height: 30,
         spawnWeight: 2,
@@ -102,6 +109,7 @@ const WORLD_OBJECT_CONFIG: Record<WorldObjectType, WorldObjectConfig> = {
     },
     mailBox: {
         healthDelta: -10,
+        scoreDelta: 0,
         width: 30,
         height: 15,
         spawnWeight: 2,
@@ -111,6 +119,7 @@ const WORLD_OBJECT_CONFIG: Record<WorldObjectType, WorldObjectConfig> = {
     },
     pedestrian: {
         healthDelta: -20,
+        scoreDelta: -500,
         width: 40,
         height: 30,
         spawnWeight: 4,
@@ -122,6 +131,7 @@ const WORLD_OBJECT_CONFIG: Record<WorldObjectType, WorldObjectConfig> = {
     },
     cyclist: {
         healthDelta: -25,
+        scoreDelta: -400,
         width: 35,
         height: 80,
         spawnWeight: 3,
@@ -133,6 +143,7 @@ const WORLD_OBJECT_CONFIG: Record<WorldObjectType, WorldObjectConfig> = {
     },
     lightPole: {
         healthDelta: -30,
+        scoreDelta: 0,
         width: 20,
         height: 20,
         spawnWeight: 2,
@@ -142,6 +153,7 @@ const WORLD_OBJECT_CONFIG: Record<WorldObjectType, WorldObjectConfig> = {
     },
     streetSign: {
         healthDelta: -30,
+        scoreDelta: 0,
         width: 30,
         height: 10,
         spawnWeight: 2,
@@ -151,6 +163,7 @@ const WORLD_OBJECT_CONFIG: Record<WorldObjectType, WorldObjectConfig> = {
     },
     car: {
         healthDelta: -40,
+        scoreDelta: 0,
         width: 80,
         height: 160,
         spawnWeight: 5,
@@ -161,6 +174,7 @@ const WORLD_OBJECT_CONFIG: Record<WorldObjectType, WorldObjectConfig> = {
     },
     concreteBarrier: {
         healthDelta: -40,
+        scoreDelta: 0,
         width: 60,
         height: 30,
         spawnWeight: 1,
@@ -171,6 +185,7 @@ const WORLD_OBJECT_CONFIG: Record<WorldObjectType, WorldObjectConfig> = {
     },
     container: {
         healthDelta: -60,
+        scoreDelta: 0,
         width: 60,
         height: 120,
         spawnWeight: 1,
@@ -181,6 +196,7 @@ const WORLD_OBJECT_CONFIG: Record<WorldObjectType, WorldObjectConfig> = {
     },
     schoolBus: {
         healthDelta: -60,
+        scoreDelta: 0,
         width: 100,
         height: 300,
         spawnWeight: 1,
@@ -191,6 +207,7 @@ const WORLD_OBJECT_CONFIG: Record<WorldObjectType, WorldObjectConfig> = {
     },
     concreteTruck: {
         healthDelta: -80,
+        scoreDelta: 0,
         width: 120,
         height: 200,
         spawnWeight: 1,
@@ -200,6 +217,7 @@ const WORLD_OBJECT_CONFIG: Record<WorldObjectType, WorldObjectConfig> = {
     },
     manhole: {
         healthDelta: -100,
+        scoreDelta: 0,
         width: 30,
         height: 30,
         spawnWeight: 1,
@@ -426,4 +444,8 @@ export function updateWorldObjectCount(state: GameState) {
 
 function getDifficultyProgress(state: GameState) {
     return Math.min(state.world.elapsedTime / DIFFICULTY_RAMP_DURATION, 1)
+}
+
+export function getWorldObjectScoreDelta(type: WorldObjectType) {
+    return WORLD_OBJECT_CONFIG[type].scoreDelta
 }

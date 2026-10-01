@@ -1,11 +1,11 @@
 export interface OrderAddress {
     id: number
-    fname: string
-    lname: string
-    street: string
-    zipcode: string
-    city: string
-    country: string
+    fname: string | null
+    lname: string | null
+    street: string | null
+    zipcode: string | null
+    city: string | null
+    country: string | null
 }
 
 export interface OrderItem {
@@ -28,21 +28,6 @@ export interface Order {
 export interface CreateOrderItemBody {
     productId: number
     quantity: number
-}
-
-export interface CreateOrderBody {
-    paymentMethodId?: number | null
-
-    address: {
-        fname: string
-        lname: string
-        street: string
-        zipcode: string
-        city: string
-        country: string
-    }
-
-    items: CreateOrderItemBody[]
 }
 
 export interface UpdateOrderBody {

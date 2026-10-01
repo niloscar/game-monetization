@@ -56,13 +56,15 @@ export async function fetchScoresForUser(userId: number): Promise<UserScore[]> {
 // härifrån om anropet misslyckas eller användaren saknar produkt/tier.
 export async function fetchPublicProfile(
     username: string
-): Promise<Pick<ProfileIdentity, 'role' | 'tier' | 'createdAt'> | null> {
+): Promise<Pick<ProfileIdentity, 'userId' | 'username' | 'role' | 'tier' | 'createdAt'> | null> {
     try {
         const res = await api.get(`/user/username/${username}`)
         return {
+            userId: res.data.id,
+            username: res.data.username,
             role: res.data.role,
             tier: res.data.tier,
-            createdAt: res.data.created_at ?? res.data.createdAt
+            createdAt: res.data.created_at
         }
     } catch {
         return null

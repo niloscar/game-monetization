@@ -1,7 +1,10 @@
 import pool from '../database'
-import type { Order, CreateOrderBody, UpdateOrderBody } from '../types/order'
+import type { Order, UpdateOrderBody } from '../types/order'
+import type { CreateOrderBody, CreateOrderResponse } from '@assignment/shared/types/order'
 
-type OrderServiceErrorCode = 'PAYMENT_METHOD_NOT_AVAILABLE' | 'PRODUCT_NOT_AVAILABLE'
+export type OrderServiceErrorCode =
+    | 'PAYMENT_METHOD_NOT_AVAILABLE'
+    | 'PRODUCT_NOT_AVAILABLE'
 
 export class OrderServiceError extends Error {
     constructor(public code: OrderServiceErrorCode, public productId?: number) {
@@ -104,69 +107,111 @@ export async function getOrderByUser(id: number, userId: number): Promise<Order 
     return rows[0] ?? null
 }
 
-export async function createOrder(userId: number, { paymentMethodId = null, address, items }: CreateOrderBody): Promise<Order> {
+export async function createOrder(
+    userId: number,
+    { productId, paymentMethod }: CreateOrderBody
+): Promise<CreateOrderResponse> {
     const client = await pool.connect()
 
     try {
         await client.query('BEGIN')
 
         /*
-         * Create customer if it doesn't exist. If the customer already exists, update information.
-         */
+        * Create or reuse the customer connected to the authenticated user.
+        */
         const customerResult = await client.query<{ id: number }>(
             `INSERT INTO customers (
-                user_id,
-                fname,
-                lname
+                user_id
             )
-            VALUES ($1, $2, $3)
+            VALUES ($1)
 
             ON CONFLICT (user_id)
             DO UPDATE SET
-                fname = EXCLUDED.fname,
-                lname = EXCLUDED.lname
+                user_id = EXCLUDED.user_id
 
             RETURNING id`,
-            [userId, address.fname, address.lname]
+            [userId]
         )
 
         const customer = customerResult.rows[0]
 
-        if (!customer) throw new Error('Failed to create customer')
-
-        /*
-         * If paymentMethodId is provided, check that it exists and is active.
-         */
-        if (paymentMethodId !== null) {
-            const paymentMethodResult = await client.query(
-                `SELECT id
-                FROM payment_methods
-                WHERE
-                    id = $1
-                    AND is_active = TRUE`,
-                [paymentMethodId]
-            )
-
-            if (paymentMethodResult.rowCount === 0) {
-                throw new OrderServiceError(
-                    'PAYMENT_METHOD_NOT_AVAILABLE'
-                )
-            }
+        if (!customer) {
+            throw new Error('Failed to create customer')
         }
 
         /*
-         * The actual order.
+         * Check that the selected payment method exists and is active.
+         */
+        const paymentMethodResult = await client.query<{ id: number }>(
+            `SELECT id
+            FROM payment_methods
+            WHERE
+                key = $1
+                AND is_active = TRUE`,
+            [paymentMethod]
+        )
+
+        const selectedPaymentMethod = paymentMethodResult.rows[0]
+
+        if (!selectedPaymentMethod) {
+            throw new OrderServiceError('PAYMENT_METHOD_NOT_AVAILABLE')
+        }
+
+        /*
+         * Check that the product exists and is available for purchase.
+         * The latest price is fetched from prices and later stored as a snapshot
+         * on the order item.
+         */
+        const productResult = await client.query<{
+            id: number
+            price: string
+        }>(
+            `SELECT
+                p.id,
+                pr.price
+            FROM products p
+
+            JOIN LATERAL (
+                SELECT price
+                FROM prices
+                WHERE product_id = p.id
+                ORDER BY
+                    set_at DESC,
+                    id DESC
+                LIMIT 1
+            ) pr ON TRUE
+
+            WHERE
+                p.id = $1
+                AND p.deleted_at IS NULL
+                AND p.is_available_for_purchase = TRUE`,
+            [productId]
+        )
+
+        const product = productResult.rows[0]
+
+        if (!product) {
+            throw new OrderServiceError(
+                'PRODUCT_NOT_AVAILABLE',
+                productId
+            )
+        }
+
+        /*
+         * Create the order.
          */
         const orderResult = await client.query<{ id: number }>(
             `INSERT INTO orders (
                 customer_id,
-                payment_method_id
+                payment_method_id,
+                status,
+                paid_at
             )
-            VALUES ($1, $2)
+            VALUES ($1, $2, 'paid', NOW())
             RETURNING id`,
             [
                 customer.id,
-                paymentMethodId
+                selectedPaymentMethod.id
             ]
         )
 
@@ -179,90 +224,40 @@ export async function createOrder(userId: number, { paymentMethodId = null, addr
         const orderId = createdOrder.id
 
         /*
-         * The customer address is saved as a snapshot.
+         * Save customer information as an order snapshot.
+         * Remaining fields are nullable for now.
          */
         await client.query(
             `INSERT INTO order_addresses (
-                order_id,
-                fname,
-                lname,
-                street,
-                zipcode,
-                city,
-                country
+                order_id
             )
-            VALUES (
-                $1,
-                $2,
-                $3,
-                $4,
-                $5,
-                $6,
-                $7
-            )`,
-            [
-                orderId,
-                address.fname,
-                address.lname,
-                address.street,
-                address.zipcode,
-                address.city,
-                address.country
-            ]
+            VALUES ($1)`,
+            [orderId]
         )
 
         /*
-         * Add items to the order. The unit price is taken from the latest price for the product.
-         * Throw and error if the product is not available for purchase.
+         * Add the selected product to the order.
+         * Store the current price as a snapshot.
          */
-        for (const item of items) {
-            const itemResult = await client.query(
-                `INSERT INTO order_items (
-                    order_id,
-                    product_id,
-                    quantity,
-                    unit_price
-                )
-                SELECT
-                    $1,
-                    p.id,
-                    $2,
-                    pr.price
-                FROM products p
-
-                JOIN LATERAL (
-                    SELECT price
-                    FROM prices
-                    WHERE product_id = p.id
-                    ORDER BY
-                        set_at DESC,
-                        id DESC
-                    LIMIT 1
-                ) pr ON TRUE
-
-                WHERE
-                    p.id = $3
-                    AND p.deleted_at IS NULL
-                    AND p.is_available_for_purchase = TRUE
-
-                RETURNING product_id`,
-                [
-                    orderId,
-                    item.quantity,
-                    item.productId
-                ]
+        await client.query(
+            `INSERT INTO order_items (
+                order_id,
+                product_id,
+                quantity,
+                unit_price
             )
-
-            if (itemResult.rowCount === 0) throw new OrderServiceError('PRODUCT_NOT_AVAILABLE', item.productId)
-        }
+            VALUES ($1, $2, $3, $4)`,
+            [
+                orderId,
+                product.id,
+                1,
+                product.price
+            ]
+        )
 
         await client.query('COMMIT')
 
-        const order = await getOrder(orderId)
-
-        if (!order) throw new Error('Created order could not be retrieved')
-
-        return order
+        return { id: Number(orderId) }
     } catch (error) {
         await client.query('ROLLBACK')
         throw error

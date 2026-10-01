@@ -1,13 +1,16 @@
 import { useEffect, useState } from 'react'
 import PizzaArcade from '../../../games/pizza_arcade/frontend/PizzaArcade'
 import PreGameAd from './Ads/PreGameAd'
-import { getAds, getAdPolicy } from '../api/ad'
+import { getAds } from '../api/ad'
+import { getGameAccess, saveScore } from '../api/game'
 import { selectWeightedAds } from '../utils/selectWeightedAds'
-import type { Ad, AdPolicy } from '@assignment/shared/types/ad'
+import type { GameAccess } from '../types/gameAccess'
+import type { Ad } from '@assignment/shared/types/ad'
 import styles from './game.module.css'
 
+
 export default function Game() {
-    const [adPolicy, setAdPolicy] = useState<AdPolicy | null>(null)
+    const [gameAccess, setGameAccess] = useState<GameAccess | null>(null)
     const [displayAds, setDisplayAds] = useState<Ad[]>([])
     const [preGameAd, setPreGameAd] = useState<Ad | null>(null)
     const [showPreGameAd, setShowPreGameAd] = useState(false)
@@ -16,15 +19,15 @@ export default function Game() {
     useEffect(() => {
         const loadGameData = async () => {
             try {
-                const policy = await getAdPolicy()
-                setAdPolicy(policy)
+                const access = await getGameAccess()
+                setGameAccess(access)
 
-                if (policy.display) {
+                if (access.ads.display) {
                     const ads = await getAds('display')
                     setDisplayAds(ads)
                 }
 
-                if (policy.preGame) {
+                if (access.ads.preGame) {
                     const ads = await getAds('pre_game')
                     const [selectedAd] = selectWeightedAds(ads, 1)
 
@@ -45,7 +48,7 @@ export default function Game() {
     }, [])
 
     const handleStartRequest = () => {
-        if (!adPolicy?.preGame || !preGameAd) {
+        if (!gameAccess?.ads.preGame || !preGameAd) {
             setCanStart(true)
             return
         }
@@ -55,12 +58,23 @@ export default function Game() {
 
     const handleRestartRequest = () => {
         setShowPreGameAd(false)
-        setCanStart(!adPolicy?.preGame || !preGameAd)
+        setCanStart(!gameAccess?.ads.preGame || !preGameAd)
     }
 
     const handlePreGameAdComplete = () => {
         setShowPreGameAd(false)
         setCanStart(true)
+    }
+
+    const handleGameOver = async (score: number) => {
+        if (!gameAccess?.canSaveScore) return
+
+        try {
+            await saveScore(score)
+            console.log('Score saved:', score)
+        } catch (error) {
+            console.error('Failed to save score:', error)
+        }
     }
 
     const pizzaArcadeAds = displayAds.map((ad) => ({
@@ -73,8 +87,10 @@ export default function Game() {
             <PizzaArcade
                 displayAds={pizzaArcadeAds}
                 canStart={canStart}
+                showScore={gameAccess?.showCurrentScore ?? false}
                 onStartRequest={handleStartRequest}
                 onRestartRequest={handleRestartRequest}
+                onGameOver={handleGameOver}
             />
 
             {showPreGameAd && preGameAd && (
