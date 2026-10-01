@@ -1,12 +1,16 @@
 import { useState } from 'react'
-import type { ChangeEvent, FormEvent } from 'react'
 import FormBodyCreditCard from './FormBodyCreditCard'
-import Button from '../Button'
-import type { Cart } from './storeTypes'
-import { Coins, CreditCard, LetterP } from 'pixelarticons/react'
-import styles from './store.module.css'
 import FormBodyPayPal from './FormBodyPayPal'
 import FormBodySwish from './FormBodySwish'
+import Button from '../Button'
+import { Coins, CreditCard, LetterP } from 'pixelarticons/react'
+import styles from './store.module.css'
+
+
+
+import type { ChangeEvent, FormEvent } from 'react'
+import type { Cart } from './storeTypes'
+import LoadingDots from '../LoadingDots'
 
 const validationMessages: Record<string, string> = {
     cardNumber: 'Ange ett giltigt kortnummer',
@@ -24,7 +28,12 @@ const paymentMethods = [
 
 type PaymentMethod = (typeof paymentMethods)[number]['id']
 
-export default function PaymentSection({ cart, onSubmit }: { cart: Cart; onSubmit: () => void }) {
+interface PaymentSectionProps {
+    cart: Cart
+    onSubmit: (paymentMethod: PaymentMethod) => Promise<void>
+}
+
+export default function PaymentSection({ cart, onSubmit }: PaymentSectionProps) {
     const [formData, setFormData] = useState({
         cardNumber: '',
         cardName: '',
@@ -37,6 +46,7 @@ export default function PaymentSection({ cart, onSubmit }: { cart: Cart; onSubmi
 
     const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('card')
     const [errors, setErrors] = useState<Record<string, string>>({})
+    const [isSubmitting, setIsSubmitting] = useState(false)
     const [submitted, setSubmitted] = useState(false)
     const [paypalLoggedIn, setPaypalLoggedIn] = useState(false)
 
@@ -106,8 +116,10 @@ export default function PaymentSection({ cart, onSubmit }: { cart: Cart; onSubmi
         setPaypalLoggedIn(true)
     }
 
-    const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+    const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault()
+
+        if (isSubmitting) return
 
         setSubmitted(true)
 
@@ -118,7 +130,13 @@ export default function PaymentSection({ cart, onSubmit }: { cart: Cart; onSubmi
 
         if (Object.keys(newErrors).length > 0) return
 
-        onSubmit() // ONTODO: Include payment method
+        setIsSubmitting(true)
+
+        try {
+            await onSubmit(paymentMethod)
+        } finally {
+            setIsSubmitting(false)
+        }
     }
 
     const orderSum = cart.items.reduce((acc, item) => acc + item.price, 0)
@@ -199,10 +217,16 @@ export default function PaymentSection({ cart, onSubmit }: { cart: Cart; onSubmi
 
                 <Button
                     type="submit"
+                    disabled={!paymentReady || isSubmitting}
                     className={styles['btn-confirm-purchase']}
-                    disabled={!paymentReady}
                 >
-                    Betala {orderSum} kr
+                    {isSubmitting ? (
+                        <>
+                            Genomför köp<LoadingDots />
+                        </>
+                    ) : (
+                        `Betala ${orderSum} kr`
+                    )}
                 </Button>
 
                 <p className={styles['disclaimer']}>

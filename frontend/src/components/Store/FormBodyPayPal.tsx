@@ -3,6 +3,7 @@ import FormField from '../FormField'
 import Button from '../Button'
 import type { FormBodyProps } from './storeTypes'
 import styles from './store.module.css'
+import LoadingDots from '../LoadingDots'
 
 type FormBodyPayPalProps = FormBodyProps & {
     loggedIn: boolean
@@ -18,20 +19,15 @@ export default function FormBodyPayPal({
 }: FormBodyPayPalProps) {
     const containerRef = useRef<HTMLDivElement>(null)
     const [loading, setLoading] = useState(false)
-    const [loadingDots, setLoadingDots] = useState(0)
 
     const handleLogin = () => {
         if (!containerRef.current) return
 
         setLoading(true)
 
-        const interval = setInterval(() => setLoadingDots((dots) => (dots >= 3 ? 0 : dots + 1)), 300)
-
         setTimeout(() => {
-            clearInterval(interval)
             if (containerRef.current) onLogin(containerRef.current)
             setLoading(false)
-            setLoadingDots(0)
         }, 2000)
     }
 
@@ -85,20 +81,7 @@ export default function FormBodyPayPal({
                 {loading ? (
                     <>
                         Loggar in
-                        <span className={styles['loading-dots']}>
-                            {[1, 2, 3].map((dot) => (
-                                <span
-                                    key={dot}
-                                    className={
-                                        dot <= loadingDots
-                                            ? ''
-                                            : styles['hidden']
-                                    }
-                                >
-                                    .
-                                </span>
-                            ))}
-                        </span>
+                        <LoadingDots />
                     </>
                 ) : (
                     'Logga in med PayPal'

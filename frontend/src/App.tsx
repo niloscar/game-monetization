@@ -18,6 +18,7 @@ import ApiTestPage from './pages/ApiTestPage' // Remove this page later, it's ju
 import ContactPage from './pages/ContactPage'
 import TermsPage from './pages/TermsPage'
 import AdminRoute from './components/AdminRoute'
+import OrderConfirmationPage from './pages/OrderConfirmationPage'
 
 const App = () => {
     return (
@@ -35,6 +36,7 @@ const App = () => {
                 <Route path="/profile/:username" element={<ProfilePage />} /> //
                 publik profil, öppen för alla
                 <Route path="/store" element={<StorePage />}></Route>
+                <Route path="/store/confirmation" element={<OrderConfirmationPage />}></Route>
                 <Route path="/api-test" element={<ApiTestPage />}></Route>
                 <Route path="/contact" element={<ContactPage />}></Route>
                 <Route path="/terms" element={<TermsPage />}></Route>

@@ -4,6 +4,6 @@
     "private": true,
     "type": "module",
     "exports": {
-        "./types/ad": "./src/types/ad.ts"
+        "./types/*": "./src/types/*.ts"
     }
 }
