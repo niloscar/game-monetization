@@ -1,4 +1,5 @@
 import type { GameBounds, GameState, Vehicle } from '../types/game'
+import type { PowerUp } from '@assignment/shared/types/powerUp'
 
 export const CANVAS_WIDTH = 800
 export const CANVAS_HEIGHT = 600
@@ -16,6 +17,9 @@ export const GAME_BOUNDS: GameBounds = {
     top: 80,
     bottom: 550
 }
+
+export const WORLD_UNITS_PER_METER = 40
+export const WORLD_SPEED_MULTIPLIER = 2
 
 export const ROAD_CENTER_X = (GAME_BOUNDS.left + GAME_BOUNDS.right) / 2
 export const SIDEWALK_WIDTH = 90
@@ -46,11 +50,24 @@ const SKATEBOARD: Vehicle = {
     canUseSidewalk: true
 }
 
-export const createInitialGameState = (): GameState => ({
+export const createInitialGameState = (powerUps: PowerUp[] = []): GameState => ({
     phase: 'start',
+    availablePowerUps: powerUps,
+    powerUpEffects: {
+        speedMultiplier: 1,
+        speedExpiresAt: 0,
+        speedName: null,
+        scoreMultiplier: 1,
+        scoreExpiresAt: 0,
+        scoreName: null
+    },
+    powerUpNotification: {
+        name: null,
+        startedAt: 0
+    },
     score: {
         total: 0,
-        survivalTime: 0,
+        distanceTravelled: 0,
         pizzasDelivered: 0,
         healthPickups: 0,
         penalties: 0
@@ -76,6 +93,7 @@ export const createInitialGameState = (): GameState => ({
             sameSideCount: 0
         },
         objects: [],
+        powerUps: [],
         billboards: [
             {
                 id: 1,

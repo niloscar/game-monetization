@@ -1,3 +1,5 @@
+import type { PowerUp } from '@assignment/shared/types/powerUp'
+
 export type GamePhase = 'start' | 'playing' | 'gameOver'
 
 export interface GameState {
@@ -5,11 +7,14 @@ export interface GameState {
     player: Player
     world: World
     score: ScoreState
+    availablePowerUps: PowerUp[]
+    powerUpEffects: PowerUpEffects
+    powerUpNotification: PowerUpNotification
 }
 
 export interface ScoreState {
     total: number
-    survivalTime: number
+    distanceTravelled: number
     pizzasDelivered: number
     healthPickups: number
     penalties: number
@@ -55,6 +60,7 @@ export interface World {
     scrollOffset: number
     elapsedTime: number
     objects: WorldObject[]
+    powerUps: SpawnedPowerUp[]
     billboards: Billboard[]
     deliveryTarget: DeliveryTarget | null
     spawn: {
@@ -120,4 +126,24 @@ export interface DeliveryTarget {
     width: number
     height: number
     side: WorldSide
+}
+
+export interface SpawnedPowerUp {
+    id: number
+    powerUp: PowerUp
+    position: Position
+}
+
+export interface PowerUpEffects {
+    speedMultiplier: number
+    speedExpiresAt: number
+    speedName: string | null
+    scoreMultiplier: number
+    scoreExpiresAt: number
+    scoreName: string | null
+}
+
+export interface PowerUpNotification {
+    name: string | null
+    startedAt: number
 }

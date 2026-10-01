@@ -1,11 +1,6 @@
-import { getSpawnX } from './worldZones'
+import { getSpawnX, getSpawnSide } from './worldZones'
 import type { AssetName } from './assets'
-import type {
-    GameState,
-    WorldObject,
-    WorldObjectType,
-    WorldSide
-} from '../types/game'
+import type { GameState, WorldObject, WorldObjectType } from '../types/game'
 import type { SpawnZone } from './../types/game'
 
 const INITIAL_MIN_GAP = 140
@@ -288,29 +283,6 @@ function getSpawnZone(type: WorldObjectType): SpawnZone {
     }
 
     return rules[rules.length - 1].zone
-}
-
-function getSpawnSide(state: GameState): WorldSide {
-    const { lastSide, sameSideCount } = state.world.spawn
-
-    if (!lastSide) {
-        const side = Math.random() < 0.5 ? 'left' : 'right'
-        state.world.spawn.lastSide = side
-        state.world.spawn.sameSideCount = 1
-        return side
-    }
-
-    const oppositeSide = lastSide === 'left' ? 'right' : 'left'
-
-    const side =
-        sameSideCount >= 3 || Math.random() < 0.65
-            ? oppositeSide
-            : lastSide
-
-    state.world.spawn.lastSide = side
-    state.world.spawn.sameSideCount = side === lastSide ? sameSideCount + 1 : 1
-
-    return side
 }
 
 function setObjectSpawnPosition(state: GameState, object: WorldObject) {

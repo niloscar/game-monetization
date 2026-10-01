@@ -1,19 +1,4 @@
-export interface PowerUp {
-    id: number
-    name: string
-    key: string
-    description: string | null
-    imageUrl: string | null
-    isActive: boolean
-    width: number
-    height: number
-    healthDelta: number
-    scoreDelta: number
-    speedMultiplier: number
-    scoreMultiplier: number
-    durationSeconds: number
-    spawnWeight: number
-}
+export type { PowerUp } from '@assignment/shared/types/powerUp'
 
 export interface CreatePowerUpBody {
     name: string

@@ -1,4 +1,4 @@
-export type { AdPolicy } from '@assignment/shared/types/ad'
+import type { PowerUp } from './powerUp'
 export interface Score {
     id: number
     userId: number
@@ -45,4 +45,5 @@ export interface GameAccess {
         preGame: boolean
         display: boolean
     }
+    powerUps: PowerUp[]
 }
