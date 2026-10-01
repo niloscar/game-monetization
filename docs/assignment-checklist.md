@@ -8,7 +8,7 @@
 - [x] En användare ska kunna registrera konto, logga in och logga ut
 - [x] En användare ska kunna välja vilken nivå de vill vara på och då ska de gå igenom ett låtsas betalsteg
 - [x] En kund ska kunna se kvitton på de gånger de gått igenom betalsteget
-- [ ] En administratör ska kunna lägga till innehållssidor och välja vilken nivå man måste ha för att få se den
+- [x] En administratör ska kunna lägga till innehållssidor och välja vilken nivå man måste ha för att få se den
 - [x] Innehållssidor ska hämta all sin information från databasen
 - [x] Om en användare inte har rätt nivå på sitt konto ska den få ett förslag att uppgradera när en begränsad sida laddas
 - [x] Utöver innehållet som matchas mot nivån på kontot så ska det även utvecklas någon form av funktionaltiet som förbättras ju högre nivå man har. Valet för detta är fritt så välj något som kommer att passa inom den tidsplanen för uppgiften.

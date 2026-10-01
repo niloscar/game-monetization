@@ -7,8 +7,7 @@ import { selectWeightedAds } from '../utils/selectWeightedAds'
 import type { GameAccess } from '../types/gameAccess'
 import type { Ad } from '@assignment/shared/types/ad'
 import styles from './game.module.css'
-import UpgradeAlert from './UpgradeAlert'
-
+import UpgradeAlert from './Ads/UpgradeAlert'
 
 export default function Game() {
     const [gameAccess, setGameAccess] = useState<GameAccess | null>(null)
