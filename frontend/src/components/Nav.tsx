@@ -1,8 +1,9 @@
 import { NavLink } from 'react-router-dom'
+import { useAuth } from '../context/AuthContext'
 import styles from './nav.module.css'
 
 const Nav = () => {
-    const isAdmin = true
+    const { isAdmin } = useAuth()
 
     return (
         <nav className={styles.nav}>
