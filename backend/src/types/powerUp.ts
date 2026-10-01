@@ -14,6 +14,7 @@ export interface CreatePowerUpBody {
     scoreMultiplier?: number
     durationSeconds?: number
     spawnWeight?: number
+    productIds?: number[]
 }
 
 export interface UpdatePowerUpBody {

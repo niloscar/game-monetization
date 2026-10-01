@@ -1,10 +1,23 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import api from '../api/apiClient'
 import Button from '../components/Button'
 import Input from '../components/Input'
 import axios from 'axios'
+import type { Product } from '../types/product'
 
 const AdminContentPage = () => {
+    const [products, setProducts] = useState<Product[]>([])
+    const [selectedProductIds, setSelectedProductIds] = useState<number[]>([])
+
+    useEffect(() => {
+        async function fetchProducts() {
+            const response = await api.get<Product[]>('/product')
+            setProducts(response.data)
+        }
+
+        fetchProducts()
+    }, [])
+
     const [title, setTitle] = useState('')
     const [mediaType, setMediaType] = useState<'image' | 'video'>('image')
     const [mediaFile, setMediaFile] = useState<File | null>(null)
@@ -108,6 +121,7 @@ const AdminContentPage = () => {
             formData.append('scoreMultiplier', scoreMultiplier)
             formData.append('durationSeconds', durationSeconds)
             formData.append('spawnWeight', spawnWeight)
+            formData.append('productIds', JSON.stringify(selectedProductIds))
 
             await api.post('/admin/power-up', formData)
 
@@ -295,6 +309,28 @@ const AdminContentPage = () => {
                             }
                             required
                         />
+                    </label>
+
+                    <label>
+                        produkter
+                        <select
+                            multiple
+                            value={selectedProductIds.map(String)}
+                            onChange={(e) => {
+                                const ids = Array.from(
+                                    e.target.selectedOptions,
+                                    (option) => Number(option.value)
+                                )
+
+                                setSelectedProductIds(ids)
+                            }}
+                        >
+                            {products.map((product) => (
+                                <option key={product.id} value={product.id}>
+                                    {product.name}
+                                </option>
+                            ))}
+                        </select>
                     </label>
 
                     <label>

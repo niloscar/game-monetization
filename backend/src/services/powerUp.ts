@@ -1,5 +1,9 @@
 import pool from '../database'
-import type { CreatePowerUpBody, PowerUp, UpdatePowerUpBody } from '../types/powerUp'
+import type {
+    CreatePowerUpBody,
+    PowerUp,
+    UpdatePowerUpBody
+} from '../types/powerUp'
 
 interface PowerUpRow {
     id: string
@@ -85,7 +89,8 @@ export async function createPowerUp(data: CreatePowerUpBody): Promise<PowerUp> {
         speedMultiplier = 1,
         scoreMultiplier = 1,
         durationSeconds = 0,
-        spawnWeight = 1
+        spawnWeight = 1,
+        productIds = []
     } = data
 
     const { rows } = await pool.query<PowerUpRow>(
@@ -144,10 +149,21 @@ export async function createPowerUp(data: CreatePowerUpBody): Promise<PowerUp> {
         throw new Error('Failed to create power-up')
     }
 
+    for (const productId of productIds) {
+        await pool.query(
+            `INSERT INTO product_power_ups (product_id, power_up_id)
+         VALUES ($1, $2)`,
+            [productId, powerUp.id]
+        )
+    }
+
     return mapPowerUp(powerUp)
 }
 
-export async function updatePowerUp(id: number, data: UpdatePowerUpBody): Promise<PowerUp | null> {
+export async function updatePowerUp(
+    id: number,
+    data: UpdatePowerUpBody
+): Promise<PowerUp | null> {
     const updates: string[] = []
     const values: unknown[] = []
 

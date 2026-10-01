@@ -59,8 +59,14 @@ export const createPowerUp = async (
         speedMultiplier,
         scoreMultiplier,
         durationSeconds,
-        spawnWeight
+        spawnWeight,
+        productIds
     } = req.body ?? {}
+
+    const parsedProductIds =
+    typeof productIds === 'string'
+        ? JSON.parse(productIds)
+        : productIds ?? []
 
     const imageUrl = req.file
         ? `/mock/powerups/${req.file.filename}`
@@ -278,7 +284,8 @@ export const createPowerUp = async (
         speedMultiplier: parsedSpeedMultiplier,
         scoreMultiplier: parsedScoreMultiplier,
         durationSeconds: parsedDurationSeconds,
-        spawnWeight: parsedSpawnWeight
+        spawnWeight: parsedSpawnWeight,
+        productIds: parsedProductIds
     })
 
     res.status(201).json(powerUp)
