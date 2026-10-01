@@ -57,6 +57,9 @@ export type WorldSide = 'left' | 'right'
 export type WorldObjectType = 
     'soda' |
     'pizza' |
+    'dogPoo' |
+    'tireFire' |
+    'tires' |
     'rat' | 
     'cat' | 
     'dog' | 
