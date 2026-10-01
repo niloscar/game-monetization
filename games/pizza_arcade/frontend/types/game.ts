@@ -9,7 +9,7 @@ export interface GameState {
     score: ScoreState
     availablePowerUps: PowerUp[]
     powerUpEffects: PowerUpEffects
-    powerUpNotification: PowerUpNotification
+    pickupNotification: PickupNotification
 }
 
 export interface ScoreState {
@@ -144,7 +144,7 @@ export interface PowerUpEffects {
     scoreName: string | null
 }
 
-export interface PowerUpNotification {
+export interface PickupNotification {
     name: string | null
     startedAt: number
 }

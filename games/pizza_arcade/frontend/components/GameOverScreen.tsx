@@ -4,7 +4,7 @@ export default function GameOverScreen() {
     return (
         <div className={styles['game-over-screen']}>
             <h1>GAME OVER</h1>
-            <p>Press space to play again</p>
+            <p className={styles['game-over-text']}>Tryck på SPACE för att spela igen</p>
         </div>
     )
 }

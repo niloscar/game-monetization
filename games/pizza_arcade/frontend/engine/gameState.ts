@@ -61,7 +61,7 @@ export const createInitialGameState = (powerUps: PowerUp[] = []): GameState => (
         scoreExpiresAt: 0,
         scoreName: null
     },
-    powerUpNotification: {
+    pickupNotification: {
         name: null,
         startedAt: 0
     },

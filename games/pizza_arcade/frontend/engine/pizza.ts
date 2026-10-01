@@ -10,6 +10,11 @@ const DELIVERY_SPAWN_DISTANCE = 600
 export function pickupPizza(state: GameState) {
     state.player.pizzas += 1
 
+    state.pickupNotification = {
+        name: 'Pizza +1',
+        startedAt: state.world.elapsedTime
+    }
+
     if (!state.world.deliveryTarget) {
         spawnDeliveryTarget(state)
     }
