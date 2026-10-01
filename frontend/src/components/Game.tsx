@@ -12,6 +12,7 @@ import styles from './game.module.css'
 export default function Game() {
     const [gameAccess, setGameAccess] = useState<GameAccess | null>(null)
     const [displayAds, setDisplayAds] = useState<Ad[]>([])
+    const [preGameAds, setPreGameAds] = useState<Ad[]>([])
     const [preGameAd, setPreGameAd] = useState<Ad | null>(null)
     const [showPreGameAd, setShowPreGameAd] = useState(false)
     const [canStart, setCanStart] = useState(false)
@@ -30,12 +31,10 @@ export default function Game() {
 
                 if (access.ads.preGame) {
                     const ads = await getAds('pre_game')
-                    const [selectedAd] = selectWeightedAds(ads, 1)
+                    setPreGameAds(ads)
 
-                    if (selectedAd) {
-                        setPreGameAd(selectedAd)
-                    } else {
-                        setCanStart(true) // No pre-game ad available, allow game to start
+                    if (ads.length === 0) {
+                        setCanStart(true)
                     }
                 } else {
                     setCanStart(true)
@@ -49,21 +48,31 @@ export default function Game() {
     }, [])
 
     const handleStartRequest = () => {
-        if (!gameAccess?.ads.preGame || !preGameAd) {
+        if (!gameAccess?.ads.preGame || preGameAds.length === 0) {
             setCanStart(true)
             return
         }
 
+        const [selectedAd] = selectWeightedAds(preGameAds, 1)
+
+        if (!selectedAd) {
+            setCanStart(true)
+            return
+        }
+
+        setPreGameAd(selectedAd)
         setShowPreGameAd(true)
     }
 
     const handleRestartRequest = () => {
+        setPreGameAd(null)
         setShowPreGameAd(false)
-        setCanStart(!gameAccess?.ads.preGame || !preGameAd)
+        setCanStart(!gameAccess?.ads.preGame || preGameAds.length === 0)
     }
 
     const handlePreGameAdComplete = () => {
         setShowPreGameAd(false)
+        setPreGameAd(null)
         setCanStart(true)
     }
 
