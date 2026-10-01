@@ -655,15 +655,13 @@ code {
     transform: skewX(-23deg);
 }
 /* ---------- Store page ---------- */
-.store-page {
+.store-page, .order-confirmation-page {
     max-width: 880px;
     width: 100%;
     margin: 0 auto;
     padding: 25px 20px;
 
     .page-title {
-        text-align: left;
-
         h1 {
             text-transform: uppercase;
         }
@@ -672,6 +670,23 @@ code {
             text-transform: lowercase;
         }
     }
+
+    .btn-confirmation {
+        display: inline-block;
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        font-size: 0.875rem;
+        cursor: pointer;
+        text-transform: lowercase;
+        user-select: none;
+        background-color: var(--accent);
+        color: #0a0a0f;
+        margin-top: 2rem;
+    }
+}
+
+.store-page .page-title {
+    text-align: left;
 }
 
 /* ---------- Admin Dashboard ---------- */

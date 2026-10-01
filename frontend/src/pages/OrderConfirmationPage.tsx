@@ -20,10 +20,8 @@ export default function OrderConfirmationPage() {
                 <p>Du har nu tillgång till {confirmation.productName}.</p>
             </div>
 
-            <p>Ordernummer: {confirmation.orderId}</p>
-
-            <Link to="/" className="btn">
-                Spela Pizza Arcade
+            <Link to="/" className="btn btn-confirmation">
+                Börja spela!
             </Link>
         </main>
     )
