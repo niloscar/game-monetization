@@ -1,11 +1,6 @@
-export interface Feature {
-    id: number
-    key: string
-    name: string
-    description: string | null
-}
+import type { PowerUp } from './powerUp'
 
-export interface PowerUp {
+export interface Feature {
     id: number
     key: string
     name: string

@@ -3,9 +3,10 @@ import { createInput } from '../engine/input'
 import { createGameLoop } from '../engine/gameLoop'
 import { CANVAS_HEIGHT, CANVAS_WIDTH } from '../engine/gameState'
 import { loadGameAssets } from '../engine/assets'
+import { createGameState } from '../engine/createGameState'
 import type { GamePhase } from '../types/game'
 import type { DisplayAd, LoadedDisplayAd } from '../types/ad'
-import { createGameState } from '../engine/createGameState'
+import type { PowerUp } from '@assignment/shared/types/powerUp'
 
 interface GameCanvasProps {
     onPhaseChange: (phase: GamePhase) => void
@@ -13,6 +14,7 @@ interface GameCanvasProps {
     displayAds: DisplayAd[]
     canStart: boolean
     showScore: boolean
+    powerUps: PowerUp[]
     startToken: number
     restartToken: number
     onStartRequest: () => void
@@ -24,6 +26,7 @@ export default function GameCanvas({
     displayAds,
     canStart,
     showScore,
+    powerUps,
     startToken,
     restartToken,
     onStartRequest
@@ -81,7 +84,7 @@ export default function GameCanvas({
             const assets = await loadGameAssets()
             if (stopped) return
 
-            const state = createGameState()
+            const state = createGameState(powerUps)
 
             input = createInput(canvas)
             gameLoop = createGameLoop(

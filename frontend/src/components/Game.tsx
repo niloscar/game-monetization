@@ -20,6 +20,7 @@ export default function Game() {
         const loadGameData = async () => {
             try {
                 const access = await getGameAccess()
+
                 setGameAccess(access)
 
                 if (access.ads.display) {
@@ -84,14 +85,17 @@ export default function Game() {
 
     return (
         <div className={styles['game-container']}>
-            <PizzaArcade
-                displayAds={pizzaArcadeAds}
-                canStart={canStart}
-                showScore={gameAccess?.showCurrentScore ?? false}
-                onStartRequest={handleStartRequest}
-                onRestartRequest={handleRestartRequest}
-                onGameOver={handleGameOver}
-            />
+            {gameAccess && (
+                <PizzaArcade
+                    displayAds={pizzaArcadeAds}
+                    canStart={canStart}
+                    showScore={gameAccess.showCurrentScore}
+                    powerUps={gameAccess.powerUps}
+                    onStartRequest={handleStartRequest}
+                    onRestartRequest={handleRestartRequest}
+                    onGameOver={handleGameOver}
+                />
+            )}
 
             {showPreGameAd && preGameAd && (
                 <PreGameAd

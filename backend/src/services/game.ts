@@ -167,7 +167,8 @@ const GUEST_GAME_ACCESS: GameAccess = {
     ads: {
         preGame: true,
         display: true
-    }
+    },
+    powerUps: []
 }
 
 export async function getGameAccess(userId?: number): Promise<GameAccess> {
@@ -195,7 +196,8 @@ export async function getGameAccess(userId?: number): Promise<GameAccess> {
         ads: {
             preGame: !hasFeature('disable_pre_game_ads'),
             display: !hasFeature('disable_display_ads')
-        }
+        },
+        powerUps: product.powerUps.filter((powerUp) => powerUp.isActive)
     }
 }
 

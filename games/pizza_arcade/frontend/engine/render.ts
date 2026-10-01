@@ -4,6 +4,7 @@ import { getWorldObjectSprite, getWorldObjectHealthDelta } from './worldObjects'
 import type { GameState } from '../types/game'
 import type { LoadedDisplayAd } from '../types/ad'
 import type { GameAssets } from './assets'
+import { getPowerUpImage } from './powerUps'
 
 const ROAD_MARKING_WIDTH = 8
 const ROAD_MARKING_HEIGHT = 50
@@ -88,6 +89,33 @@ export const renderGame = (
         ctx.fillRect(x, y, object.width, object.height)
     }
 
+    /* Render the power-ups */
+    for (const spawnedPowerUp of state.world.powerUps) {
+        const { powerUp, position } = spawnedPowerUp
+        const image = getPowerUpImage(powerUp.id)
+
+        const x = position.x - powerUp.width / 2
+        const y = position.y - powerUp.height / 2
+
+        if (image?.complete && image.naturalWidth > 0) {
+            ctx.drawImage(
+                image,
+                x,
+                y,
+                powerUp.width,
+                powerUp.height
+            )
+        } else {
+            ctx.fillStyle = '#ffd54a'
+            ctx.fillRect(
+                x,
+                y,
+                powerUp.width,
+                powerUp.height
+            )
+        }
+    }
+
     /* Render the delivery target */
     renderDeliveryTarget(ctx, state)
 
@@ -111,6 +139,9 @@ export const renderGame = (
 
     /* Render the delivered goods count */
     renderDelivered(ctx, state)
+
+    /* Render active power-ups */
+    renderPowerUpStatus(ctx, state) 
 
     // Render the score if showScore is true
     if (showScore) {
@@ -238,7 +269,7 @@ function renderInventory(ctx: CanvasRenderingContext2D, state: GameState) {
     ctx.textAlign = 'left'
     ctx.textBaseline = 'top'
 
-    ctx.fillText('Bag', positionX, positionY)
+    ctx.fillText('I väskan', positionX, positionY)
 
     ctx.font = '16px monospace'
     inventory.forEach((item, index) => {
@@ -267,7 +298,7 @@ function renderDelivered(ctx: CanvasRenderingContext2D, state: GameState) {
     ctx.textAlign = 'left'
     ctx.textBaseline = 'top'
 
-    ctx.fillText('Delivered', positionX, positionY)
+    ctx.fillText('Levererat', positionX, positionY)
 
     ctx.font = '16px monospace'
     delivered.forEach((item, index) => {
@@ -278,6 +309,66 @@ function renderDelivered(ctx: CanvasRenderingContext2D, state: GameState) {
             `${itemName}: ${itemCount}`,
             positionX,
             positionY + lineHeight * (index + 1)
+        )
+    })
+}
+
+const POWER_UP_BLINK_DURATION = 1.2
+const POWER_UP_BLINK_INTERVAL = 0.4
+
+function renderPowerUpStatus(ctx: CanvasRenderingContext2D, state: GameState) {
+    const { powerUpEffects, powerUpNotification } = state
+    const elapsedTime = state.world.elapsedTime
+    const notificationAge = elapsedTime - powerUpNotification.startedAt
+    const isBlinking =
+        powerUpNotification.name !== null &&
+        notificationAge < POWER_UP_BLINK_DURATION
+
+    if (isBlinking) {
+        const isVisible =
+            Math.floor(notificationAge / POWER_UP_BLINK_INTERVAL) % 2 === 0
+
+        if (isVisible) {
+            ctx.fillStyle = '#fff'
+            ctx.font = 'bold 24px monospace'
+            ctx.textAlign = 'center'
+            ctx.textBaseline = 'top'
+            ctx.fillText(
+                powerUpNotification.name!,
+                ctx.canvas.width / 2,
+                ctx.canvas.height * .8
+            )
+        }
+    }
+
+    const activeEffects = [
+        {
+            name: powerUpEffects.speedName,
+            expiresAt: powerUpEffects.speedExpiresAt
+        },
+        {
+            name: powerUpEffects.scoreName,
+            expiresAt: powerUpEffects.scoreExpiresAt
+        }
+    ].filter(
+        (effect) =>
+            effect.name &&
+            effect.expiresAt > elapsedTime &&
+            !(isBlinking && effect.name === powerUpNotification.name)
+    )
+
+    ctx.fillStyle = '#fff'
+    ctx.font = '16px monospace'
+    ctx.textAlign = 'left'
+    ctx.textBaseline = 'top'
+
+    activeEffects.forEach((effect, index) => {
+        const secondsRemaining = Math.ceil(effect.expiresAt - elapsedTime)
+
+        ctx.fillText(
+            `${effect.name} ${secondsRemaining}s`,
+            20,
+            160 + index * 22
         )
     })
 }

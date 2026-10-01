@@ -53,7 +53,17 @@ const productSelect = `
                         'id', pu.id,
                         'key', pu.key,
                         'name', pu.name,
-                        'description', pu.description
+                        'description', pu.description,
+                        'imageUrl', pu.image_url,
+                        'isActive', pu.is_active,
+                        'width', pu.width,
+                        'height', pu.height,
+                        'healthDelta', pu.health_delta,
+                        'scoreDelta', pu.score_delta,
+                        'speedMultiplier', pu.speed_multiplier,
+                        'scoreMultiplier', pu.score_multiplier,
+                        'durationSeconds', pu.duration_seconds,
+                        'spawnWeight', pu.spawn_weight
                     )
                     ORDER BY pu.id
                 )

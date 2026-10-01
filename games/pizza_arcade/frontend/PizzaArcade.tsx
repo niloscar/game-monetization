@@ -4,12 +4,14 @@ import StartScreen from './components/StartScreen'
 import GameOverScreen from './components/GameOverScreen'
 import type { GamePhase } from './types/game'
 import type { DisplayAd } from './types/ad'
+import type { PowerUp } from '@assignment/shared/types/powerUp'
 import styles from './pizza-arcade.module.css'
 
 interface PizzaArcadeProps {
     displayAds: DisplayAd[]
     canStart: boolean
     showScore: boolean
+    powerUps: PowerUp[]
     onStartRequest: () => void
     onRestartRequest: () => void
     onGameOver: (score: number) => void
@@ -19,6 +21,7 @@ export default function PizzaArcade({
     displayAds,
     canStart,
     showScore,
+    powerUps,
     onStartRequest,
     onRestartRequest,
     onGameOver
@@ -75,6 +78,7 @@ export default function PizzaArcade({
                 displayAds={displayAds}
                 canStart={canStart}
                 showScore={showScore}
+                powerUps={powerUps}
                 startToken={startToken}
                 restartToken={restartToken}
                 onStartRequest={onStartRequest}

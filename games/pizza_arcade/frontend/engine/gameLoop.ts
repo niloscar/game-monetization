@@ -3,7 +3,7 @@ import { renderGame } from './render'
 import { handleCollisions } from './collision'
 import { updateBillboards } from './billboards'
 import { updateMovement } from './movement'
-import { getScore, updateSurvivalScore } from './score'
+import { getScore } from './score'
 import { updateWorld } from './world'
 import { updateWorldObjectCount } from './worldObjects'
 
@@ -39,8 +39,6 @@ export const createGameLoop = (
         }
 
         if (state.phase === 'playing') {
-            updateSurvivalScore(state, deltaTime)
-
             updateMovement(state, input, deltaTime)
 
             const respawnedBillboardIds = updateWorld(state, deltaTime)
@@ -83,7 +81,7 @@ export const createGameLoop = (
     }
 
     const restart = () => {
-        const initialState = createGameState()
+        const initialState = createGameState(state.availablePowerUps)
 
         state.score = initialState.score
         state.phase = initialState.phase

@@ -1,12 +1,5 @@
-import {
-    GAME_BOUNDS,
-    SIDEWALK_WIDTH,
-    SIDEWALK_EDGE_WIDTH,
-    PARKED_ZONE_WIDTH,
-    CENTER_LINE_OVERLAP,
-    ROAD_CENTER_X
-} from './gameState'
-import type { SpawnZone, WorldSide } from '../types/game'
+import { GAME_BOUNDS, SIDEWALK_WIDTH, SIDEWALK_EDGE_WIDTH, PARKED_ZONE_WIDTH, CENTER_LINE_OVERLAP, ROAD_CENTER_X } from './gameState'
+import type { GameState, SpawnZone, WorldSide } from '../types/game'
 
 interface ZoneBounds {
     minX: number
@@ -58,4 +51,27 @@ export function getSpawnX(zone: SpawnZone, side: WorldSide, width: number) {
     }
 
     return Math.random() * (max - min) + min
+}
+
+export function getSpawnSide(state: GameState): WorldSide {
+    const { lastSide, sameSideCount } = state.world.spawn
+
+    if (!lastSide) {
+        const side = Math.random() < 0.5 ? 'left' : 'right'
+        state.world.spawn.lastSide = side
+        state.world.spawn.sameSideCount = 1
+        return side
+    }
+
+    const oppositeSide = lastSide === 'left' ? 'right' : 'left'
+
+    const side =
+        sameSideCount >= 3 || Math.random() < 0.65
+            ? oppositeSide
+            : lastSide
+
+    state.world.spawn.lastSide = side
+    state.world.spawn.sameSideCount = side === lastSide ? sameSideCount + 1 : 1
+
+    return side
 }
