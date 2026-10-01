@@ -8,6 +8,7 @@ import adRouter from './routes/ad'
 import authRouter from './routes/auth'
 import gameRouter from './routes/game'
 import orderRouter from './routes/order'
+import powerUpRouter from './routes/powerUp'
 import productRouter from './routes/product'
 import userRouter from './routes/user'
 import adminRouter from './routes/admin'
@@ -50,6 +51,7 @@ app.use('/api/ad', adRouter)
 app.use('/api/auth', authRouter)
 app.use('/api/game', gameRouter)
 app.use('/api/order', orderRouter)
+app.use('/api/power-up', powerUpRouter)
 app.use('/api/product', productRouter)
 app.use('/api/user', userRouter)
 app.use('/api/admin', adminRouter)
