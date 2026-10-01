@@ -77,8 +77,8 @@ export function respawnPowerUp(state: GameState, spawnedPowerUp: SpawnedPowerUp)
 }
 
 export function applyPowerUpEffects(state: GameState, powerUp: PowerUp) {
-    state.powerUpNotification.name = powerUp.name
-    state.powerUpNotification.startedAt = state.world.elapsedTime
+    state.pickupNotification.name = powerUp.name
+    state.pickupNotification.startedAt = state.world.elapsedTime
 
     if (powerUp.speedMultiplier !== 1 && powerUp.durationSeconds > 0) {
         state.powerUpEffects.speedMultiplier = powerUp.speedMultiplier

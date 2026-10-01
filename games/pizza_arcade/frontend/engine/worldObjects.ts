@@ -256,7 +256,7 @@ const WORLD_OBJECT_CONFIG: Record<WorldObjectType, WorldObjectConfig> = {
             asset: 'concreteTruck'
         },
         spawnRules: [
-            { zone: 'lane', weight: 4 }
+            { zone: 'lane', weight: 1 }
         ]
     },
     manhole: {

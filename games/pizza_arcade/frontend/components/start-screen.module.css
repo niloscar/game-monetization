@@ -6,4 +6,27 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
+
+    img.logo {
+        display: block;
+        width: 100%;
+        max-width: 400px;
+        height: auto;
+        max-height: none;
+        flex-shrink: 0;
+        margin-bottom: 1rem;
+    }
+
+    p.start-text {
+        animation: blink 1s steps(1, end) infinite;
+    }
+}
+
+@keyframes blink {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0;
+    }
 }

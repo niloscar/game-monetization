@@ -333,11 +333,11 @@ const POWER_UP_BLINK_DURATION = 1.2
 const POWER_UP_BLINK_INTERVAL = 0.4
 
 function renderPowerUpStatus(ctx: CanvasRenderingContext2D, state: GameState) {
-    const { powerUpEffects, powerUpNotification } = state
+    const { powerUpEffects, pickupNotification } = state
     const elapsedTime = state.world.elapsedTime
-    const notificationAge = elapsedTime - powerUpNotification.startedAt
+    const notificationAge = elapsedTime - pickupNotification.startedAt
     const isBlinking =
-        powerUpNotification.name !== null &&
+        pickupNotification.name !== null &&
         notificationAge < POWER_UP_BLINK_DURATION
 
     if (isBlinking) {
@@ -350,7 +350,7 @@ function renderPowerUpStatus(ctx: CanvasRenderingContext2D, state: GameState) {
             ctx.textAlign = 'center'
             ctx.textBaseline = 'top'
             ctx.fillText(
-                powerUpNotification.name!,
+                pickupNotification.name!,
                 ctx.canvas.width / 2,
                 ctx.canvas.height * .8
             )
@@ -370,7 +370,7 @@ function renderPowerUpStatus(ctx: CanvasRenderingContext2D, state: GameState) {
         (effect) =>
             effect.name &&
             effect.expiresAt > elapsedTime &&
-            !(isBlinking && effect.name === powerUpNotification.name)
+            !(isBlinking && effect.name === pickupNotification.name)
     )
 
     ctx.fillStyle = '#fff'
