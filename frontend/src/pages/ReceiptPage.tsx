@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { useAuth } from '../context/AuthContext'
+import { useAuth } from '../context/useAuth'
 import {
     fetchMyOrders,
     formatPrice,
@@ -17,10 +17,7 @@ const ReceiptPage = () => {
     const [loadError, setLoadError] = useState<string | null>(null)
 
     useEffect(() => {
-        if (!isAuthenticated) {
-            setIsLoading(false)
-            return
-        }
+        if (!isAuthenticated) return
 
         let cancelled = false
 

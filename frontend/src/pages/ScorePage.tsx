@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../context/useAuth";
 import { TierGate } from "../components/TierGate";
 import api from "../api/apiClient";
 import {
@@ -51,6 +51,8 @@ const ScorePage = () => {
   const effectivePeriod: Period = hasHSA ? period : "all";
 
   useEffect(() => {
+    if (!isAuthenticated) return
+
     let cancelled = false;
 
     async function loadScoreboard() {
@@ -73,7 +75,7 @@ const ScorePage = () => {
     return () => {
       cancelled = true;
     };
-  }, [effectivePeriod]);
+  }, [effectivePeriod, isAuthenticated]);
 
   // scoreboard kommer redan begränsad till topp 50 från backend. own är
   // din egen placering oavsett var den ligger, uträknad server-side mot
@@ -82,31 +84,24 @@ const ScorePage = () => {
   const ownEntry = data?.own ?? null;
   const ownRank = ownEntry?.rank ?? null;
 
-  const top3 = useMemo(() => scoreboard.slice(0, 3), [scoreboard]);
+  const top3 = scoreboard.slice(0, 3)
 
   // Platser mellan topp 3 och din egen placering — infällda, kräver High
   // Score Access för att visas. Baseras på entry.rank (inte array-index),
   // så det spelar ingen roll om listan skulle ha luckor.
-  const gapEntries = useMemo(
-    () =>
-      ownRank && ownRank > 4
+  const gapEntries =
+    ownRank && ownRank > 4
         ? scoreboard.filter((entry) => entry.rank > 3 && entry.rank < ownRank)
-        : [],
-    [scoreboard, ownRank]
-  );
+        : []
 
   // Resten av listan, efter din egen placering (eller hela listan efter
   // topp 3 om du ligger i topp 3 / inte är inloggad). Måste kolla
   // "ownRank > 3" här, inte bara att ownRank finns — annars filtrerar vi
   // på entry.rank > ownRank även när ownRank är 1–3, vilket duplicerar
   // t.ex. plats 3 (redan i top3) om man själv ligger på plats 2.
-  const afterEntries = useMemo(
-    () =>
-      scoreboard.filter((entry) =>
-        ownRank && ownRank > 3 ? entry.rank > ownRank : entry.rank > 3
-      ),
-    [scoreboard, ownRank]
-  );
+  const afterEntries = scoreboard.filter((entry) =>
+    ownRank && ownRank > 3 ? entry.rank > ownRank : entry.rank > 3
+  )
 
   function isSelf(entry: ScoreboardEntry) {
     return Boolean(ownEntry && entry.userId === ownEntry.userId);
@@ -165,8 +160,8 @@ const ScorePage = () => {
           </div>
         </div>
 
-        {loadError && <p className="error-text">{loadError}</p>}
-        {isLoading && !data && !loadError && <p className="loading-text">Laddar topplistan…</p>}
+        {isAuthenticated && loadError && <p className="error-text">{loadError}</p>}
+        {isAuthenticated && isLoading && !data && !loadError && <p className="loading-text">Laddar topplistan…</p>}
 
         {/* Combo Pass: topp 3 */}
         <TierGate
@@ -262,7 +257,11 @@ const ScorePage = () => {
         ) : !isAuthenticated ? (
           <div className="login-cta">
             <p>Logga in eller registrera dig för att se din placering och spara framtida scores.</p>
-            <button className="btn combo" type="button">
+            <button 
+                className="btn combo" 
+                type="button"
+                onClick={() => navigate("/login")}
+            >
               Logga in / Registrera dig
             </button>
           </div>

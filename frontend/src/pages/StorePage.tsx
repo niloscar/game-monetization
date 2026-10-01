@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Navigate, useNavigate } from 'react-router-dom'
-import { useAuth } from '../context/AuthContext'
+import { useAuth } from '../context/useAuth'
 import { createOrder } from '../api/order'
 import { getProducts } from '../api/product'
 import { productToTier } from '../components/Store/productToTier'

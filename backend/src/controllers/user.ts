@@ -27,6 +27,22 @@ export const getCurrentUser = async (
     res.status(200).json(user)
 }
 
+export const getCurrentAuthUser = async (
+    req: Request,
+    res: Response<User | null>
+) => {
+    const id = req.session.userId
+
+    if (!id) {
+        res.status(200).json(null)
+        return
+    }
+
+    const user = await service.getUser(id)
+
+    res.status(200).json(user ?? null)
+}
+
 export const updateCurrentUser = async (
     req: Request,
     res: Response<User | ApiError>

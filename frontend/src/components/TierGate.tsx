@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { useAuth } from '../context/AuthContext'
+import { useAuth } from '../context/useAuth'
 
 export type TierSlug = 'quarter-pass' | 'combo-pass' | 'high-score-access'
 
