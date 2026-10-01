@@ -108,6 +108,7 @@ export interface WorldObject {
     height: number
     spawnZone?: SpawnZone
     spawnSide?: WorldSide
+    spriteFrame: number
 }
 
 export interface Billboard {

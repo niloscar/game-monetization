@@ -4,7 +4,7 @@ import dogsUrl from '../assets/animals/dogs_sheet.png'
 import ratsUrl from '../assets/animals/rats_sheet.png'
 import houseUrl from '../assets/buildings/house_sheet.png'
 import pizzaHouseUrl from '../assets/buildings/pizzahouse.png'
-import concerteBarrierUrl from '../assets/obstacles/concretebarrier.png'
+import concreteBarrierUrl from '../assets/obstacles/concretebarrier.png'
 import dogPooUrl from '../assets/obstacles/dogpoo_sheet.png'
 import tireFireUrl from '../assets/obstacles/tirefire_sheet.png'
 import tiresUrl from '../assets/obstacles/tires.png'
@@ -42,7 +42,7 @@ export const ASSET_URLS = {
     rats: ratsUrl,
     house: houseUrl,
     pizzaHouse: pizzaHouseUrl,
-    concerteBarrier: concerteBarrierUrl,
+    concreteBarrier: concreteBarrierUrl,
     tireFire: tireFireUrl,
     dogPoo: dogPooUrl,
     tires: tiresUrl,
@@ -73,6 +73,21 @@ export const ASSET_URLS = {
     concreteTruck: concreteTruckUrl,
     schoolbus: schoolbusUrl,
 } as const
+
+export const SPRITE_SHEETS = new Set<AssetName>([
+    'cats',
+    'dogs',
+    'rats',
+    'house',
+    'dogPoo',
+    'tireFire',
+    'kids',
+    'pedestrians',
+    'cyclist',
+    'grass',
+    'mailbox',
+    'cars'
+])
 
 export type AssetName = keyof typeof ASSET_URLS
 export type GameAssets = Record<AssetName, HTMLImageElement>
