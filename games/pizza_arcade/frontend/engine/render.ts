@@ -12,6 +12,17 @@ const ROAD_MARKING_WIDTH = 8
 const ROAD_MARKING_HEIGHT = 50
 const ROAD_MARKING_GAP = 50
 
+const PLAYER_WIDTH = 20
+const PLAYER_HEIGHT = 50
+const PLAYER_Y_OFFSET = -20
+
+const VEHICLE_ASSETS: Partial<Record<GameState['player']['vehicle']['type'], AssetName>
+> = {
+    skateboard: 'skateboard',
+    bike: 'bicycle',
+    moped: 'motorcycle'
+}
+
 export const renderGame = (
     ctx: CanvasRenderingContext2D,
     state: GameState,
@@ -20,8 +31,6 @@ export const renderGame = (
     showScore: boolean
 ) => {
     const { canvas } = ctx
-    const { player } = state
-    const { vehicle } = player
 
     ctx.clearRect(0, 0, canvas.width, canvas.height)
 
@@ -133,13 +142,7 @@ export const renderGame = (
     renderDeliveryTarget(ctx, state)
 
     /* Render the player */
-    ctx.fillStyle = '#ffffff'
-    ctx.fillRect(
-        player.position.x - vehicle.width / 2,
-        player.position.y - vehicle.height / 2,
-        vehicle.width,
-        vehicle.height
-    )
+    renderPlayer(ctx, state, assets)
 
     /* Render the ads */
     renderAds(ctx, state, displayAds)
@@ -417,5 +420,48 @@ function drawSprite(
         y,
         width,
         height
+    )
+}
+
+function renderPlayer(
+    ctx: CanvasRenderingContext2D,
+    state: GameState,
+    assets: GameAssets
+) {
+    const { player } = state
+    const { vehicle } = player
+
+    const vehicleX = player.position.x - vehicle.width / 2
+    const vehicleY = player.position.y - vehicle.height / 2
+
+    const vehicleAsset = VEHICLE_ASSETS[vehicle.type]
+
+    if (vehicleAsset) {
+        ctx.drawImage(
+            assets[vehicleAsset],
+            vehicleX,
+            vehicleY,
+            vehicle.width,
+            vehicle.height
+        )
+    } else {
+        ctx.fillStyle = '#ffffff'
+        ctx.fillRect(
+            vehicleX,
+            vehicleY,
+            vehicle.width,
+            vehicle.height
+        )
+    }
+
+    const playerX = player.position.x - PLAYER_WIDTH / 2
+    const playerY = player.position.y - PLAYER_HEIGHT / 2 + PLAYER_Y_OFFSET
+
+    ctx.drawImage(
+        assets.player,
+        playerX,
+        playerY,
+        PLAYER_WIDTH,
+        PLAYER_HEIGHT
     )
 }
