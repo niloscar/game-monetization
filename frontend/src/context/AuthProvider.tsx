@@ -1,25 +1,9 @@
-import { createContext, useContext, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import type { ReactNode } from 'react'
 import type { AxiosError } from 'axios'
 import api from '../api/apiClient'
-
-export interface AuthUser {
-    id: number
-    username: string
-    email: string
-    role: {
-        id: number
-        name: string
-        description: string | null
-    }
-    tier: {
-        id: number
-        name: string
-        description: string
-        level: number
-    } | null
-    createdAt: string
-}
+import { AuthContext } from './AuthContext'
+import type { AuthUser, UpdateProfileInput, AuthContextType } from './AuthContext'
 
 const DEV_FAKE_USER =
     import.meta.env.DEV && import.meta.env.VITE_DEV_FAKE_USER === 'true'
@@ -36,30 +20,6 @@ const FAKE_USER: AuthUser = {
     tier: { id: 3, name: 'High Score Access', description: '', level: 3 },
     createdAt: new Date().toISOString()
 }
-
-export interface UpdateProfileInput {
-    username?: string
-    email?: string
-    password?: string
-}
-
-interface AuthContextType {
-    user: AuthUser | null
-    loading: boolean
-    error: string | null
-    login: (email: string, password: string) => Promise<void>
-    register: (
-        username: string,
-        email: string,
-        password: string
-    ) => Promise<void>
-    logout: () => Promise<void>
-    updateProfile: (data: UpdateProfileInput) => Promise<void>
-    isAuthenticated: boolean
-    isAdmin: boolean
-}
-
-const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
 function getErrorMessage(err: unknown, fallback: string): string {
     const axiosErr = err as AxiosError<{ message?: string }>
@@ -79,7 +39,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     async function refreshUser(): Promise<AuthUser | null> {
         try {
-            const res = await api.get<AuthUser>('/user/me')
+            const res = await api.get<AuthUser | null>('/auth/me')
             setUser(res.data)
             return res.data
         } catch {
@@ -95,7 +55,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
         async function checkSession() {
             try {
-                const res = await api.get<AuthUser>('/user/me')
+                const res = await api.get<AuthUser | null>('/auth/me')
                 if (!cancelled) setUser(res.data)
             } catch {
                 if (!cancelled) setUser(null)
@@ -118,7 +78,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         } catch (err) {
             const message = getErrorMessage(err, 'Inloggning misslyckades')
             setError(message)
-            throw new Error(message)
+            throw new Error(message, { cause: err })
         }
     }
 
@@ -130,7 +90,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         } catch (err) {
             const message = getErrorMessage(err, 'Registrering misslyckades')
             setError(message)
-            throw new Error(message)
+            throw new Error(message, { cause: err })
         }
     }
 
@@ -170,7 +130,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 'Kunde inte uppdatera profilen'
             )
             setError(message)
-            throw new Error(message)
+            throw new Error(message, { cause: err })
         }
     }
 
@@ -187,16 +147,4 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
-}
-
-// -----------------------------------------------------------------------
-// Hook
-// -----------------------------------------------------------------------
-
-export function useAuth(): AuthContextType {
-    const context = useContext(AuthContext)
-    if (context === undefined) {
-        throw new Error('useAuth måste användas inuti en <AuthProvider>')
-    }
-    return context
 }

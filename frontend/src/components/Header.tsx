@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { useAuth } from '../context/AuthContext'
+import { useAuth } from '../context/useAuth'
 import Nav from './Nav'
 import logo from '../assets/pizza-arcade-logo-1.png'
 import styles from './header.module.css'
