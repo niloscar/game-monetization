@@ -18,7 +18,7 @@ const Nav = () => {
                     </NavLink>
                 </li>
 
-                {isAuthenticated && tierLevel >= 1 && (
+                {isAuthenticated && tierLevel >= 2 && (
                     <li>
                         <NavLink to="/scoreboard" className={styles.link}>
                             scoreboard
