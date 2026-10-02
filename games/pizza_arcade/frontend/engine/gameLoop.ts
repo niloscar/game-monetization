@@ -81,11 +81,13 @@ export const createGameLoop = (
     }
 
     const restart = () => {
-        Object.assign(
-            state,
-            createGameState(state.availablePowerUps)
-        )
+        const initialState = createGameState(state.availablePowerUps)
 
+        state.score = initialState.score
+        state.phase = initialState.phase
+        state.player = initialState.player
+        state.world = initialState.world
+        
         startRequested = false
 
         onPhaseChange(state.phase)
