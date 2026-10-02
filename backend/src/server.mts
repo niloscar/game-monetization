@@ -18,6 +18,8 @@ import { notFoundHandler } from './middleware/notFoundHandler'
 
 dotenv.config()
 
+console.log('Blob token:', process.env.BLOB_READ_WRITE_TOKEN ? 'FOUND' : 'MISSING')
+
 const host = process.env.HOST || 'localhost'
 const port = process.env.PORT || 3000
 

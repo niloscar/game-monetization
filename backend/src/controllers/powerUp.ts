@@ -11,6 +11,7 @@ import type {
     PowerUp,
     UpdatePowerUpBody
 } from '../types/powerUp'
+import { put } from '@vercel/blob'
 
 export const getPowerUps = async (_req: Request, res: Response<PowerUp[]>) => {
     const powerUps = await service.getPowerUps()
@@ -64,13 +65,25 @@ export const createPowerUp = async (
     } = req.body ?? {}
 
     const parsedProductIds =
-    typeof productIds === 'string'
-        ? JSON.parse(productIds)
-        : productIds ?? []
+        typeof productIds === 'string'
+            ? JSON.parse(productIds)
+            : (productIds ?? [])
 
-    const imageUrl = req.file
-        ? `/mock/powerups/${req.file.filename}`
-        : undefined
+    const file = req.file
+
+    let imageUrl: string | null = null
+
+    if (file) {
+        const blob = await put(
+            `powerups/${Date.now()}-${file.originalname}`,
+            file.buffer,
+            {
+                access: 'public'
+            }
+        )
+
+        imageUrl = blob.url
+    }
 
     const parsedIsActive = String(isActive) === 'true'
     const parsedWidth = Number(width)
