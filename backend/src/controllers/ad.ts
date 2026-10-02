@@ -8,6 +8,7 @@ import { validateField, validateId } from '../utils/validation'
 import type { Request, Response } from 'express'
 import type { Ad, CreateAdBody, UpdateAdBody, AdPlacement } from '../types/ad'
 import type { ApiError } from '../types/errors'
+import { put } from '@vercel/blob'
 
 export const getAds = async (
     req: Request<{}, {}, {}, { placement?: string }>,
@@ -141,7 +142,17 @@ export const createAd = async (
         return
     }
 
-    const mediaUrl = `/mock/ads/${req.file.filename}`
+    const file = req.file
+
+    const blob = await put(
+        `ads/${Date.now()}-${file.originalname}`,
+        file.buffer,
+        {
+            access: 'public'
+        }
+    )
+
+    const mediaUrl = blob.url
 
     const mediaTypeError = validateField('media_type', media_type, 'string')
     if (mediaTypeError) {
