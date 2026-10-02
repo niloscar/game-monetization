@@ -1,3 +1,4 @@
+import { CANVAS_HEIGHT } from './gameState'
 import { getSpawnX, getSpawnSide } from './worldZones'
 import type { AssetName } from './assets'
 import type { GameState, WorldObject, WorldObjectType } from '../types/game'
@@ -44,8 +45,8 @@ const WORLD_OBJECT_CONFIG: Record<WorldObjectType, WorldObjectConfig> = {
         },
         spawnRules: [
             { zone: 'sidewalk', weight: 5 },
-            { zone: 'parked', weight: 5 },
-            { zone: 'lane', weight: 5 }
+            { zone: 'parked', weight: 3 },
+            { zone: 'lane', weight: 1 }
         ]
     },
     pizza: {
@@ -58,9 +59,9 @@ const WORLD_OBJECT_CONFIG: Record<WorldObjectType, WorldObjectConfig> = {
             asset: 'pizza'
         },
         spawnRules: [
-            { zone: 'sidewalk', weight: 5 },
+            { zone: 'sidewalk', weight: 3 },
             { zone: 'parked', weight: 5 },
-            { zone: 'lane', weight: 5 }
+            { zone: 'lane', weight: 3 }
         ]
     },
     rat: {
@@ -73,9 +74,10 @@ const WORLD_OBJECT_CONFIG: Record<WorldObjectType, WorldObjectConfig> = {
             asset: 'rats'
         },
         spawnRules: [
-            { zone: 'sidewalk', weight: 4 },
-            { zone: 'parked', weight: 4 },
-            { zone: 'lane', weight: 4 }
+            { zone: 'sidewalkEdge', weight: 4 },
+            { zone: 'sidewalk', weight: 3 },
+            { zone: 'parked', weight: 3 },
+            { zone: 'lane', weight: 3 }
         ]
     },
     cat: {
@@ -88,7 +90,8 @@ const WORLD_OBJECT_CONFIG: Record<WorldObjectType, WorldObjectConfig> = {
             asset: 'cats'
         },
         spawnRules: [
-            { zone: 'sidewalk', weight: 5 },
+            { zone: 'sidewalkEdge', weight: 5 },
+            { zone: 'sidewalk', weight: 4 },
             { zone: 'parked', weight: 3 },
             { zone: 'lane', weight: 2 }
         ]
@@ -113,15 +116,13 @@ const WORLD_OBJECT_CONFIG: Record<WorldObjectType, WorldObjectConfig> = {
         scoreDelta: 0,
         width: 30,
         height: 30,
-        spawnWeight: 2,
+        spawnWeight: 1,
         sprite: {
             asset: 'trashcan'
         },
         spawnRules: [
             { zone: 'sidewalkEdge', weight: 5 },
             { zone: 'sidewalk', weight: 2 },
-            { zone: 'parked', weight: 1 },
-            { zone: 'lane', weight: 1 }
         ]
     },
     mailBox: {
@@ -157,14 +158,14 @@ const WORLD_OBJECT_CONFIG: Record<WorldObjectType, WorldObjectConfig> = {
         scoreDelta: -400,
         width: 35,
         height: 80,
-        spawnWeight: 3,
+        spawnWeight: 2,
         sprite: {
             asset: 'cyclist'
         },
         spawnRules: [
             { zone: 'sidewalk', weight: 2 },
             { zone: 'parked', weight: 2 },
-            { zone: 'lane', weight: 5 }
+            { zone: 'lane', weight: 3 }
         ]
     },
     lightPole: {
@@ -277,15 +278,14 @@ const WORLD_OBJECT_CONFIG: Record<WorldObjectType, WorldObjectConfig> = {
         height: 5,
         healthDelta: -5,
         scoreDelta: -50,
-        spawnWeight: 3,
+        spawnWeight: 2,
         sprite: {
             asset: 'dogPoo'
         },
         spawnRules: [
             { zone: 'sidewalkEdge', weight: 5 },
-            { zone: 'sidewalk', weight: 5 },
-            { zone: 'parked', weight: 2 },
-            { zone: 'lane', weight: 1 }
+            { zone: 'sidewalk', weight: 3 },
+            { zone: 'parked', weight: 1 }
         ]
     },
     tireFire: {
@@ -293,12 +293,11 @@ const WORLD_OBJECT_CONFIG: Record<WorldObjectType, WorldObjectConfig> = {
         height: 20,
         healthDelta: -20,
         scoreDelta: -100,
-        spawnWeight: 2,
+        spawnWeight: 1,
         sprite: {
             asset: 'tireFire'
         },
         spawnRules: [
-            { zone: 'sidewalkEdge', weight: 3 },
             { zone: 'sidewalk', weight: 3 },
             { zone: 'parked', weight: 1 },
             { zone: 'lane', weight: 1 }
@@ -428,12 +427,32 @@ function getTargetObjectCount(state: GameState) {
 function placeWorldObject(state: GameState, object: WorldObject) {
     setObjectSpawnPosition(state, object)
 
+    const isUpwardVehicle =
+        isVehicle(object.type) &&
+        object.spawnZone === 'lane' &&
+        object.spawnSide === 'right'
+
     const objectsInSameZone = state.world.objects.filter(
         (worldObject) =>
             worldObject.id !== object.id &&
             worldObject.spawnZone === object.spawnZone &&
-            worldObject.spawnSide === object.spawnSide
+            worldObject.spawnSide === object.spawnSide &&
+            (!isUpwardVehicle || isVehicle(worldObject.type))
     )
+
+    if (isUpwardVehicle) {
+        const objectBottoms = objectsInSameZone.map(
+            (worldObject) =>
+                worldObject.position.y + worldObject.height / 2
+        )
+
+        const backEdge = Math.max(CANVAS_HEIGHT, ...objectBottoms)
+
+        object.position.y =
+            backEdge + getObjectGap(state) + object.height / 2
+
+        return
+    }
 
     const objectTops = objectsInSameZone.map(
         (worldObject) =>
@@ -487,4 +506,12 @@ export function getWorldObjectScoreDelta(type: WorldObjectType) {
 
 function getRandomSpriteFrame() {
     return Math.floor(Math.random() * 3)
+}
+
+export function isVehicle(type: WorldObjectType) {
+    return (
+        type === 'car' ||
+        type === 'schoolBus' ||
+        type === 'concreteTruck'
+    )
 }

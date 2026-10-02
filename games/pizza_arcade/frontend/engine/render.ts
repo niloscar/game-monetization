@@ -2,7 +2,7 @@ import { GAME_BOUNDS, SIDEWALK_WIDTH } from './gameState'
 import { getWorldObjectSprite, getWorldObjectHealthDelta } from './worldObjects'
 import { getPowerUpImage } from './powerUps'
 
-import type { GameState } from '../types/game'
+import type { GameState, WorldObjectType } from '../types/game'
 import type { LoadedDisplayAd } from '../types/ad'
 import type { GameAssets, AssetName } from './assets'
 import { SPRITE_SHEETS } from './assets'
@@ -22,6 +22,12 @@ const VEHICLE_ASSETS: Partial<Record<GameState['player']['vehicle']['type'], Ass
     bike: 'bicycle',
     moped: 'motorcycle'
 }
+
+const VEHICLE_OBJECT_TYPES = new Set<WorldObjectType>([
+    'car',
+    'schoolBus',
+    'concreteTruck'
+])
 
 export const renderGame = (
     ctx: CanvasRenderingContext2D,
@@ -85,6 +91,10 @@ export const renderGame = (
         const sprite = getWorldObjectSprite(object.type)
 
         if (sprite) {
+            const shouldRotate =
+                object.spawnSide === 'left' &&
+                VEHICLE_OBJECT_TYPES.has(object.type)
+
             drawSprite(
                 ctx,
                 assets,
@@ -93,7 +103,8 @@ export const renderGame = (
                 x,
                 y,
                 object.width,
-                object.height
+                object.height,
+                shouldRotate ? Math.PI : 0
             )
 
             continue
@@ -397,12 +408,33 @@ function drawSprite(
     x: number,
     y: number,
     width: number,
-    height: number
+    height: number,
+    rotation = 0
 ) {
     const image = assets[asset]
 
+    ctx.save()
+
+    ctx.translate(
+        x + width / 2,
+        y + height / 2
+    )
+
+    ctx.rotate(rotation)
+
+    const drawX = -width / 2
+    const drawY = -height / 2
+
     if (!SPRITE_SHEETS.has(asset)) {
-        ctx.drawImage(image, x, y, width, height)
+        ctx.drawImage(
+            image,
+            drawX,
+            drawY,
+            width,
+            height
+        )
+
+        ctx.restore()
         return
     }
 
@@ -416,11 +448,13 @@ function drawSprite(
         0,
         sourceWidth,
         sourceHeight,
-        x,
-        y,
+        drawX,
+        drawY,
         width,
         height
     )
+
+    ctx.restore()
 }
 
 function renderPlayer(
