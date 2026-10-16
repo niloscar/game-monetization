@@ -19,11 +19,11 @@ Plattformen hanterar användarkonton, produkter, beställningar, annonser, power
 - **Spelintegration:** Pizza Arcade är separerat från plattformens övriga frontendkod och använder gemensamma typer för kommunikationen med plattformen.
 
 
-## 2. Förhandsvisning
+## 2. Demo
 
-Applikationen driftsätts via Vercel.
+En driftsatt version av applikationen finns tillgänglig via Vercel.
 
-[Öppna förhandsvisningen](https://game-monetization.vercel.app)
+[Öppna förhandsvisningen](https://pizza-arcade.vercel.app)
 
 ## 3. Tech stack
 
