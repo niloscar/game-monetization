@@ -1,4 +1,4 @@
-# Game Monetization – Plattform för intäktsgenerering
+# Pizza Arcade / Game Monetization – Plattform för intäktsgenerering
 
 ## 1. Projektbeskrivning
 
